@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, GhostButton } from '@/components/ui';
+import { geocodeVille } from '@/lib/geo';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
@@ -26,13 +27,23 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
 
   useEffect(() => { load(); }, []);
 
+  const [geocoding, setGeocoding] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.poste || !form.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
+    setGeocoding(true);
+    const geo = await geocodeVille(form.ville);
+    setGeocoding(false);
+    if (!geo) {
+      showToast(`Ville "${form.ville}" non reconnue. Vérifie l'orthographe.`);
+      return;
+    }
     const { error } = await supabase.from('player_listings').insert({
       owner_id: user.id,
       sport: form.sport, poste: form.poste, niveau: form.niveau, ville: form.ville,
       distance: parseInt(form.distance) || 15, dispo: form.dispo, bio: form.bio,
+      latitude: geo.latitude, longitude: geo.longitude,
     });
     if (error) { showToast("Erreur lors de la publication."); return; }
     showToast('Profil publié ✓');
@@ -66,7 +77,7 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
             <Field label="Disponibilité"><Select value={form.dispo} onChange={(e) => setForm({ ...form, dispo: e.target.value })} options={URGENCES} /></Field>
           </div>
           <Field label="Présentation"><TextArea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} placeholder="Ton parcours, ce que tu recherches…" /></Field>
-          <PrimaryButton type="submit">Publier mon profil</PrimaryButton>
+          <PrimaryButton type="submit" disabled={geocoding}>{geocoding ? 'Localisation de la ville…' : 'Publier mon profil'}</PrimaryButton>
         </form>
       )}
 

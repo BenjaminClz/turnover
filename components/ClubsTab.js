@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton } from '@/components/ui';
+import { geocodeVille } from '@/lib/geo';
 
 export default function ClubsTab({ user, profile, showToast, onContact }) {
   const supabase = createClient();
@@ -24,14 +25,24 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
 
   useEffect(() => { load(); }, []);
 
+  const [geocoding, setGeocoding] = useState(false);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.poste || !form.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
+    setGeocoding(true);
+    const geo = await geocodeVille(form.ville);
+    setGeocoding(false);
+    if (!geo) {
+      showToast(`Ville "${form.ville}" non reconnue. Vérifie l'orthographe.`);
+      return;
+    }
     const { error } = await supabase.from('club_needs').insert({
       owner_id: user.id,
       club: profile.nom,
       sport: form.sport, poste: form.poste, niveau: form.niveau, ville: form.ville,
       urgence: form.urgence, details: form.details,
+      latitude: geo.latitude, longitude: geo.longitude,
     });
     if (error) { showToast('Erreur lors de la publication.'); return; }
     showToast('Besoin publié ✓');
@@ -62,7 +73,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
           </div>
           <Field label="Urgence"><Select value={form.urgence} onChange={(e) => setForm({ ...form, urgence: e.target.value })} options={URGENCES} /></Field>
           <Field label="Détails"><TextArea value={form.details} onChange={(e) => setForm({ ...form, details: e.target.value })} placeholder="Jours d'entraînement, ambiance du club…" /></Field>
-          <PrimaryButton type="submit">Publier ce besoin</PrimaryButton>
+          <PrimaryButton type="submit" disabled={geocoding}>{geocoding ? 'Localisation de la ville…' : 'Publier ce besoin'}</PrimaryButton>
         </form>
       )}
 

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { Field, TextInput, Select, PrimaryButton, GhostButton } from '@/components/ui';
+import { ROLES } from '@/lib/constants';
 
 export default function AuthPage() {
   const supabase = createClient();
@@ -128,7 +129,7 @@ export default function AuthPage() {
           <TextInput required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="Marc Dupuis / RC Annemasse" />
         </Field>
         <Field label="Je suis…">
-          <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} options={['joueur', 'club']} />
+          <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} options={ROLES} />
         </Field>
         <Field label="Email">
           <TextInput type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="toi@exemple.com" />

@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
+import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
+import GalleryTab from '@/components/GalleryTab';
 
 const BESOIN_TYPES = [
   { value: 'joueur', label: 'Un joueur', icon: '🏉' },
@@ -29,6 +31,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const [creatingType, setCreatingType] = useState(null); // type choisi pour une NOUVELLE annonce
   const [geocoding, setGeocoding] = useState(false);
   const [form, setForm] = useState(emptyForm);
+  const [showInfraGallery, setShowInfraGallery] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -176,6 +179,27 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
     <div>
       <PageTitle>Mon espace club</PageTitle>
       <PageSubtitle>Publie autant de besoins que nécessaire — joueur, staff médical, encadrement technique ou bénévole.</PageSubtitle>
+
+      <div style={{ marginBottom: 28 }}>
+        <AvatarUpload userId={user.id} currentPath={profile?.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} size={84} />
+      </div>
+
+      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 36 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div>
+            <h3 style={{ fontSize: 17, marginBottom: 4 }}>Infrastructures du club</h3>
+            <p style={{ fontSize: 13.5, color: '#A4B0A6' }}>Terrain, vestiaires, club-house… visible par tous les joueurs et profils que tu contactes.</p>
+          </div>
+          <SecondaryButton onClick={() => setShowInfraGallery((v) => !v)} style={{ width: 'auto' }}>
+            {showInfraGallery ? 'Masquer' : 'Gérer la galerie'}
+          </SecondaryButton>
+        </div>
+        {showInfraGallery && (
+          <div style={{ marginTop: 24 }}>
+            <GalleryTab userId={user.id} ownerName={profile?.nom} readOnly={false} showToast={showToast} />
+          </div>
+        )}
+      </div>
 
       {/* Mes annonces actives, chacune avec son propre Modifier/Supprimer */}
       {myListings.length > 0 && !creatingType && (

@@ -7,27 +7,45 @@ import { ROLES } from '@/lib/constants';
 
 export default function AuthPage() {
   const supabase = createClient();
-  const [mode, setMode] = useState('login'); // login | signup | forgot | sent
-  const [form, setForm] = useState({ nom: '', email: '', password: '', role: 'joueur' });
+  const [mode, setMode] = useState('login'); // login | signup | verify-phone | sent | forgot | sent-reset
+  const [form, setForm] = useState({ nom: '', prenom: '', email: '', password: '', role: 'joueur', telephone: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [simCode, setSimCode] = useState('');
+  const [otpInput, setOtpInput] = useState('');
 
-  const handleSignup = async (e) => {
+  const isClub = form.role === 'club';
+
+  const genCode = () => String(Math.floor(100000 + Math.random() * 900000));
+
+  // Étape 1 du signup : valider les champs, puis passer à la vérification du téléphone
+  // (pas encore de vraie création de compte à ce stade).
+  const handleSignupStart = (e) => {
     e.preventDefault();
-    setError(''); setLoading(true);
-    if (!form.nom.trim() || !form.email.trim() || !form.password) {
-      setError('Tous les champs sont requis.'); setLoading(false); return;
+    setError('');
+    const nomOk = isClub ? form.nom.trim() : (form.prenom.trim() && form.nom.trim());
+    if (!nomOk || !form.email.trim() || !form.password || !form.telephone.trim()) {
+      setError('Tous les champs sont requis, y compris le téléphone.'); return;
     }
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    if (form.password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères.'); return; }
+    setSimCode(genCode());
+    setOtpInput('');
+    setMode('verify-phone');
+  };
+
+  // Étape 2 : vérification du code SMS simulé, puis création réelle du compte Supabase
+  const handleVerifyPhone = async (e) => {
+    e.preventDefault();
+    if (otpInput.trim() !== simCode) { setError('Code incorrect.'); return; }
+    setError(''); setLoading(true);
+    const nomComplet = isClub ? form.nom.trim() : `${form.prenom.trim()} ${form.nom.trim()}`;
+    const { error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { nom: form.nom, role: form.role } },
+      options: { data: { nom: nomComplet, prenom: isClub ? null : form.prenom.trim(), role: form.role, telephone: form.telephone } },
     });
-    if (signUpError) {
-      setError(signUpError.message); setLoading(false); return;
-    }
-    // Le profil sera créé automatiquement via un trigger SQL (voir guide) à la confirmation d'email.
     setLoading(false);
+    if (signUpError) { setError(signUpError.message); setMode('signup'); return; }
     setMode('sent');
   };
 
@@ -121,24 +139,60 @@ export default function AuthPage() {
     );
   }
 
+  if (mode === 'verify-phone') {
+    return wrap(
+      <form onSubmit={handleVerifyPhone}>
+        <h2 style={{ fontSize: 20, marginBottom: 6 }}>Vérification du téléphone</h2>
+        <p style={{ color: '#8C9A8E', fontSize: 13, marginBottom: 18 }}>Entre le code envoyé au {form.telephone}.</p>
+        <div style={{ background: 'rgba(212,255,63,0.08)', border: '1px dashed #D4FF3F', borderRadius: 10, padding: 16, marginBottom: 20 }}>
+          <div style={{ fontSize: 11, color: '#D4FF3F', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>Code SMS (simulé)</div>
+          <div style={{ fontFamily: 'monospace', fontSize: 26, fontWeight: 700, letterSpacing: '0.1em' }}>{simCode}</div>
+          <div style={{ fontSize: 12, color: '#8C9A8E', marginTop: 6 }}>Simulation — dans la vraie appli, ce code serait envoyé par SMS.</div>
+        </div>
+        <Field label="Code à 6 chiffres">
+          <TextInput value={otpInput} onChange={(e) => setOtpInput(e.target.value)} placeholder="000000" maxLength={6} />
+        </Field>
+        {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
+        <PrimaryButton type="submit" disabled={loading}>{loading ? 'Création du compte…' : 'Valider et créer mon compte'}</PrimaryButton>
+        <div style={{ textAlign: 'center', marginTop: 16 }}>
+          <GhostButton type="button" onClick={() => { setMode('signup'); setError(''); }}>Retour</GhostButton>
+        </div>
+      </form>
+    );
+  }
+
   if (mode === 'signup') {
     return wrap(
-      <form onSubmit={handleSignup}>
+      <form onSubmit={handleSignupStart}>
         <h2 style={{ fontSize: 20, marginBottom: 18 }}>Créer un compte</h2>
-        <Field label="Nom (ou nom du club)">
-          <TextInput required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="Marc Dupuis / RC Annemasse" />
-        </Field>
         <Field label="Je suis…">
           <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} options={ROLES} />
         </Field>
+        {isClub ? (
+          <Field label="Nom du club">
+            <TextInput required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="RC Annemasse" />
+          </Field>
+        ) : (
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <Field label="Prénom">
+              <TextInput required value={form.prenom} onChange={(e) => setForm({ ...form, prenom: e.target.value })} placeholder="Marc" />
+            </Field>
+            <Field label="Nom">
+              <TextInput required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="Dupuis" />
+            </Field>
+          </div>
+        )}
         <Field label="Email">
           <TextInput type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="toi@exemple.com" />
+        </Field>
+        <Field label="Téléphone">
+          <TextInput type="tel" required value={form.telephone} onChange={(e) => setForm({ ...form, telephone: e.target.value })} placeholder="06 12 34 56 78" />
         </Field>
         <Field label="Mot de passe">
           <TextInput type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="6 caractères minimum" />
         </Field>
         {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
-        <PrimaryButton type="submit" disabled={loading}>{loading ? 'Création…' : 'Créer mon compte'}</PrimaryButton>
+        <PrimaryButton type="submit" disabled={loading}>{loading ? '…' : 'Continuer'}</PrimaryButton>
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <GhostButton type="button" onClick={() => { setMode('login'); setError(''); }}>J'ai déjà un compte</GhostButton>
         </div>

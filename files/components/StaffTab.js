@@ -35,7 +35,7 @@ const ROLE_CONFIG = {
   },
 };
 
-const emptyForm = { specialite: '', diplome: '', sport: 'Rugby', niveau: '', type_mission: '', ville: '', distance: '25', dispo: 'Dès que possible', bio: '' };
+const emptyForm = { specialite: '', diplome: '', sport: 'Rugby', niveau: '', type_mission: '', type_mission_autre: '', ville: '', distance: '25', dispo: 'Dès que possible', bio: '' };
 
 export default function StaffTab({ role, user, profile, showToast, onContact }) {
   const supabase = createClient();
@@ -75,6 +75,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
     const payload = {
       owner_id: user.id, role,
       specialite: form.specialite, diplome: form.diplome, sport: form.sport, niveau: form.niveau, type_mission: form.type_mission,
+      type_mission_autre: form.type_mission === 'Autre' ? (form.type_mission_autre || null) : null,
       ville: form.ville, distance: parseInt(form.distance) || 25, dispo: form.dispo, bio: form.bio,
       latitude: geo.latitude, longitude: geo.longitude,
     };
@@ -141,6 +142,9 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       return (
         <>
           <Field label="Type de mission"><Select value={form.type_mission} onChange={(e) => setForm({ ...form, type_mission: e.target.value })} options={['', ...TYPES_MISSION_BENEVOLE]} /></Field>
+          {form.type_mission === 'Autre' && (
+            <Field label="Précise ta mission"><TextInput value={form.type_mission_autre} onChange={(e) => setForm({ ...form, type_mission_autre: e.target.value })} placeholder="ex. Animation jeune public, entretien matériel…" /></Field>
+          )}
           <Field label="Sport (optionnel)"><Select value={form.sport} onChange={(e) => setForm({ ...form, sport: e.target.value })} options={['', ...SPORTS]} /></Field>
         </>
       );
@@ -153,7 +157,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
     if (l.role === 'preparateur') return `Préparateur physique · ${l.sport || ''}`.trim();
     if (l.role === 'entraineur') return `Entraîneur ${l.sport || ''} · ${l.niveau || ''}`.trim();
     if (l.role === 'arbitre') return `Arbitre ${l.sport || ''} · ${l.niveau || ''}`.trim();
-    if (l.role === 'benevole') return l.type_mission || 'Bénévole';
+    if (l.role === 'benevole') return l.type_mission === 'Autre' && l.type_mission_autre ? l.type_mission_autre : (l.type_mission || 'Bénévole');
     return '';
   };
 

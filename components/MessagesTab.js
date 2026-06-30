@@ -2,16 +2,21 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
-import { EmptyState, TextInput } from '@/components/ui';
+import { EmptyState, TextInput, PrimaryButton } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
+import { useSubscription } from '@/lib/use-subscription';
+import ReportButton from '@/components/ReportButton';
 
-export default function MessagesTab({ user, profile, setUnreadCount, pendingConvTarget, clearPendingConvTarget }) {
+export default function MessagesTab({ user, profile, setUnreadCount, pendingConvTarget, clearPendingConvTarget, showToast }) {
   const supabase = createClient();
+  const isClub = profile?.role === 'club';
+  const { isActive } = useSubscription(isClub ? user.id : null);
   const [conversations, setConversations] = useState([]);
   const [activeConvId, setActiveConvId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [msgInput, setMsgInput] = useState('');
   const [loading, setLoading] = useState(true);
+  const [unlocking, setUnlocking] = useState(false);
   const bottomRef = useRef(null);
 
   const loadConversations = async () => {
@@ -19,7 +24,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     const { data, error } = await supabase
       .from('conversations')
       .select(`
-        id, context, participant_1, participant_2,
+        id, context, participant_1, participant_2, unlocked_by_club,
         p1:profiles!conversations_participant_1_fkey(id, nom, avatar_path),
         p2:profiles!conversations_participant_2_fkey(id, nom, avatar_path)
       `)
@@ -28,6 +33,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     if (error) { setLoading(false); return; }
     setConversations(data || []);
     setLoading(false);
+    return data || [];
   };
 
   useEffect(() => { loadConversations(); }, []);
@@ -40,9 +46,33 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     }
   }, [pendingConvTarget]);
 
+  // Un club gratuit a-t-il déjà débloqué une conversation (autre que celle-ci) ?
+  const alreadyUnlockedOther = (convId) =>
+    conversations.some((c) => c.unlocked_by_club && c.id !== convId);
+
+  const isLockedForMe = (conv) => {
+    if (!conv) return false;
+    if (!isClub) return false; // un joueur n'est jamais bloqué pour voir SES propres messages
+    if (isActive) return false; // club abonné : jamais bloqué
+    return !conv.unlocked_by_club; // club gratuit : bloqué sauf si cette conversation précise est débloquée
+  };
+
+  const handleUnlock = async (conv) => {
+    if (alreadyUnlockedOther(conv.id)) {
+      return; // sécurité : ne devrait pas arriver, le bouton est déjà caché dans ce cas
+    }
+    setUnlocking(true);
+    const { error } = await supabase.from('conversations').update({ unlocked_by_club: true }).eq('id', conv.id);
+    setUnlocking(false);
+    if (error) return;
+    await loadConversations();
+  };
+
   // Charge les messages de la conversation active + s'abonne au temps réel
   useEffect(() => {
     if (!activeConvId) { setMessages([]); return; }
+    const conv = conversations.find((c) => c.id === activeConvId);
+    if (isLockedForMe(conv)) { setMessages([]); return; } // ne charge pas le contenu si verrouillé
 
     let isMounted = true;
     (async () => {
@@ -52,17 +82,28 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
         .eq('conversation_id', activeConvId)
         .order('created_at', { ascending: true });
       if (isMounted) setMessages(data || []);
+      await supabase.from('messages')
+        .update({ read_at: new Date().toISOString() })
+        .eq('conversation_id', activeConvId)
+        .neq('sender_id', user.id)
+        .is('read_at', null);
     })();
 
     const channel = supabase
       .channel(`messages:${activeConvId}`)
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConvId}` }, (payload) => {
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConvId}` }, async (payload) => {
         setMessages((prev) => [...prev, payload.new]);
+        if (payload.new.sender_id !== user.id) {
+          await supabase.from('messages').update({ read_at: new Date().toISOString() }).eq('id', payload.new.id);
+        }
+      })
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConvId}` }, (payload) => {
+        setMessages((prev) => prev.map((m) => (m.id === payload.new.id ? payload.new : m)));
       })
       .subscribe();
 
     return () => { isMounted = false; supabase.removeChannel(channel); };
-  }, [activeConvId]);
+  }, [activeConvId, conversations]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,11 +116,12 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     const { error } = await supabase.from('messages').insert({
       conversation_id: activeConvId, sender_id: user.id, content,
     });
-    if (error) setMsgInput(content); // on remet le texte si l'envoi échoue
+    if (error) setMsgInput(content);
   };
 
   const otherOf = (conv) => (conv.participant_1 === user.id ? conv.p2 : conv.p1);
   const activeConv = conversations.find((c) => c.id === activeConvId);
+  const activeLocked = isLockedForMe(activeConv);
 
   if (loading) return <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 40 }}>Chargement…</div>;
 
@@ -94,11 +136,15 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
             {conversations.map((c) => {
               const other = otherOf(c);
               const url = avatarUrl(supabase, other?.avatar_path);
+              const locked = isLockedForMe(c);
               return (
                 <div key={c.id} onClick={() => setActiveConvId(c.id)} style={{ padding: 16, borderBottom: '1px solid #274238', cursor: 'pointer', background: activeConvId === c.id ? 'rgba(212,255,63,0.08)' : 'transparent', display: 'flex', alignItems: 'center', gap: 12 }}>
-                  {url && <img src={url} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{other?.nom}</div>
+                  {url && <img src={url} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0, opacity: locked ? 0.5 : 1 }} />}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                      {other?.nom}
+                      {locked && <span style={{ fontSize: 11 }}>🔒</span>}
+                    </div>
                     <div style={{ fontSize: 11, color: '#8C9A8E', marginTop: 2 }}>{c.context}</div>
                   </div>
                 </div>
@@ -108,6 +154,21 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             {!activeConv ? (
               <EmptyState icon="💬" title="Sélectionne une conversation" sub="Choisis une discussion dans la liste à gauche." />
+            ) : activeLocked ? (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
+                <div style={{ fontSize: 36, marginBottom: 14 }}>🔒</div>
+                <h3 style={{ fontSize: 17, marginBottom: 8 }}>Candidature de {otherOf(activeConv)?.nom}</h3>
+                <p style={{ fontSize: 14, color: '#A4B0A6', marginBottom: 24, maxWidth: 340 }}>
+                  {alreadyUnlockedOther(activeConv.id)
+                    ? "Tu as déjà débloqué une autre candidature gratuitement. Passe à l'abonnement Pro pour accéder à toutes tes candidatures."
+                    : "Débloque cette candidature gratuitement (une seule fois), ou passe à l'abonnement Pro pour accéder à toutes tes candidatures sans limite."}
+                </p>
+                {!alreadyUnlockedOther(activeConv.id) && (
+                  <PrimaryButton onClick={() => handleUnlock(activeConv)} disabled={unlocking} style={{ width: 'auto', marginBottom: 12 }}>
+                    {unlocking ? 'Déblocage…' : 'Débloquer cette candidature (gratuit)'}
+                  </PrimaryButton>
+                )}
+              </div>
             ) : (
               <>
                 <div style={{ padding: 16, borderBottom: '1px solid #274238', display: 'flex', alignItems: 'center', gap: 12 }}>
@@ -122,14 +183,22 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                 <div style={{ flex: 1, padding: 16, overflowY: 'auto', maxHeight: 360, display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {messages.length === 0 && <div style={{ color: '#8C9A8E', fontSize: 13, textAlign: 'center', marginTop: 20 }}>Dis bonjour pour démarrer la conversation.</div>}
                   {messages.map((m) => (
-                    <div key={m.id} style={{
-                      maxWidth: '75%', padding: '10px 14px', borderRadius: 12, fontSize: 14, lineHeight: 1.4,
-                      alignSelf: m.sender_id === user.id ? 'flex-end' : 'flex-start',
-                      background: m.sender_id === user.id ? '#D4FF3F' : '#0B1F1A',
-                      color: m.sender_id === user.id ? '#0B1F1A' : '#F5F0E6',
-                      fontWeight: m.sender_id === user.id ? 600 : 400,
-                      border: m.sender_id === user.id ? 'none' : '1px solid #274238',
-                    }}>{m.content}</div>
+                    <div key={m.id} style={{ display: 'flex', flexDirection: 'column', alignItems: m.sender_id === user.id ? 'flex-end' : 'flex-start', maxWidth: '75%', alignSelf: m.sender_id === user.id ? 'flex-end' : 'flex-start' }}>
+                      <div style={{
+                        padding: '10px 14px', borderRadius: 12, fontSize: 14, lineHeight: 1.4,
+                        background: m.sender_id === user.id ? '#D4FF3F' : '#0B1F1A',
+                        color: m.sender_id === user.id ? '#0B1F1A' : '#F5F0E6',
+                        fontWeight: m.sender_id === user.id ? 600 : 400,
+                        border: m.sender_id === user.id ? 'none' : '1px solid #274238',
+                      }}>{m.content}</div>
+                      {m.sender_id === user.id ? (
+                        <span style={{ fontSize: 11, color: m.read_at ? '#D4FF3F' : '#8C9A8E', marginTop: 3, marginRight: 2 }}>
+                          {m.read_at ? '✓✓ Lu' : '✓ Envoyé'}
+                        </span>
+                      ) : (
+                        <ReportButton targetType="message" targetId={m.id} targetOwnerId={m.sender_id} reporterId={user.id} showToast={showToast} style={{ marginTop: 3, marginLeft: 2 }} />
+                      )}
+                    </div>
                   ))}
                   <div ref={bottomRef} />
                 </div>

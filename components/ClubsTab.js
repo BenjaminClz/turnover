@@ -7,6 +7,7 @@ import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, S
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import GalleryTab from '@/components/GalleryTab';
+import { useSubscription } from '@/lib/use-subscription';
 
 const BESOIN_TYPES = [
   { value: 'joueur', label: 'Un joueur', icon: '🏉' },
@@ -19,11 +20,12 @@ const BESOIN_TYPES = [
 
 const emptyForm = {
   besoin_type: 'joueur', sport: 'Rugby', poste: '', niveau: 'Régionale 2', ville: '',
-  urgence: 'Dès que possible', details: '', specialite: '', diplome: '', type_mission: '',
+  urgence: 'Dès que possible', details: '', specialite: '', diplome: '', type_mission: '', type_mission_autre: '', remuneration: '',
 };
 
 export default function ClubsTab({ user, profile, showToast, onContact }) {
   const supabase = createClient();
+  const { isActive, loading: subLoading } = useSubscription(user.id);
   const [needs, setNeeds] = useState([]);
   const [myListings, setMyListings] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -80,6 +82,8 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       sport: form.sport, poste: form.poste || null, niveau: form.niveau || null, ville: form.ville,
       urgence: form.urgence, details: form.details,
       specialite: form.specialite, diplome: form.diplome, type_mission: form.type_mission,
+      type_mission_autre: form.type_mission === 'Autre' ? (form.type_mission_autre || null) : null,
+      remuneration: form.besoin_type === 'joueur' ? (form.remuneration || null) : null,
       latitude: geo.latitude, longitude: geo.longitude,
     };
 
@@ -112,6 +116,9 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
             <Field label="Poste recherché"><Select value={form.poste} onChange={(e) => setForm({ ...form, poste: e.target.value })} options={['', ...(POSTES[form.sport] || [])]} /></Field>
           </div>
           <Field label="Niveau du club"><Select value={form.niveau} onChange={(e) => setForm({ ...form, niveau: e.target.value })} options={NIVEAUX} /></Field>
+          <Field label="Rémunération / défraiement (facultatif)" hint="Texte libre, ex. « Défraiement 50€/match », « Logement + indemnités »…">
+            <TextInput value={form.remuneration} onChange={(e) => setForm({ ...form, remuneration: e.target.value })} placeholder="ex. Défraiement 50€/match" />
+          </Field>
         </>
       );
     }
@@ -143,7 +150,14 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       );
     }
     if (type === 'benevole') {
-      return <Field label="Type de mission"><Select value={form.type_mission} onChange={(e) => setForm({ ...form, type_mission: e.target.value })} options={['', ...TYPES_MISSION_BENEVOLE]} /></Field>;
+      return (
+        <>
+          <Field label="Type de mission"><Select value={form.type_mission} onChange={(e) => setForm({ ...form, type_mission: e.target.value })} options={['', ...TYPES_MISSION_BENEVOLE]} /></Field>
+          {form.type_mission === 'Autre' && (
+            <Field label="Précise la mission"><TextInput value={form.type_mission_autre} onChange={(e) => setForm({ ...form, type_mission_autre: e.target.value })} placeholder="ex. Animation jeune public, entretien matériel…" /></Field>
+          )}
+        </>
+      );
     }
     return null;
   };
@@ -169,7 +183,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
     if (n.besoin_type === 'preparateur') return `Préparateur physique · ${n.sport || ''}`.trim();
     if (n.besoin_type === 'entraineur') return `Entraîneur ${n.sport || ''} · ${n.niveau || ''}`.trim();
     if (n.besoin_type === 'arbitre') return `Arbitre ${n.sport || ''} · ${n.niveau || ''}`.trim();
-    if (n.besoin_type === 'benevole') return n.type_mission || 'Bénévole';
+    if (n.besoin_type === 'benevole') return n.type_mission === 'Autre' && n.type_mission_autre ? n.type_mission_autre : (n.type_mission || 'Bénévole');
     return '';
   };
 
@@ -183,6 +197,13 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       <div style={{ marginBottom: 28 }}>
         <AvatarUpload userId={user.id} currentPath={profile?.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} size={84} />
       </div>
+
+      {isActive && (
+        <div style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid #D4FF3F', borderRadius: 14, padding: 18, marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <Badge tone="lime">Pro</Badge>
+          <span style={{ fontSize: 14, color: '#A4B0A6' }}>Abonnement actif — annonces illimitées et mise en avant débloquées.</span>
+        </div>
+      )}
 
       <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 36 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
@@ -217,6 +238,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
                     <div style={{ fontSize: 14, color: '#A4B0A6' }}>{describeNeed(listing)} · {listing.ville}</div>
+                    {listing.remuneration && <div style={{ fontSize: 13, color: '#D4FF3F', marginTop: 4 }}>💰 {listing.remuneration}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => startEditing(listing)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
@@ -231,20 +253,30 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
 
       {/* Bouton pour ajouter une nouvelle annonce, ou sélecteur de type si pas encore d'annonce */}
       {!creatingType && !editingId && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-            {BESOIN_TYPES.map((t) => (
-              <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: '#F5F0E6', transition: 'border-color .15s ease' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#D4FF3F'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2C4A3D'}
-              >
-                <div style={{ fontSize: 26, marginBottom: 8 }}>{t.icon}</div>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
-              </button>
-            ))}
+        myListings.length >= 1 && !isActive && !subLoading ? (
+          <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36, textAlign: 'center' }}>
+            <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
+            <h3 style={{ fontSize: 17, marginBottom: 8 }}>Limite gratuite atteinte</h3>
+            <p style={{ fontSize: 14, color: '#A4B0A6', marginBottom: 20, maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>
+              Le compte gratuit permet 1 annonce active. Passe par l'onglet <strong style={{ color: '#F5F0E6' }}>Abonnement</strong> pour en publier davantage.
+            </p>
           </div>
-        </div>
+        ) : (
+          <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
+            <h3 style={{ marginBottom: 20, fontSize: 18 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+              {BESOIN_TYPES.map((t) => (
+                <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: '#F5F0E6', transition: 'border-color .15s ease' }}
+                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#D4FF3F'}
+                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2C4A3D'}
+                >
+                  <div style={{ fontSize: 26, marginBottom: 8 }}>{t.icon}</div>
+                  <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )
       )}
 
       {/* Formulaire de création d'une nouvelle annonce */}
@@ -267,6 +299,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
               <div>
                 <div style={{ fontWeight: 700, fontSize: 16 }}>{n.club} <span style={{ color: '#A4B0A6', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
                 <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{describeNeed(n)} · {n.ville}</div>
+                {n.remuneration && <div style={{ fontSize: 13.5, color: '#D4FF3F', marginTop: 6 }}>💰 {n.remuneration}</div>}
                 {n.details && <div style={{ fontSize: 14, color: '#C7CFC8', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}
                 <div style={{ marginTop: 12 }}><Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge></div>
               </div>

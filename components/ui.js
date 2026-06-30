@@ -96,6 +96,26 @@ export function GhostButton({ children, ...props }) {
   );
 }
 
+export function ToggleSwitch({ checked, onChange, ...props }) {
+  return (
+    <button
+      {...props}
+      onClick={onChange}
+      role="switch"
+      aria-checked={checked}
+      style={{
+        width: 44, height: 24, borderRadius: 14, border: 'none', cursor: 'pointer', padding: 3,
+        background: checked ? '#D4FF3F' : '#2C4A3D', position: 'relative', transition: 'background .15s ease',
+        flexShrink: 0, ...props.style,
+      }}
+    >
+      <span style={{
+        display: 'block', width: 18, height: 18, borderRadius: '50%', background: checked ? '#0B1F1A' : '#F5F0E6',
+        transform: checked ? 'translateX(20px)' : 'translateX(0)', transition: 'transform .15s ease',
+      }} />
+    </button>
+  );
+}
 export function Toast({ message }) {
   if (!message) return null;
   return (

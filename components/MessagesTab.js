@@ -121,7 +121,10 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     const { error } = await supabase.from('messages').insert({
       conversation_id: activeConvId, sender_id: user.id, content,
     });
-    if (error) setMsgInput(content);
+    if (error) {
+      setMsgInput(content);
+      showToast(error.message?.includes('Trop de messages') ? error.message : "Erreur lors de l'envoi du message.");
+    }
   };
 
   const otherOf = (conv) => (conv.participant_1 === user.id ? conv.p2 : conv.p1);

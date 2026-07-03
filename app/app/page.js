@@ -95,7 +95,7 @@ export default function AppPage() {
     if (!existing) {
       const { data: created, error } = await supabase
         .from('conversations').insert({ participant_1: p1, participant_2: p2, context: contextLabel, club_need_id: clubNeedId }).select('id').single();
-      if (error) { showToast("Impossible d'ouvrir la conversation."); return; }
+      if (error) { showToast(error.message?.includes('Trop de nouvelles conversations') ? error.message : "Impossible d'ouvrir la conversation."); return; }
       existing = created;
     }
     setPendingConvTarget({ conversationId: existing.id, otherName });

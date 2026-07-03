@@ -106,7 +106,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       showToast('Besoin mis à jour ✓');
     } else {
       const { error } = await supabase.from('club_needs').insert(payload);
-      if (error) { showToast('Erreur lors de la publication.'); return; }
+      if (error) { showToast(error.message?.includes('Trop d\'annonces') ? error.message : 'Erreur lors de la publication.'); return; }
       showToast('Besoin publié ✓');
       // Alerte les joueurs dont le profil correspond (même sport + même poste), sauf le club lui-même.
       if (payload.besoin_type === 'joueur') {

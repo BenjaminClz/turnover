@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { PageTitle, PageSubtitle, EmptyState, Badge } from '@/components/ui';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 const TARGET_LABELS = {
   player_listing: 'Profil joueur', staff_listing: 'Profil staff', club_need: 'Annonce club',
@@ -14,15 +15,19 @@ export default function AdminTab({ showToast }) {
   const [reports, setReports] = useState([]);
   const [suspendedProfiles, setSuspendedProfiles] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [confirmSuspendId, setConfirmSuspendId] = useState(null);
+  const [clubs, setClubs] = useState([]);
 
   const load = async () => {
     setLoading(true);
-    const [{ data: r }, { data: s }] = await Promise.all([
+    const [{ data: r }, { data: s }, { data: c }] = await Promise.all([
       supabase.from('reports').select('*, reporter:profiles!reports_reporter_id_fkey(nom), target_owner:profiles!reports_target_owner_id_fkey(nom, suspended)').order('created_at', { ascending: false }),
       supabase.from('profiles').select('*').eq('suspended', true),
+      supabase.from('profiles').select('id, nom, verified').eq('role', 'club').order('nom'),
     ]);
     setReports(r || []);
     setSuspendedProfiles(s || []);
+    setClubs(c || []);
     setLoading(false);
   };
 
@@ -44,6 +49,20 @@ export default function AdminTab({ showToast }) {
     load();
   };
 
+  const handleSuspend = async (profileId) => {
+    const { error } = await supabase.from('profiles').update({ suspended: true }).eq('id', profileId);
+    if (error) { showToast('Erreur lors de la suspension.'); return; }
+    showToast('Compte suspendu.');
+    load();
+  };
+
+  const toggleVerified = async (clubId, current) => {
+    const { error } = await supabase.from('profiles').update({ verified: !current }).eq('id', clubId);
+    if (error) { showToast('Erreur.'); return; }
+    showToast(!current ? 'Club vérifié ✓' : 'Vérification retirée.');
+    load();
+  };
+
   const handleDismiss = async (reportIds) => {
     const { error } = await supabase.from('reports').delete().in('id', reportIds);
     if (error) { showToast('Erreur lors du rejet.'); return; }
@@ -55,6 +74,28 @@ export default function AdminTab({ showToast }) {
     <div>
       <PageTitle>Administration</PageTitle>
       <PageSubtitle>Signalements reçus et comptes suspendus.</PageSubtitle>
+
+      <div style={{ marginBottom: 36 }}>
+        <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+          Clubs — vérification ({clubs.length})
+        </h2>
+        <div style={{ display: 'grid', gap: 8 }}>
+          {clubs.map((c) => (
+            <div key={c.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 10, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
+                {c.nom}
+                {c.verified && <span title="Vérifié" style={{ color: '#D4FF3F' }}>✓</span>}
+              </span>
+              <button
+                onClick={() => toggleVerified(c.id, c.verified)}
+                style={{ background: c.verified ? 'transparent' : '#D4FF3F', border: c.verified ? '1.5px solid #2C4A3D' : 'none', color: c.verified ? '#A4B0A6' : '#0B1F1A', padding: '7px 14px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
+              >
+                {c.verified ? 'Retirer la vérification' : 'Vérifier ce club'}
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
 
       {suspendedProfiles.length > 0 && (
         <div style={{ marginBottom: 36 }}>
@@ -95,7 +136,14 @@ export default function AdminTab({ showToast }) {
                       {g.target_owner?.suspended && <span style={{ marginLeft: 8 }}><Badge tone="urgent">Compte suspendu</Badge></span>}
                     </div>
                   </div>
-                  <button onClick={() => handleDismiss(g.reports.map((r) => r.id))} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '8px 14px', borderRadius: 7, fontWeight: 600, fontSize: 12.5, cursor: 'pointer' }}>Rejeter ces signalements</button>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    {!g.target_owner?.suspended && (
+                      <button onClick={() => setConfirmSuspendId(g.target_owner_id)} style={{ background: '#FF6B6B', color: '#0B1F1A', border: 'none', padding: '8px 14px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
+                        Suspendre ce compte
+                      </button>
+                    )}
+                    <button onClick={() => handleDismiss(g.reports.map((r) => r.id))} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '8px 14px', borderRadius: 7, fontWeight: 600, fontSize: 12.5, cursor: 'pointer' }}>Rejeter ces signalements</button>
+                  </div>
                 </div>
                 <div style={{ display: 'grid', gap: 8 }}>
                   {g.reports.map((r) => (
@@ -109,6 +157,15 @@ export default function AdminTab({ showToast }) {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmSuspendId}
+        title="Suspendre ce compte ?"
+        message="Le compte ne pourra plus se connecter ni utiliser la messagerie tant qu'il n'est pas réactivé."
+        confirmLabel="Suspendre"
+        onConfirm={() => { const id = confirmSuspendId; setConfirmSuspendId(null); handleSuspend(id); }}
+        onCancel={() => setConfirmSuspendId(null)}
+      />
     </div>
   );
 }

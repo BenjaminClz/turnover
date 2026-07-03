@@ -69,3 +69,26 @@ h1, h2, h3 { line-height: 1.15; }
 .tv-btn:active {
   transform: scale(0.97);
 }
+
+.tv-messages-grid {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+}
+.tv-messages-back {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .tv-messages-grid {
+    grid-template-columns: 1fr;
+  }
+  .tv-messages-list-mobile-hidden {
+    display: none;
+  }
+  .tv-messages-detail-mobile-hidden {
+    display: none;
+  }
+  .tv-messages-back {
+    display: block;
+  }
+}

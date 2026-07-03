@@ -36,6 +36,15 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const [form, setForm] = useState(emptyForm);
   const [showInfraGallery, setShowInfraGallery] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [candidatureCounts, setCandidatureCounts] = useState({});
+
+  const loadCandidatureCounts = async (myListingIds) => {
+    if (myListingIds.length === 0) { setCandidatureCounts({}); return; }
+    const { data } = await supabase.from('conversations').select('club_need_id').in('club_need_id', myListingIds);
+    const counts = {};
+    (data || []).forEach((c) => { counts[c.club_need_id] = (counts[c.club_need_id] || 0) + 1; });
+    setCandidatureCounts(counts);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -45,7 +54,9 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       .order('created_at', { ascending: false });
     if (error) { showToast('Erreur de chargement.'); setLoading(false); return; }
     setNeeds(data || []);
-    setMyListings((data || []).filter((n) => n.owner_id === user.id));
+    const mine = (data || []).filter((n) => n.owner_id === user.id);
+    setMyListings(mine);
+    loadCandidatureCounts(mine.map((m) => m.id));
     setLoading(false);
   };
 
@@ -216,6 +227,16 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       <PageTitle>Mon espace club</PageTitle>
       <PageSubtitle>Publie autant de besoins que nécessaire — joueur, staff médical, encadrement technique ou bénévole.</PageSubtitle>
 
+      {profile?.verified ? (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(212,255,63,0.1)', border: '1px solid #D4FF3F', borderRadius: 20, padding: '5px 14px', fontSize: 12.5, fontWeight: 700, color: '#D4FF3F', marginBottom: 20 }}>
+          ✓ Club vérifié
+        </div>
+      ) : (
+        <div style={{ fontSize: 12.5, color: '#5C6B5E', marginBottom: 20 }}>
+          Club non vérifié — contacte turn-over@outlook.fr pour demander la vérification de ton club.
+        </div>
+      )}
+
       <div style={{ marginBottom: 28 }}>
         <AvatarUpload userId={user.id} currentPath={profile?.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} size={84} />
       </div>
@@ -261,6 +282,14 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
                     <div style={{ fontSize: 14, color: '#A4B0A6' }}>{describeNeed(listing)} · {listing.ville}</div>
                     {listing.remuneration && <div style={{ fontSize: 13, color: '#D4FF3F', marginTop: 4 }}>💰 {listing.remuneration}</div>}
+                    {isActive && (
+                      <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 6 }}>
+                        📊 {candidatureCounts[listing.id] || 0} candidature{(candidatureCounts[listing.id] || 0) !== 1 ? 's' : ''} reçue{(candidatureCounts[listing.id] || 0) !== 1 ? 's' : ''}
+                      </div>
+                    )}
+                    {!isActive && !subLoading && (
+                      <div style={{ fontSize: 12, color: '#5C6B5E', marginTop: 6 }}>📊 Passe à Pro pour voir le nombre de candidatures reçues</div>
+                    )}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => startEditing(listing)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>

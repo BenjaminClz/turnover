@@ -24,7 +24,7 @@ const ROLE_HOME_TAB = {
 };
 
 export default function AppPage() {
-  const { user, profile, loading } = useUser();
+  const { user, profile, loading, suspended } = useUser();
   const supabase = createClient();
   const [tab, setTab] = useState(null); // null tant qu'on n'a pas déterminé l'onglet de départ
   const [toast, setToast] = useState(null);
@@ -34,8 +34,8 @@ export default function AppPage() {
   const [myPlayerListing, setMyPlayerListing] = useState(null);
 
   useEffect(() => {
-    if (!loading && !user) { window.location.href = '/'; }
-  }, [loading, user]);
+    if (!loading && !user && !suspended) { window.location.href = '/'; }
+  }, [loading, user, suspended]);
 
   // Marque l'utilisateur comme actif récemment (affiché sur son profil aux autres)
   useEffect(() => {
@@ -59,6 +59,19 @@ export default function AppPage() {
       setTab(ROLE_HOME_TAB[profile.role] || 'recherche');
     }
   }, [profile, tab]);
+
+  // Message de bienvenue une seule fois, à la toute première connexion sur cet appareil
+  useEffect(() => {
+    if (!user || !profile) return;
+    const key = `tv-welcomed-${user.id}`;
+    if (!localStorage.getItem(key)) {
+      localStorage.setItem(key, '1');
+      const msg = profile.role === 'club'
+        ? 'Bienvenue sur Turnover ! Publie ton premier besoin pour commencer à recevoir des candidatures.'
+        : 'Bienvenue sur Turnover ! Complète ton profil pour apparaître auprès des clubs qui recrutent.';
+      setTimeout(() => showToast(msg), 600);
+    }
+  }, [user, profile]);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2800); };
 
@@ -93,6 +106,22 @@ export default function AppPage() {
     setViewingGallery({ userId, ownerName });
     setTab('galerie');
   };
+
+  if (suspended) {
+    return (
+      <div style={{ minHeight: '100vh', background: '#0B1F1A', color: '#F5F0E6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
+        <div style={{ maxWidth: 420 }}>
+          <div style={{ fontSize: 40, marginBottom: 16 }}>🚫</div>
+          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Ton compte a été suspendu</h1>
+          <p style={{ fontSize: 14.5, color: '#A4B0A6', lineHeight: 1.6, marginBottom: 20 }}>
+            L'accès à ton compte a été temporairement suspendu suite à un ou plusieurs signalements.
+            Si tu penses qu'il s'agit d'une erreur, contacte-nous.
+          </p>
+          <a href="mailto:turn-over@outlook.fr" style={{ color: '#D4FF3F', fontWeight: 700, textDecoration: 'underline' }}>turn-over@outlook.fr</a>
+        </div>
+      </div>
+    );
+  }
 
   if (loading || !user || !profile || tab === null) {
     return <div style={{ minHeight: '100vh', background: '#0B1F1A' }} />;

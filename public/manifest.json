@@ -1,0 +1,10 @@
+{
+  "name": "Turnover — Le marché des transferts amateurs",
+  "short_name": "Turnover",
+  "start_url": "/app",
+  "display": "standalone",
+  "background_color": "#0B1F1A",
+  "theme_color": "#0B1F1A",
+  "description": "Connecte clubs et joueurs amateurs.",
+  "icons": []
+}

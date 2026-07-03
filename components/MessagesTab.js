@@ -136,8 +136,8 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
       {conversations.length === 0 ? (
         <EmptyState icon="💬" title="Aucune conversation" sub="Clique sur « Contacter » depuis un profil ou un besoin pour démarrer une discussion." />
       ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: '260px 1fr', background: '#152E26', border: '1px solid #274238', borderRadius: 16, overflow: 'hidden', minHeight: 480 }}>
-          <div style={{ borderRight: '1px solid #274238', overflowY: 'auto' }}>
+        <div className="tv-messages-grid" style={{ background: '#152E26', border: '1px solid #274238', borderRadius: 16, overflow: 'hidden', minHeight: 480 }}>
+          <div className={activeConvId ? 'tv-messages-list-mobile-hidden' : ''} style={{ borderRight: '1px solid #274238', overflowY: 'auto' }}>
             {conversations.map((c) => {
               const other = otherOf(c);
               const url = avatarUrl(supabase, other?.avatar_path);
@@ -156,7 +156,16 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
               );
             })}
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className={activeConvId ? '' : 'tv-messages-detail-mobile-hidden'} style={{ display: 'flex', flexDirection: 'column' }}>
+            {activeConv && (
+              <button
+                className="tv-messages-back"
+                onClick={() => setActiveConvId(null)}
+                style={{ display: 'none', background: 'transparent', border: 'none', color: '#D4FF3F', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: '12px 16px', textAlign: 'left' }}
+              >
+                ← Retour aux conversations
+              </button>
+            )}
             {!activeConv ? (
               <EmptyState icon="💬" title="Sélectionne une conversation" sub="Choisis une discussion dans la liste à gauche." />
             ) : activeLocked ? (

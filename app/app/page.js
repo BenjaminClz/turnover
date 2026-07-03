@@ -15,6 +15,7 @@ import SubscriptionTab from '@/components/SubscriptionTab';
 import AdminTab from '@/components/AdminTab';
 import FavoritesTab from '@/components/FavoritesTab';
 import NotificationsBell from '@/components/NotificationsBell';
+import ConfirmDialog from '@/components/ConfirmDialog';
 import { isProfileComplete } from '@/lib/profile-completion';
 
 // Mappe chaque rôle vers son onglet "espace personnel" par défaut à la connexion
@@ -32,6 +33,8 @@ export default function AppPage() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [pendingConvTarget, setPendingConvTarget] = useState(null);
   const [myPlayerListing, setMyPlayerListing] = useState(null);
+  const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
     if (!loading && !user && !suspended) { window.location.href = '/'; }
@@ -77,6 +80,31 @@ export default function AppPage() {
 
   const logout = async () => {
     await supabase.auth.signOut();
+    window.location.href = '/';
+  };
+
+  const exportMyData = async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) { showToast('Session expirée.'); return; }
+    const res = await fetch('/api/export-data', { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) { showToast("Erreur lors de l'export."); return; }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'turnover-mes-donnees.json';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const deleteMyAccount = async () => {
+    setDeletingAccount(true);
+    const { data: sessionData } = await supabase.auth.getSession();
+    const token = sessionData?.session?.access_token;
+    if (!token) { showToast('Session expirée.'); setDeletingAccount(false); return; }
+    const res = await fetch('/api/delete-account', { method: 'POST', headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) { showToast('Erreur lors de la suppression du compte.'); setDeletingAccount(false); return; }
     window.location.href = '/';
   };
 
@@ -180,6 +208,8 @@ export default function AppPage() {
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <NotificationsBell user={user} onNavigate={(t) => setTab(t)} />
           <span style={{ fontSize: 15.5, color: '#F5F0E6', fontWeight: 800 }}>{profile.nom} <Badge tone="lime">{ROLE_LABELS[profile.role]}</Badge></span>
+          <GhostButton onClick={exportMyData} title="Exporter mes données" style={{ fontSize: 12 }}>Exporter</GhostButton>
+          <GhostButton onClick={() => setConfirmDeleteAccount(true)} title="Supprimer mon compte" style={{ fontSize: 12, color: '#FF6B6B' }}>Supprimer mon compte</GhostButton>
           <ToggleSwitch checked={true} onChange={logout} title="Se déconnecter" />
         </div>
       </nav>
@@ -197,6 +227,15 @@ export default function AppPage() {
           <GalleryTab userId={viewingGallery.userId} ownerName={viewingGallery.ownerName} readOnly={viewingGallery.userId !== user.id} showToast={showToast} />
         )}
       </main>
+
+      <ConfirmDialog
+        open={confirmDeleteAccount}
+        title="Supprimer définitivement ton compte ?"
+        message="Cette action est irréversible : ton profil, tes annonces, tes messages et toutes tes données seront définitivement supprimés. Pense à exporter tes données avant si tu veux les conserver."
+        confirmLabel={deletingAccount ? 'Suppression…' : 'Supprimer mon compte'}
+        onConfirm={deleteMyAccount}
+        onCancel={() => setConfirmDeleteAccount(false)}
+      />
 
       <Toast message={toast} />
     </div>

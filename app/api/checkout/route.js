@@ -10,8 +10,21 @@ const supabaseAdmin = createClient(
 
 export async function POST(request) {
   try {
-    const { userId, plan } = await request.json(); // plan: 'monthly' | 'yearly'
-    if (!userId || !['monthly', 'yearly'].includes(plan)) {
+    // Sécurité : on ne fait JAMAIS confiance à un userId envoyé tel quel par le client.
+    // On vérifie le token de connexion Supabase pour retrouver l'identité réelle de l'appelant.
+    const authHeader = request.headers.get('authorization') || '';
+    const token = authHeader.replace('Bearer ', '');
+    if (!token) {
+      return Response.json({ error: 'Non authentifié.' }, { status: 401 });
+    }
+    const { data: authData, error: authError } = await supabaseAdmin.auth.getUser(token);
+    if (authError || !authData?.user) {
+      return Response.json({ error: 'Session invalide.' }, { status: 401 });
+    }
+    const userId = authData.user.id; // identité vérifiée, ignore tout userId fourni dans le body
+
+    const { plan } = await request.json();
+    if (!['monthly', 'yearly'].includes(plan)) {
       return Response.json({ error: 'Paramètres invalides.' }, { status: 400 });
     }
 

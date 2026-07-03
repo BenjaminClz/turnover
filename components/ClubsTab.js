@@ -8,6 +8,7 @@ import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import GalleryTab from '@/components/GalleryTab';
 import { useSubscription } from '@/lib/use-subscription';
+import ConfirmDialog from '@/components/ConfirmDialog';
 
 const BESOIN_TYPES = [
   { value: 'joueur', label: 'Un joueur', icon: '🏉' },
@@ -34,6 +35,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const [geocoding, setGeocoding] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [showInfraGallery, setShowInfraGallery] = useState(false);
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -95,6 +97,26 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       const { error } = await supabase.from('club_needs').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
       showToast('Besoin publié ✓');
+      // Alerte les joueurs dont le profil correspond (même sport + même poste), sauf le club lui-même.
+      if (payload.besoin_type === 'joueur') {
+        const { data: matches } = await supabase
+          .from('player_listings')
+          .select('owner_id')
+          .eq('sport', payload.sport)
+          .eq('poste', payload.poste);
+        const notifRows = (matches || [])
+          .filter((m) => m.owner_id !== user.id)
+          .map((m) => ({
+            user_id: m.owner_id,
+            type: 'offre_correspondante',
+            title: `Nouvelle offre : ${payload.club}`,
+            body: `${payload.poste} · ${payload.niveau || ''} · ${payload.ville}`,
+            link_tab: 'recherche',
+          }));
+        if (notifRows.length > 0) {
+          await supabase.from('notifications').insert(notifRows);
+        }
+      }
     }
     cancelForm();
     load();
@@ -111,7 +133,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
     if (type === 'joueur') {
       return (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+          <div className="tv-grid-2" style={{ gap: 18 }}>
             <Field label="Sport"><Select value={form.sport} onChange={(e) => setForm({ ...form, sport: e.target.value, poste: '' })} options={SPORTS} /></Field>
             <Field label="Poste recherché"><Select value={form.poste} onChange={(e) => setForm({ ...form, poste: e.target.value })} options={['', ...(POSTES[form.sport] || [])]} /></Field>
           </div>
@@ -165,7 +187,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const renderForm = (type) => (
     <form onSubmit={handleSubmit}>
       {renderSpecificFields(type)}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
+      <div className="tv-grid-2" style={{ gap: 18 }}>
         <Field label="Ville"><TextInput value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} placeholder="Annemasse" /></Field>
         <Field label="Urgence"><Select value={form.urgence} onChange={(e) => setForm({ ...form, urgence: e.target.value })} options={URGENCES} /></Field>
       </div>
@@ -242,7 +264,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => startEditing(listing)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
-                    <button onClick={() => handleDelete(listing.id)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer</button>
+                    <button onClick={() => setConfirmDeleteId(listing.id)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer</button>
                   </div>
                 </div>
               )
@@ -308,6 +330,15 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={!!confirmDeleteId}
+        title="Supprimer cette annonce ?"
+        message="Cette action est irréversible."
+        confirmLabel="Supprimer"
+        onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); handleDelete(id); }}
+        onCancel={() => setConfirmDeleteId(null)}
+      />
     </div>
   );
 }

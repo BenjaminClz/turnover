@@ -60,7 +60,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       if (isClub) {
         const [{ data: n }, { data: p }, { data: ps }, { data: s }] = await Promise.all([
           supabase.from('club_needs').select('*, profiles(avatar_path)').order('created_at', { ascending: false }),
-          supabase.from('player_listings').select('*, profiles(nom, avatar_path, last_seen_at)').order('created_at', { ascending: false }),
+          supabase.from('player_listings').select('*, profiles(nom, avatar_path)').order('created_at', { ascending: false }),
           supabase.from('player_searches').select('*, profiles(nom, avatar_path)').order('created_at', { ascending: false }),
           supabase.from('staff_listings').select('*, profiles(nom, avatar_path)').order('created_at', { ascending: false }),
         ]);
@@ -143,7 +143,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           </button>
         </div>
 
-        <div className="tv-grid-2" style={{ gridTemplateColumns: isClub ? undefined : '1fr', gap: 14, marginBottom: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: isClub ? 'repeat(2, 1fr)' : '1fr', gap: 14, marginBottom: 18 }}>
           {isClub && (
             <Field label="Catégorie">
               <Select value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} options={[
@@ -155,7 +155,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           )}
           <Field label="Sport"><Select value={searchSport} onChange={(e) => setSearchSport(e.target.value)} options={['Tous', ...SPORTS]} /></Field>
         </div>
-        <div className="tv-grid-2" style={{ gap: 14, marginBottom: 18 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 14, marginBottom: 18 }}>
           <Field label="Niveau"><Select value={searchNiveau} onChange={(e) => setSearchNiveau(e.target.value)} options={['Tous', ...NIVEAUX]} /></Field>
           <Field label="Urgence"><Select value={searchUrgence} onChange={(e) => setSearchUrgence(e.target.value)} options={['Tous', ...URGENCES]} /></Field>
         </div>

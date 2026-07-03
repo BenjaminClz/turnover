@@ -47,3 +47,25 @@ h1, h2, h3 { line-height: 1.15; }
   html { font-size: 16px; }
 }
 
+.tv-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.tv-card {
+  transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+}
+.tv-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+  border-color: #3d5f4f;
+}
+.tv-btn {
+  transition: transform .12s ease, background .12s ease, opacity .12s ease;
+}
+.tv-btn:hover {
+  transform: scale(1.04);
+}
+.tv-btn:active {
+  transform: scale(0.97);
+}

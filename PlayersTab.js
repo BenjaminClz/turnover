@@ -13,22 +13,7 @@ import NationaliteSelect from '@/components/NationaliteSelect';
 import StatsSlider from '@/components/StatsSlider';
 import StatsRadar from '@/components/StatsRadar';
 import PiedFortSelect from '@/components/PiedFortSelect';
-import ConfirmDialog from '@/components/ConfirmDialog';
-import VilleAutocomplete from '@/components/VilleAutocomplete';
 import { nationalites } from '@/lib/nationalites';
-
-const lastSeenLabel = (dateStr) => {
-  if (!dateStr) return null;
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  const mins = diffMs / 60000;
-  if (mins < 5) return 'En ligne maintenant';
-  if (mins < 60) return `Actif il y a ${Math.floor(mins)} min`;
-  const hrs = mins / 60;
-  if (hrs < 24) return `Actif il y a ${Math.floor(hrs)} h`;
-  const days = hrs / 24;
-  if (days < 14) return `Actif il y a ${Math.floor(days)} j`;
-  return null;
-};
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
@@ -62,14 +47,12 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
   const [basicForm, setBasicForm] = useState(emptyBasicForm);
   const [detailsForm, setDetailsForm] = useState(emptyDetailsForm);
   const [viewingPlayer, setViewingPlayer] = useState(null);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
-  const [villeCoords, setVilleCoords] = useState(null);
 
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from('player_listings')
-      .select('*, profiles(nom, avatar_path, last_seen_at)')
+      .select('*, profiles(nom, avatar_path)')
       .order('created_at', { ascending: false });
     if (error) { showToast('Erreur de chargement.'); setLoading(false); return; }
     setPlayers(data || []);
@@ -95,13 +78,10 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
   const handleCreateBasic = async (e) => {
     e.preventDefault();
     if (!basicForm.poste || !basicForm.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
-    let geo = villeCoords && villeCoords.ville === basicForm.ville ? villeCoords : null;
-    if (!geo) {
-      setGeocoding(true);
-      geo = await geocodeVille(basicForm.ville);
-      setGeocoding(false);
-      if (!geo) { showToast(`Ville "${basicForm.ville}" non reconnue. Vérifie l'orthographe.`); return; }
-    }
+    setGeocoding(true);
+    const geo = await geocodeVille(basicForm.ville);
+    setGeocoding(false);
+    if (!geo) { showToast(`Ville "${basicForm.ville}" non reconnue. Vérifie l'orthographe.`); return; }
 
     const payload = {
       owner_id: user.id,
@@ -118,13 +98,10 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
   const handleUpdateBasic = async (e) => {
     e.preventDefault();
     if (!basicForm.poste || !basicForm.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
-    let geo = villeCoords && villeCoords.ville === basicForm.ville ? villeCoords : null;
-    if (!geo) {
-      setGeocoding(true);
-      geo = await geocodeVille(basicForm.ville);
-      setGeocoding(false);
-      if (!geo) { showToast(`Ville "${basicForm.ville}" non reconnue.`); return; }
-    }
+    setGeocoding(true);
+    const geo = await geocodeVille(basicForm.ville);
+    setGeocoding(false);
+    if (!geo) { showToast(`Ville "${basicForm.ville}" non reconnue.`); return; }
 
     const payload = {
       sport: basicForm.sport, poste: basicForm.poste, niveau: basicForm.niveau, ville: basicForm.ville,
@@ -178,23 +155,15 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
 
   const renderBasicFields = () => (
     <>
-      <div className="tv-grid-2" style={{ gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
         <Field label="Sport"><Select value={basicForm.sport} onChange={(e) => setBasicForm({ ...basicForm, sport: e.target.value, poste: '' })} options={SPORTS} /></Field>
         <Field label="Poste"><Select value={basicForm.poste} onChange={(e) => setBasicForm({ ...basicForm, poste: e.target.value })} options={['', ...(POSTES[basicForm.sport] || [])]} /></Field>
       </div>
-      <div className="tv-grid-2" style={{ gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
         <Field label="Niveau"><Select value={basicForm.niveau} onChange={(e) => setBasicForm({ ...basicForm, niveau: e.target.value })} options={NIVEAUX} /></Field>
-        <Field label="Ville">
-          <VilleAutocomplete
-            onSelect={(data) => {
-              setBasicForm({ ...basicForm, ville: data.ville });
-              setVilleCoords(data);
-            }}
-          />
-          {basicForm.ville && <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 6 }}>Sélectionnée : {basicForm.ville}</div>}
-        </Field>
+        <Field label="Ville"><TextInput value={basicForm.ville} onChange={(e) => setBasicForm({ ...basicForm, ville: e.target.value })} placeholder="Genève" /></Field>
       </div>
-      <div className="tv-grid-2" style={{ gap: 18 }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
         <Field label="Rayon (km)"><TextInput type="number" value={basicForm.distance} onChange={(e) => setBasicForm({ ...basicForm, distance: e.target.value })} /></Field>
         <Field label="Disponibilité"><Select value={basicForm.dispo} onChange={(e) => setBasicForm({ ...basicForm, dispo: e.target.value })} options={URGENCES} /></Field>
       </div>
@@ -236,13 +205,8 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
             </div>
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setEditing(true)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '10px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Modifier</button>
-              <button onClick={() => setConfirmDeleteOpen(true)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer</button>
+              <button onClick={handleDelete} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer</button>
             </div>
-          </div>
-          <div style={{ fontSize: 13, marginBottom: 14 }}>
-            <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline' }}>
-              Voir / partager mon profil public ↗
-            </a>
           </div>
           <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
             <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
@@ -322,7 +286,7 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
             <div style={{ marginTop: 8, marginBottom: 24 }}>
               <h4 style={{ fontSize: 15, marginBottom: 4 }}>Points forts</h4>
               <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 16 }}>Positionne les curseurs pour donner une idée de ton profil de jeu.</p>
-              <div className="tv-grid-2" style={{ gap: 32 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32 }}>
                 <StatsSlider
                   stats={detailsForm}
                   onChange={(key, val) => setDetailsForm({ ...detailsForm, [key]: val })}
@@ -374,12 +338,7 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
                   </div>
                 )}
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {p.profiles?.nom}
-                    {lastSeenLabel(p.profiles?.last_seen_at) && (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#D4FF3F' }}>· {lastSeenLabel(p.profiles?.last_seen_at)}</span>
-                    )}
-                  </div>
+                  <div style={{ fontWeight: 700, fontSize: 16 }}>{p.profiles?.nom}</div>
                   <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{p.poste} · {p.niveau} · {p.ville} ({p.distance} km)</div>
                   <div style={{ fontSize: 13, color: '#8C9A8E', marginTop: 4, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
                     {p.date_naissance && <span>{calculAge(p.date_naissance)} ans</span>}
@@ -413,15 +372,6 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
           ))}
         </div>
       )}
-
-      <ConfirmDialog
-        open={confirmDeleteOpen}
-        title="Supprimer ton profil ?"
-        message="Cette action est irréversible. Ton profil et tes candidatures seront définitivement supprimés."
-        confirmLabel="Supprimer"
-        onConfirm={() => { setConfirmDeleteOpen(false); handleDelete(); }}
-        onCancel={() => setConfirmDeleteOpen(false)}
-      />
 
       <PlayerProfileModal
         player={viewingPlayer}

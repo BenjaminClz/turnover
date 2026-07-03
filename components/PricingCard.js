@@ -1,18 +1,27 @@
 'use client';
 
 import { useState } from 'react';
-import { PrimaryButton, SecondaryButton, Badge } from '@/components/ui';
+import { PrimaryButton, Badge } from '@/components/ui';
+import { createClient } from '@/lib/supabase-client';
 
 export default function PricingCard({ userId, isActive, showToast }) {
   const [loading, setLoading] = useState(null); // 'monthly' | 'yearly' | null
+  const supabase = createClient();
 
   const startCheckout = async (plan) => {
     setLoading(plan);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token;
+      if (!token) {
+        showToast('Session expirée, reconnecte-toi.');
+        setLoading(null);
+        return;
+      }
       const res = await fetch('/api/checkout', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, plan }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ plan }),
       });
       const data = await res.json();
       if (data.url) {
@@ -44,7 +53,7 @@ export default function PricingCard({ userId, isActive, showToast }) {
       <h3 style={{ fontSize: 18, marginBottom: 6 }}>Passer à Turnover Pro</h3>
       <p style={{ fontSize: 14, color: '#A4B0A6', marginBottom: 24 }}>Annonces illimitées, mise en avant dans la recherche, coordonnées directes et statistiques de consultation.</p>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+      <div className="tv-grid-2" style={{ gap: 16 }}>
         <div style={{ background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 22 }}>
           <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>Tarif de lancement</div>
           <div style={{ fontFamily: 'Anton', fontSize: 30, marginBottom: 4 }}>29€<span style={{ fontFamily: 'Inter', fontSize: 14, color: '#A4B0A6', fontWeight: 500 }}>/mois</span></div>

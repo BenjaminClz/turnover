@@ -14,6 +14,7 @@ import GalleryTab from '@/components/GalleryTab';
 import SubscriptionTab from '@/components/SubscriptionTab';
 import AdminTab from '@/components/AdminTab';
 import FavoritesTab from '@/components/FavoritesTab';
+import NotificationsBell from '@/components/NotificationsBell';
 import { isProfileComplete } from '@/lib/profile-completion';
 
 // Mappe chaque rôle vers son onglet "espace personnel" par défaut à la connexion
@@ -35,6 +36,12 @@ export default function AppPage() {
   useEffect(() => {
     if (!loading && !user) { window.location.href = '/'; }
   }, [loading, user]);
+
+  // Marque l'utilisateur comme actif récemment (affiché sur son profil aux autres)
+  useEffect(() => {
+    if (!user) return;
+    supabase.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('id', user.id);
+  }, [user]);
 
   // Pour un joueur, charge son propre profil afin de vérifier le taux de complétion
   // (nécessaire pour autoriser ou bloquer l'accès à la messagerie).
@@ -60,7 +67,9 @@ export default function AppPage() {
     window.location.href = '/';
   };
 
-  const startConversation = async (otherId, otherName, contextLabel) => {
+  // clubNeedId (optionnel) : quand un joueur contacte un club au sujet d'une offre précise,
+  // ça permet de scoper le déblocage gratuit "un joueur choisi par offre" plutôt que par compte.
+  const startConversation = async (otherId, otherName, contextLabel, clubNeedId = null) => {
     if (otherId === user.id) { showToast("C'est ton propre profil."); return; }
     if (profile.role === 'joueur' && !isProfileComplete(myPlayerListing)) {
       showToast('Complète ton profil (date de naissance, taille, poids) pour débloquer la messagerie.');
@@ -72,7 +81,7 @@ export default function AppPage() {
       .from('conversations').select('id').eq('participant_1', p1).eq('participant_2', p2).maybeSingle();
     if (!existing) {
       const { data: created, error } = await supabase
-        .from('conversations').insert({ participant_1: p1, participant_2: p2, context: contextLabel }).select('id').single();
+        .from('conversations').insert({ participant_1: p1, participant_2: p2, context: contextLabel, club_need_id: clubNeedId }).select('id').single();
       if (error) { showToast("Impossible d'ouvrir la conversation."); return; }
       existing = created;
     }
@@ -140,6 +149,7 @@ export default function AppPage() {
           ))}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <NotificationsBell user={user} onNavigate={(t) => setTab(t)} />
           <span style={{ fontSize: 15.5, color: '#F5F0E6', fontWeight: 800 }}>{profile.nom} <Badge tone="lime">{ROLE_LABELS[profile.role]}</Badge></span>
           <ToggleSwitch checked={true} onChange={logout} title="Se déconnecter" />
         </div>

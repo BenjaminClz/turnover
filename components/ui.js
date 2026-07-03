@@ -71,9 +71,11 @@ export function PrimaryButton({ children, ...props }) {
   return (
     <button
       {...props}
-      style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '15px 28px', borderRadius: 10, fontWeight: 700, fontSize: 15.5, cursor: 'pointer', width: '100%', transition: 'transform .12s ease, opacity .12s ease', ...props.style }}
-      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '15px 28px', borderRadius: 10, fontWeight: 700, fontSize: 15.5, cursor: 'pointer', width: '100%', transition: 'transform .12s ease, opacity .12s ease, background .12s ease', ...props.style }}
+      onMouseEnter={(e) => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.background = '#e4ff70'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#D4FF3F'; }}
+      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
+      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1.02)'}
     >
       {children}
     </button>
@@ -82,7 +84,14 @@ export function PrimaryButton({ children, ...props }) {
 
 export function SecondaryButton({ children, ...props }) {
   return (
-    <button {...props} style={{ background: 'transparent', color: '#F5F0E6', border: '1.5px solid #2C4A3D', padding: '13px 24px', borderRadius: 10, fontWeight: 600, fontSize: 14.5, cursor: 'pointer', transition: 'border-color .12s ease', ...props.style }}>
+    <button
+      {...props}
+      style={{ background: 'transparent', color: '#F5F0E6', border: '1.5px solid #2C4A3D', padding: '13px 24px', borderRadius: 10, fontWeight: 600, fontSize: 14.5, cursor: 'pointer', transition: 'border-color .12s ease, transform .12s ease, background .12s ease', ...props.style }}
+      onMouseEnter={(e) => { e.currentTarget.style.borderColor = '#D4FF3F'; e.currentTarget.style.background = 'rgba(212,255,63,0.06)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.borderColor = '#2C4A3D'; e.currentTarget.style.background = 'transparent'; }}
+      onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
+      onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+    >
       {children}
     </button>
   );
@@ -90,7 +99,12 @@ export function SecondaryButton({ children, ...props }) {
 
 export function GhostButton({ children, ...props }) {
   return (
-    <button {...props} style={{ background: 'transparent', color: '#A4B0A6', border: 'none', fontSize: 14, cursor: 'pointer', textDecoration: 'underline', fontWeight: 500, ...props.style }}>
+    <button
+      {...props}
+      style={{ background: 'transparent', color: '#A4B0A6', border: 'none', fontSize: 14, cursor: 'pointer', textDecoration: 'underline', fontWeight: 500, transition: 'color .12s ease', ...props.style }}
+      onMouseEnter={(e) => { e.currentTarget.style.color = '#D4FF3F'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.color = '#A4B0A6'; }}
+    >
       {children}
     </button>
   );
@@ -119,7 +133,7 @@ export function ToggleSwitch({ checked, onChange, ...props }) {
 export function Toast({ message }) {
   if (!message) return null;
   return (
-    <div style={{ position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)', background: '#D4FF3F', color: '#0B1F1A', padding: '14px 24px', borderRadius: 10, fontWeight: 700, fontSize: 14.5, boxShadow: '0 10px 30px rgba(0,0,0,0.35)', zIndex: 100, maxWidth: '90vw' }}>
+    <div style={{ position: 'fixed', bottom: 28, left: '50%', transform: 'translateX(-50%)', background: '#D4FF3F', color: '#0B1F1A', padding: '14px 24px', borderRadius: 10, fontWeight: 700, fontSize: 14.5, boxShadow: '0 10px 30px rgba(0,0,0,0.35)', zIndex: 100, maxWidth: '90vw', animation: 'tv-toast-in .25s ease' }}>
       {message}
     </div>
   );

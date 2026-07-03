@@ -15,6 +15,7 @@ import SubscriptionTab from '@/components/SubscriptionTab';
 import AdminTab from '@/components/AdminTab';
 import FavoritesTab from '@/components/FavoritesTab';
 import NotificationsBell from '@/components/NotificationsBell';
+import UserMenu from '@/components/UserMenu';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { isProfileComplete } from '@/lib/profile-completion';
 
@@ -163,27 +164,27 @@ export default function AppPage() {
   // via le sélecteur de catégorie à l'intérieur de l'écran Rechercher, pas via des onglets séparés.
   const tabs = profile.role === 'club'
     ? [
-        { key: 'club', label: '👤 Mon espace' },
-        { key: 'recherche', label: '🔍 Rechercher' },
-        { key: 'favoris', label: '❤️ Favoris' },
-        { key: 'abonnement', label: '⭐ Abonnement' },
-        { key: 'messages', label: `💬 Messages${unreadCount ? ` (${unreadCount})` : ''}` },
-        ...(profile.is_admin ? [{ key: 'admin', label: '🛡️ Admin' }] : []),
+        { key: 'club', label: 'Mon espace' },
+        { key: 'recherche', label: 'Rechercher' },
+        { key: 'favoris', label: 'Favoris' },
+        { key: 'abonnement', label: 'Abonnement' },
+        { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
+        ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ]
     : [
-        { key: ROLE_HOME_TAB[profile.role], label: '👤 Mon profil' },
-        { key: 'recherche', label: '🔍 Rechercher' },
-        { key: 'favoris', label: '❤️ Favoris' },
-        { key: 'messages', label: `💬 Messages${unreadCount ? ` (${unreadCount})` : ''}` },
-        ...(profile.role === 'joueur' ? [{ key: 'galerie', label: '📸 Ma galerie' }] : []),
-        ...(profile.is_admin ? [{ key: 'admin', label: '🛡️ Admin' }] : []),
+        { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil' },
+        { key: 'recherche', label: 'Rechercher' },
+        { key: 'favoris', label: 'Favoris' },
+        { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
+        ...(profile.role === 'joueur' ? [{ key: 'galerie', label: 'Ma galerie' }] : []),
+        ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ];
 
   return (
     <div style={{ minHeight: '100vh', color: '#F5F0E6' }}>
       <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 5vw', background: 'rgba(11,31,26,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1.5px solid #2C4A3D', flexWrap: 'wrap', gap: 14 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 13, height: 13, background: '#D4FF3F', borderRadius: '50%' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <img src="/logo.png" alt="Turnover" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 6 }} />
           <span className="turnover-anton" style={{ fontSize: 30 }}>TURNOVER</span>
         </div>
         <div style={{ display: 'flex', gap: 4, background: '#152E26', padding: 5, borderRadius: 12, border: '1.5px solid #2C4A3D', flexWrap: 'wrap', maxWidth: '100%', overflowX: 'auto' }}>
@@ -205,12 +206,15 @@ export default function AppPage() {
             </button>
           ))}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <NotificationsBell user={user} onNavigate={(t) => setTab(t)} />
-          <span style={{ fontSize: 15.5, color: '#F5F0E6', fontWeight: 800 }}>{profile.nom} <Badge tone="lime">{ROLE_LABELS[profile.role]}</Badge></span>
-          <GhostButton onClick={exportMyData} title="Exporter mes données" style={{ fontSize: 12 }}>Exporter</GhostButton>
-          <GhostButton onClick={() => setConfirmDeleteAccount(true)} title="Supprimer mon compte" style={{ fontSize: 12, color: '#FF6B6B' }}>Supprimer mon compte</GhostButton>
-          <ToggleSwitch checked={true} onChange={logout} title="Se déconnecter" />
+          <UserMenu
+            nom={profile.nom}
+            roleLabel={ROLE_LABELS[profile.role]}
+            onExport={exportMyData}
+            onDeleteRequest={() => setConfirmDeleteAccount(true)}
+            onLogout={logout}
+          />
         </div>
       </nav>
 

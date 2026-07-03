@@ -73,7 +73,10 @@ export default function NotificationsBell({ user, onNavigate }) {
         className="tv-btn"
         style={{ position: 'relative', background: 'transparent', border: '1.5px solid #2C4A3D', color: '#F5F0E6', width: 40, height: 40, borderRadius: 10, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
-        🔔
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
+          <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+        </svg>
         {unreadCount > 0 && (
           <span style={{ position: 'absolute', top: -4, right: -4, background: '#D4FF3F', color: '#0B1F1A', fontSize: 10.5, fontWeight: 800, minWidth: 17, height: 17, borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
             {unreadCount > 9 ? '9+' : unreadCount}

@@ -83,7 +83,7 @@ export default function AuthPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 32 }}>
-          <div style={{ width: 9, height: 9, background: '#D4FF3F', borderRadius: '50%' }} />
+          <img src="/logo.png" alt="Turnover" style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: 6 }} />
           <span className="turnover-anton" style={{ fontSize: 22 }}>TURNOVER</span>
         </div>
         <div style={{ background: '#152E26', border: '1px solid #274238', borderRadius: 16, padding: 28 }}>

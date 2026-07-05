@@ -16,12 +16,16 @@ export default function MentionsLegales() {
 
         <Section title="Éditeur du site">
           <p>
-            Le site Turnover est édité par : <strong>[Nom et prénom du responsable de publication — à compléter]</strong>.
+            Le site Turnover (accessible notamment à l'adresse turnover-sport.fr) est édité par :
           </p>
           <p style={{ marginTop: 8 }}>
-            En l'absence de structure juridique enregistrée à ce jour, le site est publié à titre individuel.
-            Cette mention doit être complétée avec l'identité réelle de la personne responsable de la publication,
-            conformément à l'article 6-III de la loi n°2004-575 du 21 juin 2004 pour la confiance dans l'économie numérique (LCEN).
+            <strong>Benjamin Cluzel</strong><br />
+            Éditeur individuel — activité non commerciale à ce jour (aucune structure juridique enregistrée,
+            aucune facturation en cours)
+          </p>
+          <p style={{ marginTop: 8 }}>
+            Conformément à l'article 6-III de la loi n°2004-575 du 21 juin 2004 pour la confiance dans
+            l'économie numérique (LCEN).
           </p>
           <p style={{ marginTop: 8 }}>Contact : turn-over@outlook.fr</p>
         </Section>
@@ -32,6 +36,13 @@ export default function MentionsLegales() {
             Vercel Inc.<br />
             340 S Lemon Ave #4133, Walnut, CA 91789, États-Unis<br />
             <a href="https://vercel.com" target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F' }}>vercel.com</a>
+          </p>
+        </Section>
+
+        <Section title="Nom de domaine">
+          <p>
+            Le nom de domaine turnover-sport.fr est enregistré auprès d'OVH SAS, 2 rue Kellermann, 59100
+            Roubaix, France.
           </p>
         </Section>
 

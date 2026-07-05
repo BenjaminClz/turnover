@@ -85,7 +85,7 @@ export default function NotificationsBell({ user, onNavigate }) {
       </button>
 
       {open && (
-        <div style={{ position: 'absolute', top: 48, right: 0, width: 320, maxHeight: 420, overflowY: 'auto', background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 12, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', zIndex: 300 }}>
+        <div style={{ position: 'absolute', top: 48, left: 0, width: 'min(320px, calc(100vw - 32px))', maxHeight: 420, overflowY: 'auto', background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 12, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', zIndex: 300 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid #2C4A3D' }}>
             <span style={{ fontWeight: 700, fontSize: 14 }}>Notifications</span>
             {unreadCount > 0 && (

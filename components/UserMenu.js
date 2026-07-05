@@ -34,7 +34,7 @@ export default function UserMenu({ nom, roleLabel, onExport, onDeleteRequest, on
       </button>
 
       {open && (
-        <div style={{ position: 'absolute', top: 42, right: 0, width: 220, background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 12, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', zIndex: 300, overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: 42, right: 0, width: 'min(220px, calc(100vw - 32px))', background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 12, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', zIndex: 300, overflow: 'hidden' }}>
           <button
             onClick={() => { setOpen(false); onExport(); }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,255,63,0.06)'}

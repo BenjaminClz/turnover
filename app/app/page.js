@@ -182,15 +182,16 @@ export default function AppPage() {
 
   return (
     <div style={{ minHeight: '100vh', color: '#F5F0E6' }}>
-      <nav style={{ position: 'sticky', top: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '18px 5vw', background: 'rgba(11,31,26,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1.5px solid #2C4A3D', flexWrap: 'wrap', gap: 14 }}>
+      <nav className="tv-navbar" style={{ position: 'sticky', top: 0, zIndex: 50, padding: '18px 5vw', background: 'rgba(11,31,26,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1.5px solid #2C4A3D' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <img src="/logo.png" alt="Turnover" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 6 }} />
           <span className="turnover-anton" style={{ fontSize: 30 }}>TURNOVER</span>
         </div>
-        <div style={{ display: 'flex', gap: 4, background: '#152E26', padding: 5, borderRadius: 12, border: '1.5px solid #2C4A3D', flexWrap: 'wrap', maxWidth: '100%', overflowX: 'auto' }}>
+        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 4, background: '#152E26', padding: 5, borderRadius: 12, border: '1.5px solid #2C4A3D' }}>
           {tabs.map((t) => (
             <button
               key={t.key}
+              className="tv-tab-btn"
               onClick={() => {
                 if (t.key === 'messages' && profile.role === 'joueur' && !isProfileComplete(myPlayerListing)) {
                   showToast('Complète ton profil pour débloquer la messagerie.');
@@ -200,7 +201,7 @@ export default function AppPage() {
                 setTab(t.key);
                 if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
               }}
-              style={{ padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap' }}
+              style={{ padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0 }}
             >
               {t.label}
             </button>

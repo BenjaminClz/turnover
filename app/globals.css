@@ -92,3 +92,36 @@ h1, h2, h3 { line-height: 1.15; }
     display: block;
   }
 }
+
+.tv-navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.tv-tabs-scroll {
+  display: flex;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  flex: 1 1 100%;
+  order: 3;
+}
+.tv-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+@media (min-width: 900px) {
+  .tv-tabs-scroll {
+    flex: 0 1 auto;
+    order: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .tv-tab-btn {
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+}

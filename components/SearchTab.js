@@ -59,8 +59,8 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       setLoading(true);
       if (isClub) {
         const [{ data: n }, { data: p }, { data: ps }, { data: s }] = await Promise.all([
-          supabase.from('club_needs').select('*, profiles(avatar_path, verified)').order('created_at', { ascending: false }),
-          supabase.from('player_listings').select('*, profiles(nom, avatar_path, last_seen_at)').order('created_at', { ascending: false }),
+          supabase.from('club_needs').select('*, profiles(avatar_path)').order('created_at', { ascending: false }),
+          supabase.from('player_listings').select('*, profiles(nom, avatar_path, last_seen_at)').eq('published', true).order('created_at', { ascending: false }),
           supabase.from('player_searches').select('*, profiles(nom, avatar_path)').order('created_at', { ascending: false }),
           supabase.from('staff_listings').select('*, profiles(nom, avatar_path)').order('created_at', { ascending: false }),
         ]);
@@ -71,7 +71,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       } else {
         // Un non-club ne doit voir que les besoins clubs.
         // On joint le statut d'abonnement pour mettre en avant les clubs Pro dans les résultats.
-        const { data: n } = await supabase.from('club_needs').select('*, profiles(avatar_path, verified)').order('created_at', { ascending: false });
+        const { data: n } = await supabase.from('club_needs').select('*, profiles(avatar_path)').order('created_at', { ascending: false });
         const ownerIds = [...new Set((n || []).map((x) => x.owner_id))];
         let activeOwners = new Set();
         if (ownerIds.length > 0) {
@@ -185,7 +185,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
               {filteredNeeds.length === 0 ? <EmptyState icon="📋" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
                 <div style={{ display: 'grid', gap: 10 }}>
                   {filteredNeeds.map((n) => (
-                    <ResultRow key={n.id} title={<>{n.club} {n.profiles?.verified && <span title="Club vérifié" style={{ color: '#D4FF3F', marginLeft: 4 }}>✓</span>}</>} details={`${needDetails(n)} · ${n.ville}`} distance={n._distance} showContact={n.owner_id !== user.id} onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)} avatarPath={n.profiles?.avatar_path} supabase={supabase} featured={n._featured} extra={<GhostButton onClick={() => onViewGallery(n.owner_id, n.club)} style={{ fontSize: 12 }}>Voir le club</GhostButton>} reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }} />
+                    <ResultRow key={n.id} title={n.club} details={`${needDetails(n)} · ${n.ville}`} distance={n._distance} showContact={n.owner_id !== user.id} onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)} avatarPath={n.profiles?.avatar_path} supabase={supabase} featured={n._featured} extra={<GhostButton onClick={() => onViewGallery(n.owner_id, n.club)} style={{ fontSize: 12 }}>Voir le club</GhostButton>} reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }} />
                   ))}
                 </div>
               )}

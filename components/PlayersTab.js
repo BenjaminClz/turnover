@@ -3,12 +3,10 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
-import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
+import { Field, TextInput, TextArea, Select, Badge, PrimaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import { profileCompletion, COMPLETION_THRESHOLD } from '@/lib/profile-completion';
-import PlayerProfileModal from '@/components/PlayerProfileModal';
-import PlayerSearchesTab from '@/components/PlayerSearchesTab';
 import NationaliteSelect from '@/components/NationaliteSelect';
 import StatsSlider from '@/components/StatsSlider';
 import StatsRadar from '@/components/StatsRadar';
@@ -17,20 +15,6 @@ import ConfirmDialog from '@/components/ConfirmDialog';
 import VilleAutocomplete from '@/components/VilleAutocomplete';
 import { nationalites } from '@/lib/nationalites';
 
-const lastSeenLabel = (dateStr) => {
-  if (!dateStr) return null;
-  const diffMs = Date.now() - new Date(dateStr).getTime();
-  const mins = diffMs / 60000;
-  if (mins < 5) return 'En ligne maintenant';
-  if (mins < 60) return `Actif il y a ${Math.floor(mins)} min`;
-  const hrs = mins / 60;
-  if (hrs < 24) return `Actif il y a ${Math.floor(hrs)} h`;
-  const days = hrs / 24;
-  if (days < 14) return `Actif il y a ${Math.floor(days)} j`;
-  return null;
-};
-
-const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
 
 const emptyBasicForm = { sport: 'Rugby', poste: '', niveau: 'Régionale 2', ville: '', distance: '15', dispo: 'Dès que possible' };
@@ -51,9 +35,8 @@ const calculAge = (dateNaissance) => {
   return age;
 };
 
-export default function PlayersTab({ user, profile, showToast, onContact, onViewGallery }) {
+export default function PlayersTab({ user, profile, showToast }) {
   const supabase = createClient();
-  const [players, setPlayers] = useState([]);
   const [myListing, setMyListing] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -61,19 +44,18 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
   const [geocoding, setGeocoding] = useState(false);
   const [basicForm, setBasicForm] = useState(emptyBasicForm);
   const [detailsForm, setDetailsForm] = useState(emptyDetailsForm);
-  const [viewingPlayer, setViewingPlayer] = useState(null);
   const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [villeCoords, setVilleCoords] = useState(null);
+  const [publishing, setPublishing] = useState(false);
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase
+    const { data: mine, error } = await supabase
       .from('player_listings')
-      .select('*, profiles(nom, avatar_path, last_seen_at)')
-      .order('created_at', { ascending: false });
+      .select('*')
+      .eq('owner_id', user.id)
+      .maybeSingle();
     if (error) { showToast('Erreur de chargement.'); setLoading(false); return; }
-    setPlayers(data || []);
-    const mine = (data || []).find((p) => p.owner_id === user.id);
     setMyListing(mine || null);
     if (mine) {
       setBasicForm({ ...emptyBasicForm, ...mine, distance: String(mine.distance) });
@@ -108,10 +90,11 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
       sport: basicForm.sport, poste: basicForm.poste, niveau: basicForm.niveau, ville: basicForm.ville,
       distance: parseInt(basicForm.distance) || 15, dispo: basicForm.dispo,
       latitude: geo.latitude, longitude: geo.longitude,
+      published: false,
     };
     const { error } = await supabase.from('player_listings').insert(payload);
-    if (error) { showToast('Erreur lors de la publication.'); return; }
-    showToast('Profil créé ✓ Complète-le pour débloquer la messagerie.');
+    if (error) { showToast('Erreur lors de la création.'); return; }
+    showToast('Profil créé ✓ Complète-le pour pouvoir le publier.');
     load();
   };
 
@@ -165,6 +148,22 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
     load();
   };
 
+  const handlePublish = async () => {
+    setPublishing(true);
+    const { error } = await supabase.from('player_listings').update({ published: true }).eq('id', myListing.id);
+    setPublishing(false);
+    if (error) { showToast('Erreur lors de la publication.'); return; }
+    showToast('Profil publié ✓ Les clubs peuvent maintenant te trouver.');
+    load();
+  };
+
+  const handleUnpublish = async () => {
+    const { error } = await supabase.from('player_listings').update({ published: false }).eq('id', myListing.id);
+    if (error) { showToast('Erreur.'); return; }
+    showToast('Profil retiré de la recherche.');
+    load();
+  };
+
   const handleDelete = async () => {
     if (!myListing) return;
     const { error } = await supabase.from('player_listings').delete().eq('id', myListing.id);
@@ -203,215 +202,187 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
 
   const completion = myListing ? profileCompletion(myListing) : 0;
   const isComplete = completion >= COMPLETION_THRESHOLD;
+  const isPublished = myListing?.published === true;
+
+  const InfoRow = ({ label, value }) => value ? (
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '10px 0', borderBottom: '1px solid #1c332a' }}>
+      <span style={{ color: '#8C9A8E' }}>{label}</span>
+      <span style={{ color: '#F5F0E6', fontWeight: 600, textAlign: 'right' }}>{value}</span>
+    </div>
+  ) : null;
 
   return (
     <div>
-      <PageTitle>Profils joueurs</PageTitle>
-      <PageSubtitle>Visibles par tous les clubs. Crée le tien si tu cherches une équipe.</PageSubtitle>
+      <PageTitle>Mon profil</PageTitle>
+      <PageSubtitle>Ton profil joueur, visible des clubs uniquement une fois publié.</PageSubtitle>
 
-      {profile.role === 'joueur' && (
-        <div style={{ marginBottom: 28 }}>
-          <AvatarUpload userId={user.id} currentPath={profile.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} />
-        </div>
-      )}
+      <div style={{ marginBottom: 28 }}>
+        <AvatarUpload userId={user.id} currentPath={profile.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} />
+      </div>
 
-      {/* Pas encore de profil : formulaire court */}
-      {profile.role === 'joueur' && !myListing && (
+      {!myListing && (
         <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>Publier mon profil</h3>
+          <h3 style={{ marginBottom: 20, fontSize: 18 }}>Créer mon profil</h3>
           <form onSubmit={handleCreateBasic}>
             {renderBasicFields()}
-            <PrimaryButton type="submit" disabled={geocoding}>{geocoding ? 'Localisation de la ville…' : 'Publier mon profil'}</PrimaryButton>
+            <PrimaryButton type="submit" disabled={geocoding}>{geocoding ? 'Localisation de la ville…' : 'Créer mon profil'}</PrimaryButton>
           </form>
-        </div>
-      )}
-
-      {/* Profil existant : carte résumé + barre de complétion */}
-      {profile.role === 'joueur' && myListing && !editing && (
-        <div style={{ background: isComplete ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isComplete ? '#D4FF3F' : '#FF6B6B'}`, borderRadius: 18, padding: 24, marginBottom: 20 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
-            <div>
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>Ton profil est publié</div>
-              <div style={{ fontSize: 14, color: '#A4B0A6' }}>{myListing.poste} · {myListing.niveau} · {myListing.ville}</div>
-            </div>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => setEditing(true)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '10px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Modifier</button>
-              <button onClick={() => setConfirmDeleteOpen(true)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer</button>
-            </div>
-          </div>
-          <div style={{ fontSize: 13, marginBottom: 14 }}>
-            <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline' }}>
-              Voir / partager mon profil public ↗
-            </a>
-          </div>
-          <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
-            <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
-          </div>
-          <div style={{ fontSize: 13, color: '#A4B0A6' }}>
-            Profil complété à {completion}%{!isComplete && ` — ${COMPLETION_THRESHOLD}% requis pour débloquer la messagerie`}
-          </div>
-        </div>
-      )}
-
-      {profile.role === 'joueur' && myListing && editing && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier mon profil</h3>
-          <form onSubmit={handleUpdateBasic}>
-            {renderBasicFields()}
-            <div style={{ display: 'flex', gap: 12 }}>
-              <PrimaryButton type="submit" disabled={geocoding} style={{ width: 'auto', flex: 1 }}>{geocoding ? 'Localisation…' : 'Enregistrer'}</PrimaryButton>
-              <button type="button" onClick={() => { setEditing(false); setBasicForm({ ...emptyBasicForm, ...myListing, distance: String(myListing.distance) }); }} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '15px 24px', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {/* Complément d'informations personnelles, obligatoire pour débloquer la messagerie */}
-      {profile.role === 'joueur' && myListing && !editingDetails && !isComplete && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 36, textAlign: 'center' }}>
-          <div style={{ fontSize: 28, marginBottom: 10 }}>🔒</div>
-          <h3 style={{ fontSize: 16, marginBottom: 8 }}>Complète ton profil pour débloquer la messagerie</h3>
-          <p style={{ fontSize: 13.5, color: '#A4B0A6', marginBottom: 18, maxWidth: 380, marginLeft: 'auto', marginRight: 'auto' }}>
-            Date de naissance, taille et poids sont nécessaires pour que les clubs puissent te contacter.
-          </p>
-          <button onClick={() => setEditingDetails(true)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Compléter mon profil</button>
-        </div>
-      )}
-
-      {profile.role === 'joueur' && myListing && isComplete && !editingDetails && (
-        <div style={{ marginBottom: 36, textAlign: 'right' }}>
-          <GhostButton onClick={() => setEditingDetails(true)}>Modifier mes informations personnelles</GhostButton>
-        </div>
-      )}
-
-      {profile.role === 'joueur' && myListing && editingDetails && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 6, fontSize: 18 }}>Informations personnelles</h3>
-          <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 20 }}>Date de naissance, taille et poids sont nécessaires pour débloquer la messagerie. Le reste est facultatif.</p>
-          <form onSubmit={handleSaveDetails}>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 18 }}>
-              <Field label="Date de naissance"><TextInput type="date" value={detailsForm.date_naissance} onChange={(e) => setDetailsForm({ ...detailsForm, date_naissance: e.target.value })} /></Field>
-              <Field label="Taille (cm)"><TextInput type="number" value={detailsForm.taille_cm} onChange={(e) => setDetailsForm({ ...detailsForm, taille_cm: e.target.value })} placeholder="180" /></Field>
-              <Field label="Poids (kg)"><TextInput type="number" value={detailsForm.poids_kg} onChange={(e) => setDetailsForm({ ...detailsForm, poids_kg: e.target.value })} placeholder="85" /></Field>
-            </div>
-
-            <Field label="Nationalité(s)">
-              <NationaliteSelect
-                value={detailsForm.nationalites}
-                onChange={(codes) => setDetailsForm({ ...detailsForm, nationalites: codes })}
-              />
-            </Field>
-
-            <Field label="Années de pratique (facultatif)"><TextInput type="number" value={detailsForm.annees_pratique} onChange={(e) => setDetailsForm({ ...detailsForm, annees_pratique: e.target.value })} placeholder="8" /></Field>
-            <Field label="Dernier club (facultatif)">
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.4fr', gap: 10 }}>
-                <TextInput
-                  value={detailsForm.dernier_club}
-                  onChange={(e) => setDetailsForm({ ...detailsForm, dernier_club: e.target.value })}
-                  placeholder="ex. RC Annemasse"
-                />
-                <Select
-                  value={detailsForm.dernier_club_niveau}
-                  onChange={(e) => setDetailsForm({ ...detailsForm, dernier_club_niveau: e.target.value })}
-                  options={NIVEAUX}
-                />
-              </div>
-            </Field>
-            <Field label="Présentation (facultatif)"><TextArea value={detailsForm.bio} onChange={(e) => setDetailsForm({ ...detailsForm, bio: e.target.value })} placeholder="Ton parcours, ce que tu recherches…" /></Field>
-
-            <div style={{ marginTop: 8, marginBottom: 24 }}>
-              <h4 style={{ fontSize: 15, marginBottom: 4 }}>Points forts</h4>
-              <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 16 }}>Positionne les curseurs pour donner une idée de ton profil de jeu.</p>
-              <div className="tv-grid-2" style={{ gap: 32 }}>
-                <StatsSlider
-                  stats={detailsForm}
-                  onChange={(key, val) => setDetailsForm({ ...detailsForm, [key]: val })}
-                />
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  <StatsRadar stats={detailsForm} />
-                </div>
-              </div>
-            </div>
-
-            <div style={{ marginBottom: 24 }}>
-              <PiedFortSelect
-                sport={basicForm.sport}
-                poste={basicForm.poste}
-                value={detailsForm.pied_fort}
-                onChange={(val) => setDetailsForm({ ...detailsForm, pied_fort: val })}
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <PrimaryButton type="submit" style={{ width: 'auto', flex: 1 }}>Enregistrer</PrimaryButton>
-              <button type="button" onClick={() => setEditingDetails(false)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '15px 24px', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
-            </div>
-          </form>
-        </div>
-      )}
-
-      {profile.role === 'joueur' && myListing && isComplete && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 36 }}>
-          <h3 style={{ fontSize: 17, marginBottom: 4 }}>Je recherche un club</h3>
-          <PlayerSearchesTab user={user} showToast={showToast} onContact={onContact} />
         </div>
       )}
 
       {loading ? (
         <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>
-      ) : players.length === 0 ? (
-        <EmptyState icon="👤" title="Aucun profil pour le moment" sub="Les joueurs inscrits peuvent publier leur profil ici." />
-      ) : (
-        <div style={{ display: 'grid', gap: 12 }}>
-          {players.map((p) => (
-            <div key={p.id} className="tv-card" onClick={() => setViewingPlayer(p)} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap', cursor: 'pointer' }}>
-              <div style={{ display: 'flex', gap: 16 }}>
-                {p.profiles?.avatar_path ? (
-                  <img src={avatarUrl(supabase, p.profiles.avatar_path)} alt="" style={{ width: 48, height: 48, borderRadius: 10, objectFit: 'cover', flexShrink: 0 }} />
+      ) : myListing && (
+        <>
+          <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginBottom: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
+              <div>
+                {isPublished ? (
+                  <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Badge tone="lime">Publié</Badge> Visible par tous les clubs
+                  </div>
                 ) : (
-                  <div style={{ width: 48, height: 48, borderRadius: 10, background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton', color: '#0B1F1A', fontSize: 16, flexShrink: 0 }}>
-                    {initials(p.profiles?.nom)}
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                    {isComplete ? 'Profil prêt à être publié' : 'Complète ton profil pour le publier'}
                   </div>
                 )}
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {p.profiles?.nom}
-                    {lastSeenLabel(p.profiles?.last_seen_at) && (
-                      <span style={{ fontSize: 11, fontWeight: 600, color: '#D4FF3F' }}>· {lastSeenLabel(p.profiles?.last_seen_at)}</span>
-                    )}
+                <div style={{ fontSize: 14, color: '#A4B0A6' }}>{myListing.poste} · {myListing.niveau} · {myListing.ville}</div>
+              </div>
+              {isPublished ? (
+                <GhostButton onClick={handleUnpublish} style={{ fontSize: 12.5 }}>Retirer de la recherche</GhostButton>
+              ) : isComplete ? (
+                <PrimaryButton onClick={handlePublish} disabled={publishing} style={{ width: 'auto' }}>
+                  {publishing ? 'Publication…' : 'Publier mon profil'}
+                </PrimaryButton>
+              ) : null}
+            </div>
+            <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+              <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
+            </div>
+            <div style={{ fontSize: 13, color: '#A4B0A6' }}>
+              Profil complété à {completion}%{!isComplete && ` — ${COMPLETION_THRESHOLD}% requis pour pouvoir publier`}
+            </div>
+            <div style={{ fontSize: 13, marginTop: 12 }}>
+              <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline' }}>
+                Voir / partager mon profil public ↗
+              </a>
+            </div>
+          </div>
+
+          {editing ? (
+            <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier mes informations de base</h3>
+              <form onSubmit={handleUpdateBasic}>
+                {renderBasicFields()}
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <PrimaryButton type="submit" disabled={geocoding} style={{ width: 'auto', flex: 1 }}>{geocoding ? 'Localisation…' : 'Enregistrer'}</PrimaryButton>
+                  <button type="button" onClick={() => { setEditing(false); setBasicForm({ ...emptyBasicForm, ...myListing, distance: String(myListing.distance) }); }} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '15px 24px', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
+                </div>
+              </form>
+            </div>
+          ) : editingDetails ? (
+            <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 6, fontSize: 18 }}>Informations personnelles</h3>
+              <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 20 }}>Date de naissance, taille et poids comptent pour ta progression vers les 80%. Le reste est facultatif.</p>
+              <form onSubmit={handleSaveDetails}>
+                <div className="tv-grid-2" style={{ gap: 18 }}>
+                  <Field label="Date de naissance"><TextInput type="date" value={detailsForm.date_naissance} onChange={(e) => setDetailsForm({ ...detailsForm, date_naissance: e.target.value })} /></Field>
+                  <Field label="Taille (cm)"><TextInput type="number" value={detailsForm.taille_cm} onChange={(e) => setDetailsForm({ ...detailsForm, taille_cm: e.target.value })} placeholder="180" /></Field>
+                  <Field label="Poids (kg)"><TextInput type="number" value={detailsForm.poids_kg} onChange={(e) => setDetailsForm({ ...detailsForm, poids_kg: e.target.value })} placeholder="85" /></Field>
+                </div>
+
+                <Field label="Nationalité(s)">
+                  <NationaliteSelect
+                    value={detailsForm.nationalites}
+                    onChange={(codes) => setDetailsForm({ ...detailsForm, nationalites: codes })}
+                  />
+                </Field>
+
+                <Field label="Années de pratique (facultatif)"><TextInput type="number" value={detailsForm.annees_pratique} onChange={(e) => setDetailsForm({ ...detailsForm, annees_pratique: e.target.value })} placeholder="8" /></Field>
+
+                <Field label="Dernier club (facultatif)">
+                  <div className="tv-grid-2" style={{ gap: 10 }}>
+                    <TextInput value={detailsForm.dernier_club} onChange={(e) => setDetailsForm({ ...detailsForm, dernier_club: e.target.value })} placeholder="ex. RC Annemasse" />
+                    <Select value={detailsForm.dernier_club_niveau} onChange={(e) => setDetailsForm({ ...detailsForm, dernier_club_niveau: e.target.value })} options={NIVEAUX} />
                   </div>
-                  <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{p.poste} · {p.niveau} · {p.ville} ({p.distance} km)</div>
-                  <div style={{ fontSize: 13, color: '#8C9A8E', marginTop: 4, display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-                    {p.date_naissance && <span>{calculAge(p.date_naissance)} ans</span>}
-                    {p.taille_cm && <span>{p.taille_cm} cm</span>}
-                    {p.poids_kg && <span>{p.poids_kg} kg</span>}
-                    {p.annees_pratique != null && <span>{p.annees_pratique} ans de pratique</span>}
-                    {p.pied_fort && <span>Pied {p.pied_fort}</span>}
+                </Field>
+
+                <Field label="Présentation (facultatif)"><TextArea value={detailsForm.bio} onChange={(e) => setDetailsForm({ ...detailsForm, bio: e.target.value })} placeholder="Ton parcours, ce que tu recherches…" /></Field>
+
+                <div style={{ marginTop: 8, marginBottom: 24 }}>
+                  <h4 style={{ fontSize: 15, marginBottom: 4 }}>Points forts</h4>
+                  <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 16 }}>Positionne les curseurs pour donner une idée de ton profil de jeu.</p>
+                  <div className="tv-grid-2" style={{ gap: 32 }}>
+                    <StatsSlider
+                      stats={detailsForm}
+                      onChange={(key, val) => setDetailsForm({ ...detailsForm, [key]: val })}
+                    />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                      <StatsRadar stats={detailsForm} />
+                    </div>
                   </div>
-                  {p.nationalites?.length > 0 && (
-                    <div style={{ fontSize: 13, color: '#C7CFC8', marginTop: 4 }}>
-                      {p.nationalites.map(nomNationalite).join(', ')}
-                    </div>
-                  )}
-                  {p.dernier_club && (
-                    <div style={{ fontSize: 13, color: '#C7CFC8', marginTop: 4 }}>
-                      Dernier club : {p.dernier_club} ({p.dernier_club_niveau})
-                    </div>
-                  )}
-                  {p.bio && <div style={{ fontSize: 14, color: '#C7CFC8', marginTop: 10, maxWidth: 460 }}>{p.bio}</div>}
-                  <div style={{ marginTop: 12 }}><Badge tone="lime">{p.dispo}</Badge></div>
+                </div>
+
+                <div style={{ marginBottom: 24 }}>
+                  <PiedFortSelect
+                    sport={basicForm.sport}
+                    poste={basicForm.poste}
+                    value={detailsForm.pied_fort}
+                    onChange={(val) => setDetailsForm({ ...detailsForm, pied_fort: val })}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 12 }}>
+                  <PrimaryButton type="submit" style={{ width: 'auto', flex: 1 }}>Enregistrer</PrimaryButton>
+                  <button type="button" onClick={() => setEditingDetails(false)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '15px 24px', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
+                </div>
+              </form>
+            </div>
+          ) : (
+            <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
+                <h3 style={{ fontSize: 18 }}>Mes informations</h3>
+                <div style={{ display: 'flex', gap: 10 }}>
+                  <GhostButton onClick={() => setEditing(true)} style={{ fontSize: 13 }}>Modifier l'essentiel</GhostButton>
+                  <GhostButton onClick={() => setEditingDetails(true)} style={{ fontSize: 13 }}>Modifier les détails</GhostButton>
                 </div>
               </div>
-              <div style={{ display: 'flex', gap: 12, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
-                <button className="tv-btn" onClick={() => setViewingPlayer(p)} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '10px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Voir profil</button>
-                <GhostButton onClick={() => onViewGallery(p.owner_id, p.profiles?.nom)}>Galerie</GhostButton>
-                {p.owner_id !== user.id && (
-                  <button className="tv-btn" onClick={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
-                )}
+
+              <div style={{ marginBottom: 8 }}>
+                <InfoRow label="Sport" value={myListing.sport} />
+                <InfoRow label="Poste" value={myListing.poste} />
+                <InfoRow label="Niveau" value={myListing.niveau} />
+                <InfoRow label="Ville" value={`${myListing.ville} (rayon ${myListing.distance} km)`} />
+                <InfoRow label="Disponibilité" value={<Badge tone="lime">{myListing.dispo}</Badge>} />
+                <InfoRow label="Âge" value={calculAge(myListing.date_naissance) ? `${calculAge(myListing.date_naissance)} ans` : null} />
+                <InfoRow label="Taille" value={myListing.taille_cm ? `${myListing.taille_cm} cm` : null} />
+                <InfoRow label="Poids" value={myListing.poids_kg ? `${myListing.poids_kg} kg` : null} />
+                <InfoRow label="Années de pratique" value={myListing.annees_pratique != null ? `${myListing.annees_pratique} ans` : null} />
+                <InfoRow label="Nationalité(s)" value={myListing.nationalites?.length > 0 ? myListing.nationalites.map(nomNationalite).join(', ') : null} />
+                <InfoRow label="Pied fort" value={myListing.pied_fort} />
+                <InfoRow label="Dernier club" value={myListing.dernier_club ? `${myListing.dernier_club} (${myListing.dernier_club_niveau})` : null} />
+              </div>
+
+              {myListing.bio && (
+                <div style={{ marginTop: 20, marginBottom: 8 }}>
+                  <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 8 }}>Présentation</div>
+                  <div style={{ fontSize: 14.5, color: '#C7CFC8', lineHeight: 1.6 }}>{myListing.bio}</div>
+                </div>
+              )}
+
+              {[myListing.stat_vitesse, myListing.stat_defense, myListing.stat_vision, myListing.stat_technique, myListing.stat_combat, myListing.stat_attaque, myListing.stat_physique].some((v) => v != null) && (
+                <div style={{ marginTop: 24 }}>
+                  <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 12 }}>Points forts</div>
+                  <StatsRadar stats={myListing} />
+                </div>
+              )}
+
+              <div style={{ marginTop: 28, textAlign: 'right' }}>
+                <button onClick={() => setConfirmDeleteOpen(true)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
               </div>
             </div>
-          ))}
-        </div>
+          )}
+        </>
       )}
 
       <ConfirmDialog
@@ -421,15 +392,6 @@ export default function PlayersTab({ user, profile, showToast, onContact, onView
         confirmLabel="Supprimer"
         onConfirm={() => { setConfirmDeleteOpen(false); handleDelete(); }}
         onCancel={() => setConfirmDeleteOpen(false)}
-      />
-
-      <PlayerProfileModal
-        player={viewingPlayer}
-        supabase={supabase}
-        currentUserId={user.id}
-        onClose={() => setViewingPlayer(null)}
-        onContact={onContact}
-        onViewGallery={onViewGallery}
       />
     </div>
   );

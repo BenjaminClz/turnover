@@ -29,6 +29,8 @@ export function VilleAutocomplete({ onSelect }) {
         onChange={(e) => setValue(e.target.value)}
         disabled={!ready}
         placeholder="Rechercher une ville..."
+        autoComplete="off"
+        name="turnover-recherche-ville"
         style={{
           width: '100%', background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 10,
           color: '#F5F0E6', padding: '14px 16px', fontSize: 16, outline: 'none', boxSizing: 'border-box',

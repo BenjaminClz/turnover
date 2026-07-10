@@ -320,11 +320,15 @@ function ResultRow({ title, details, distance, showContact, onContact, extra, av
           </div>
         </div>
       </div>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-        {favoriteProps && <FavoriteButton {...favoriteProps} />}
-        {extra}
-        {reportProps && <ReportButton {...reportProps} />}
-        {showContact && <button className="tv-btn" onClick={onContact} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Contacter</button>}
+      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', paddingRight: 14, borderRight: '1px solid #2C4A3D' }}>
+          {favoriteProps && <FavoriteButton {...favoriteProps} />}
+          {reportProps && <ReportButton {...reportProps} />}
+        </div>
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+          {extra}
+          {showContact && <button className="tv-btn" onClick={onContact} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Contacter</button>}
+        </div>
       </div>
     </div>
   );

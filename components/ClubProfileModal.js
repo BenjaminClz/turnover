@@ -124,12 +124,9 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
             {needs.map((n) => (
               <div key={n.id} style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '16px 18px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 22 }}>{BESOIN_ICONS[n.besoin_type] || '🏉'}</span>
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}{n.sport ? ` · ${n.sport}` : ''}</div>
-                      <div style={{ fontSize: 13.5, color: '#A4B0A6', marginTop: 2 }}>{describeNeed(n)}</div>
-                    </div>
+                  <div>
+                    <div style={{ fontWeight: 700, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}{n.sport ? ` · ${n.sport}` : ''}</div>
+                    <div style={{ fontSize: 13.5, color: '#A4B0A6', marginTop: 2 }}>{describeNeed(n)}</div>
                   </div>
                   <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>
                 </div>

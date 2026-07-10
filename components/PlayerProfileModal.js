@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge, GhostButton, TextArea, PrimaryButton } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import StatsRadar from '@/components/StatsRadar';
+import PlayerCard from '@/components/PlayerCard';
 import { nationalites } from '@/lib/nationalites';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
@@ -40,6 +41,13 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
   const [recommendations, setRecommendations] = useState([]);
   const [newRecoText, setNewRecoText] = useState('');
   const [submittingReco, setSubmittingReco] = useState(false);
+
+  useEffect(() => {
+    if (!player) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') onClose(); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [player, onClose]);
 
   useEffect(() => {
     if (!player) return;
@@ -130,12 +138,9 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
           )}
         </div>
 
-        {hasStats(player) && (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 8 }}>Points forts</div>
-            <StatsRadar stats={player} />
-          </div>
-        )}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+          <PlayerCard player={player} nom={player.profiles?.nom} avatarSrc={url} />
+        </div>
 
         {player.bio && (
           <div style={{ marginBottom: 24 }}>

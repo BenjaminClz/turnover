@@ -125,3 +125,19 @@ h1, h2, h3 { line-height: 1.15; }
     font-size: 13px !important;
   }
 }
+
+.tv-skeleton {
+  position: relative;
+  overflow: hidden;
+}
+.tv-skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(212,255,63,0.06), transparent);
+  animation: tv-shimmer 1.4s infinite;
+}
+@keyframes tv-shimmer {
+  100% { transform: translateX(100%); }
+  0% { transform: translateX(-100%); }
+}

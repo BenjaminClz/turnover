@@ -9,6 +9,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import PlayerProfileModal from '@/components/PlayerProfileModal';
 import ReportButton from '@/components/ReportButton';
 import FavoriteButton from '@/components/FavoriteButton';
+import { SkeletonList } from '@/components/Skeleton';
 
 const RAYONS = [10, 25, 50, 100, 'Toute la France'];
 const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
@@ -176,7 +177,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       </div>
 
       {loading ? (
-        <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <SkeletonList count={4} />
       ) : (
         <div style={{ display: 'grid', gap: 32 }}>
           {showNeeds && (

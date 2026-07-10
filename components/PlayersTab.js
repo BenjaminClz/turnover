@@ -10,9 +10,11 @@ import { profileCompletion, COMPLETION_THRESHOLD } from '@/lib/profile-completio
 import NationaliteSelect from '@/components/NationaliteSelect';
 import StatsSlider from '@/components/StatsSlider';
 import StatsRadar from '@/components/StatsRadar';
+import PlayerCard from '@/components/PlayerCard';
 import PiedFortSelect from '@/components/PiedFortSelect';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import VilleAutocomplete from '@/components/VilleAutocomplete';
+import { SkeletonList } from '@/components/Skeleton';
 import { nationalites } from '@/lib/nationalites';
 
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
@@ -74,10 +76,19 @@ export default function PlayersTab({ user, profile, showToast }) {
 
   useEffect(() => { load(); }, []);
 
+  // Avertit avant de quitter la page si un formulaire est en cours de modification.
+  useEffect(() => {
+    const isEditing = editing || editingDetails || (!myListing && (basicForm.poste || basicForm.ville));
+    if (!isEditing) return;
+    const handler = (e) => { e.preventDefault(); e.returnValue = ''; };
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [editing, editingDetails, myListing, basicForm]);
+
   const handleCreateBasic = async (e) => {
     e.preventDefault();
     if (!basicForm.poste || !basicForm.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
-    let geo = villeCoords && villeCoords.ville === basicForm.ville && villeCoords.latitude != null ? villeCoords : null;
+    let geo = villeCoords && villeCoords.ville === basicForm.ville ? villeCoords : null;
     if (!geo) {
       setGeocoding(true);
       geo = await geocodeVille(basicForm.ville);
@@ -101,7 +112,7 @@ export default function PlayersTab({ user, profile, showToast }) {
   const handleUpdateBasic = async (e) => {
     e.preventDefault();
     if (!basicForm.poste || !basicForm.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
-    let geo = villeCoords && villeCoords.ville === basicForm.ville && villeCoords.latitude != null ? villeCoords : null;
+    let geo = villeCoords && villeCoords.ville === basicForm.ville ? villeCoords : null;
     if (!geo) {
       setGeocoding(true);
       geo = await geocodeVille(basicForm.ville);
@@ -231,7 +242,7 @@ export default function PlayersTab({ user, profile, showToast }) {
       )}
 
       {loading ? (
-        <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <SkeletonList count={1} />
       ) : myListing && (
         <>
           <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginBottom: 24 }}>
@@ -371,9 +382,8 @@ export default function PlayersTab({ user, profile, showToast }) {
               )}
 
               {[myListing.stat_vitesse, myListing.stat_defense, myListing.stat_vision, myListing.stat_technique, myListing.stat_combat, myListing.stat_attaque, myListing.stat_physique].some((v) => v != null) && (
-                <div style={{ marginTop: 24 }}>
-                  <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 12 }}>Points forts</div>
-                  <StatsRadar stats={myListing} />
+                <div style={{ marginTop: 24, display: 'flex', justifyContent: 'center' }}>
+                  <PlayerCard player={myListing} nom={profile.nom} avatarSrc={profile.avatar_path ? avatarUrl(supabase, profile.avatar_path) : null} />
                 </div>
               )}
 

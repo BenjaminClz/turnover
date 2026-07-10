@@ -17,6 +17,13 @@ export default function UserMenu({ nom, roleLabel, onExport, onDeleteRequest, on
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
+
   return (
     <div ref={wrapRef} style={{ position: 'relative' }}>
       <button

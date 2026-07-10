@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { Suspense, useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useUser } from '@/lib/use-user';
 import { createClient } from '@/lib/supabase-client';
 import { Badge, GhostButton, Toast, ToggleSwitch } from '@/components/ui';
@@ -19,16 +20,31 @@ import UserMenu from '@/components/UserMenu';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { isProfileComplete } from '@/lib/profile-completion';
 
-// Mappe chaque rôle vers son onglet "espace personnel" par défaut à la connexion
 const ROLE_HOME_TAB = {
   joueur: 'joueur', club: 'club', sante: 'sante', preparateur: 'preparateur',
   entraineur: 'entraineur', arbitre: 'arbitre', benevole: 'benevole',
 };
 
 export default function AppPage() {
+  return (
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0B1F1A' }} />}>
+      <AppPageInner />
+    </Suspense>
+  );
+}
+
+function AppPageInner() {
   const { user, profile, loading, suspended } = useUser();
   const supabase = createClient();
-  const [tab, setTab] = useState(null); // null tant qu'on n'a pas déterminé l'onglet de départ
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const tab = searchParams.get('tab');
+  const setTab = (newTab, { replace = false } = {}) => {
+    const method = replace ? 'replace' : 'push';
+    router[method](`/app?tab=${newTab}`, { scroll: false });
+  };
+
   const [toast, setToast] = useState(null);
   const [viewingGallery, setViewingGallery] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -41,30 +57,25 @@ export default function AppPage() {
     if (!loading && !user && !suspended) { window.location.href = '/'; }
   }, [loading, user, suspended]);
 
-  // Marque l'utilisateur comme actif récemment (affiché sur son profil aux autres)
   useEffect(() => {
     if (!user) return;
     supabase.from('profiles').update({ last_seen_at: new Date().toISOString() }).eq('id', user.id);
   }, [user]);
 
-  // Pour un joueur, charge son propre profil afin de vérifier le taux de complétion
-  // (nécessaire pour autoriser ou bloquer l'accès à la messagerie).
   useEffect(() => {
     if (profile?.role !== 'joueur') return;
     (async () => {
       const { data } = await supabase.from('player_listings').select('*').eq('owner_id', user.id).maybeSingle();
       setMyPlayerListing(data || null);
     })();
-  }, [profile, tab]); // re-vérifie à chaque changement d'onglet (ex. après complétion du profil)
+  }, [profile, tab]);
 
-  // Redirection automatique vers l'espace du rôle, une seule fois à l'arrivée
   useEffect(() => {
-    if (profile && tab === null) {
-      setTab(ROLE_HOME_TAB[profile.role] || 'recherche');
+    if (profile && !tab) {
+      setTab(ROLE_HOME_TAB[profile.role] || 'recherche', { replace: true });
     }
   }, [profile, tab]);
 
-  // Message de bienvenue une seule fois, à la toute première connexion sur cet appareil
   useEffect(() => {
     if (!user || !profile) return;
     const key = `tv-welcomed-${user.id}`;
@@ -109,8 +120,6 @@ export default function AppPage() {
     window.location.href = '/';
   };
 
-  // clubNeedId (optionnel) : quand un joueur contacte un club au sujet d'une offre précise,
-  // ça permet de scoper le déblocage gratuit "un joueur choisi par offre" plutôt que par compte.
   const startConversation = async (otherId, otherName, contextLabel, clubNeedId = null) => {
     if (otherId === user.id) { showToast("C'est ton propre profil."); return; }
     if (profile.role === 'joueur' && !isProfileComplete(myPlayerListing)) {
@@ -152,16 +161,12 @@ export default function AppPage() {
     );
   }
 
-  if (loading || !user || !profile || tab === null) {
+  if (loading || !user || !profile || !tab) {
     return <div style={{ minHeight: '100vh', background: '#0B1F1A' }} />;
   }
 
   const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
 
-  // Nav minimaliste : chacun voit uniquement ce qui le concerne.
-  // Tout le monde a la même structure : Mon espace + Rechercher + Messages (+ Galerie pour les joueurs).
-  // Le choix du TYPE de profil recherché (joueur / santé / coach / etc.) se fait
-  // via le sélecteur de catégorie à l'intérieur de l'écran Rechercher, pas via des onglets séparés.
   const tabs = profile.role === 'club'
     ? [
         { key: 'club', label: 'Mon espace' },
@@ -198,8 +203,8 @@ export default function AppPage() {
                   setTab('joueur');
                   return;
                 }
-                setTab(t.key);
                 if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
+                setTab(t.key);
               }}
               style={{ padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0 }}
             >

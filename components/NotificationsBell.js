@@ -36,6 +36,13 @@ export default function NotificationsBell({ user, onNavigate }) {
     return () => document.removeEventListener('mousedown', onClickOutside);
   }, []);
 
+  useEffect(() => {
+    if (!open) return;
+    const onKeyDown = (e) => { if (e.key === 'Escape') setOpen(false); };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
+
   const unreadCount = notifs.filter((n) => !n.read_at).length;
 
   const handleClick = async (n) => {

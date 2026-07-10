@@ -20,6 +20,19 @@ const lastSeenLabel = (dateStr) => {
   return null;
 };
 
+const BESOIN_ICONS = {
+  joueur: '🏉', sante: '🩺', preparateur: '💪', entraineur: '📋', arbitre: '🟨', benevole: '🤝',
+};
+
+const publieDepuis = (dateStr) => {
+  if (!dateStr) return null;
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const jours = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (jours < 1) return "Publié aujourd'hui";
+  if (jours === 1) return 'Publié hier';
+  return `Publié il y a ${jours} j`;
+};
+
 const describeNeed = (n) => {
   if (n.besoin_type === 'joueur' || !n.besoin_type) return `${n.poste || ''} · ${n.niveau || ''}`.trim();
   if (n.besoin_type === 'sante') return `${n.specialite || 'Professionnel de santé'} · ${n.sport || ''}`.trim();
@@ -87,6 +100,11 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
               {profileData?.verified && <span title="Club vérifié" style={{ color: '#D4FF3F', fontSize: 16 }}>✓</span>}
             </div>
             {villes.length > 0 && <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{villes.join(', ')}</div>}
+            {needs.length > 0 && (
+              <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>
+                Membre depuis {new Date(needs[needs.length - 1].created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
+              </div>
+            )}
             {lastSeenLabel(profileData?.last_seen_at) && (
               <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(profileData?.last_seen_at)}</div>
             )}
@@ -104,16 +122,27 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
         ) : (
           <div style={{ display: 'grid', gap: 10, marginBottom: 24 }}>
             {needs.map((n) => (
-              <div key={n.id} style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '14px 16px' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8 }}>
-                  <div>
-                    <div style={{ fontWeight: 700, fontSize: 14.5 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
-                    <div style={{ fontSize: 13.5, color: '#A4B0A6', marginTop: 2 }}>{describeNeed(n)} · {n.ville}</div>
-                    {n.remuneration && <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4 }}>💰 {n.remuneration}</div>}
+              <div key={n.id} style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '16px 18px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8, marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <span style={{ fontSize: 22 }}>{BESOIN_ICONS[n.besoin_type] || '🏉'}</span>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}{n.sport ? ` · ${n.sport}` : ''}</div>
+                      <div style={{ fontSize: 13.5, color: '#A4B0A6', marginTop: 2 }}>{describeNeed(n)}</div>
+                    </div>
                   </div>
                   <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>
                 </div>
-                {n.details && <div style={{ fontSize: 13, color: '#C7CFC8', marginTop: 8 }}>{n.details}</div>}
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 14, fontSize: 12.5, color: '#8C9A8E', marginTop: 10 }}>
+                  <span>📍 {n.ville}</span>
+                  {n.remuneration && <span style={{ color: '#D4FF3F' }}>💰 {n.remuneration}</span>}
+                  {publieDepuis(n.created_at) && <span>{publieDepuis(n.created_at)}</span>}
+                </div>
+                {n.details && (
+                  <div style={{ fontSize: 13.5, color: '#C7CFC8', marginTop: 12, paddingTop: 12, borderTop: '1px solid #1c332a', lineHeight: 1.5 }}>
+                    {n.details}
+                  </div>
+                )}
               </div>
             ))}
           </div>

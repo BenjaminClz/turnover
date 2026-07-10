@@ -197,40 +197,43 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
             <div>
               <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Profils joueurs ({filteredPlayers.length})</h2>
               {filteredPlayers.length === 0 ? <EmptyState icon="👤" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                <div style={{ display: 'grid', gap: 10 }}>
-                  {filteredPlayers.map((p) => (
-                    <ResultRow
-                      key={p.id}
-                      title={p.profiles?.nom}
-                      details={`${p.poste} · ${p.niveau} · ${p.ville}`}
-                      distance={p._distance}
-                      showContact={p.owner_id !== user.id}
-                      onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)}
-                      avatarPath={p.profiles?.avatar_path}
-                      supabase={supabase}
-                      extra={
-                        <>
-                          <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir profil</button>
-                          <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(p.owner_id, p.profiles?.nom); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
-                        </>
-                      }
-                      reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }}
-                      favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }}
-                    />
-                  ))}
+                <div style={{ display: 'grid', gap: 28 }}>
+                  {URGENCES.map((urgence) => {
+                    const group = filteredPlayers.filter((p) => p.dispo === urgence);
+                    if (group.length === 0) return null;
+                    return (
+                      <div key={urgence}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: '#F5F0E6' }}>{urgence}</span>
+                          <span style={{ fontSize: 12, color: '#5C6B5E' }}>({group.length})</span>
+                        </div>
+                        <div style={{ display: 'grid', gap: 10 }}>
+                          {group.map((p) => (
+                            <ResultRow
+                              key={p.id}
+                              title={p.profiles?.nom}
+                              details={`${p.poste} · ${p.niveau} · ${p.ville}`}
+                              distance={p._distance}
+                              showContact={p.owner_id !== user.id}
+                              onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)}
+                              avatarPath={p.profiles?.avatar_path}
+                              supabase={supabase}
+                              extra={
+                                <>
+                                  <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir profil</button>
+                                  <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(p.owner_id, p.profiles?.nom); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
+                                </>
+                              }
+                              reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }}
+                              favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
-            </div>
-          )}
-
-          {showPlayers && filteredPlayerSearches.length > 0 && (
-            <div>
-              <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Joueurs en recherche active de club ({filteredPlayerSearches.length})</h2>
-              <div style={{ display: 'grid', gap: 10 }}>
-                {filteredPlayerSearches.map((s) => (
-                  <ResultRow key={s.id} title={s.profiles?.nom} details={`${s.poste} · ${s.niveau} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, `${s.poste} · ${s.ville}`)} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'player_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'player_search', targetId: s.id, ownerId: user.id }} />
-                ))}
-              </div>
             </div>
           )}
 

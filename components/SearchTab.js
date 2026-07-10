@@ -49,6 +49,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [searchSport, setSearchSport] = useState('Tous');
   const [searchNiveau, setSearchNiveau] = useState('Tous');
   const [searchUrgence, setSearchUrgence] = useState('Tous');
+  const [playerDispoFilter, setPlayerDispoFilter] = useState('Tous');
   const [villeInput, setVilleInput] = useState('');
   const [originCoords, setOriginCoords] = useState(null);
   const [rayon, setRayon] = useState('Toute la France');
@@ -121,7 +122,8 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
     (searchNiveau !== 'Tous' ? needs.filter((n) => n.niveau === searchNiveau) : needs)
       .filter((n) => searchUrgence === 'Tous' || n.urgence === searchUrgence)
   );
-  const filteredPlayers = applyCommonFilters(searchNiveau !== 'Tous' ? players.filter((p) => p.niveau === searchNiveau) : players);
+  const filteredPlayers = applyCommonFilters(searchNiveau !== 'Tous' ? players.filter((p) => p.niveau === searchNiveau) : players)
+    .filter((p) => playerDispoFilter === 'Tous' || p.dispo === playerDispoFilter);
   const filteredPlayerSearches = applyCommonFilters(searchNiveau !== 'Tous' ? playerSearches.filter((s) => s.niveau === searchNiveau) : playerSearches);
   const filteredStaff = applyCommonFilters(staff);
 
@@ -196,42 +198,45 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           {showPlayers && (
             <div>
               <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Profils joueurs ({filteredPlayers.length})</h2>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
+                {['Tous', ...URGENCES].map((option) => (
+                  <button
+                    key={option}
+                    onClick={() => setPlayerDispoFilter(option)}
+                    className="tv-btn"
+                    style={{
+                      padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                      border: '1.5px solid ' + (playerDispoFilter === option ? '#D4FF3F' : '#2C4A3D'),
+                      background: playerDispoFilter === option ? 'rgba(212,255,63,0.12)' : 'transparent',
+                      color: playerDispoFilter === option ? '#D4FF3F' : '#A4B0A6',
+                    }}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
               {filteredPlayers.length === 0 ? <EmptyState icon="👤" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                <div style={{ display: 'grid', gap: 28 }}>
-                  {URGENCES.map((urgence) => {
-                    const group = filteredPlayers.filter((p) => p.dispo === urgence);
-                    if (group.length === 0) return null;
-                    return (
-                      <div key={urgence}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-                          <span style={{ fontSize: 13, fontWeight: 700, color: '#F5F0E6' }}>{urgence}</span>
-                          <span style={{ fontSize: 12, color: '#5C6B5E' }}>({group.length})</span>
-                        </div>
-                        <div style={{ display: 'grid', gap: 10 }}>
-                          {group.map((p) => (
-                            <ResultRow
-                              key={p.id}
-                              title={p.profiles?.nom}
-                              details={`${p.poste} · ${p.niveau} · ${p.ville}`}
-                              distance={p._distance}
-                              showContact={p.owner_id !== user.id}
-                              onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)}
-                              avatarPath={p.profiles?.avatar_path}
-                              supabase={supabase}
-                              extra={
-                                <>
-                                  <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir profil</button>
-                                  <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(p.owner_id, p.profiles?.nom); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
-                                </>
-                              }
-                              reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }}
-                              favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }}
-                            />
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                <div style={{ display: 'grid', gap: 10 }}>
+                  {filteredPlayers.map((p) => (
+                    <ResultRow
+                      key={p.id}
+                      title={p.profiles?.nom}
+                      details={`${p.poste} · ${p.niveau} · ${p.ville}`}
+                      distance={p._distance}
+                      showContact={p.owner_id !== user.id}
+                      onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)}
+                      avatarPath={p.profiles?.avatar_path}
+                      supabase={supabase}
+                      extra={
+                        <>
+                          <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir profil</button>
+                          <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(p.owner_id, p.profiles?.nom); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
+                        </>
+                      }
+                      reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }}
+                      favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }}
+                    />
+                  ))}
                 </div>
               )}
             </div>

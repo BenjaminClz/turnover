@@ -77,7 +77,7 @@ export default function PlayersTab({ user, profile, showToast }) {
   const handleCreateBasic = async (e) => {
     e.preventDefault();
     if (!basicForm.poste || !basicForm.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
-    let geo = villeCoords && villeCoords.ville === basicForm.ville ? villeCoords : null;
+    let geo = villeCoords && villeCoords.ville === basicForm.ville && villeCoords.latitude != null ? villeCoords : null;
     if (!geo) {
       setGeocoding(true);
       geo = await geocodeVille(basicForm.ville);
@@ -101,7 +101,7 @@ export default function PlayersTab({ user, profile, showToast }) {
   const handleUpdateBasic = async (e) => {
     e.preventDefault();
     if (!basicForm.poste || !basicForm.ville.trim()) { showToast('Complète au moins le poste et la ville.'); return; }
-    let geo = villeCoords && villeCoords.ville === basicForm.ville ? villeCoords : null;
+    let geo = villeCoords && villeCoords.ville === basicForm.ville && villeCoords.latitude != null ? villeCoords : null;
     if (!geo) {
       setGeocoding(true);
       geo = await geocodeVille(basicForm.ville);

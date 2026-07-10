@@ -16,10 +16,16 @@ export function VilleAutocomplete({ onSelect }) {
   const handleSelect = async (description) => {
     setValue(description, false);
     clearSuggestions();
-    const results = await getGeocode({ address: description });
-    const { lat, lng } = await getLatLng(results[0]);
-    const pays = results[0].address_components.find((c) => c.types.includes('country'))?.long_name ?? '';
-    onSelect({ ville: description, pays, lat, lng });
+    // Toujours transmettre la ville choisie au formulaire, même si le géocodage
+    // précis échoue ci-dessous : un repli (API française) prendra le relais ensuite.
+    try {
+      const results = await getGeocode({ address: description });
+      const { lat, lng } = await getLatLng(results[0]);
+      const pays = results[0].address_components.find((c) => c.types.includes('country'))?.long_name ?? '';
+      onSelect({ ville: description, pays, latitude: lat, longitude: lng });
+    } catch (err) {
+      onSelect({ ville: description, pays: '', latitude: null, longitude: null });
+    }
   };
 
   return (

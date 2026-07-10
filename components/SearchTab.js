@@ -7,6 +7,7 @@ import { EmptyState, GhostButton, TextInput, Select, Field, PageTitle, PageSubti
 import { geocodeVille, distanceKm } from '@/lib/geo';
 import { avatarUrl } from '@/components/AvatarUpload';
 import PlayerProfileModal from '@/components/PlayerProfileModal';
+import ClubProfileModal from '@/components/ClubProfileModal';
 import ReportButton from '@/components/ReportButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import { SkeletonList } from '@/components/Skeleton';
@@ -55,6 +56,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [rayon, setRayon] = useState('Toute la France');
   const [geocodingOrigin, setGeocodingOrigin] = useState(false);
   const [viewingPlayer, setViewingPlayer] = useState(null);
+  const [viewingClub, setViewingClub] = useState(null);
 
   useEffect(() => {
     (async () => {
@@ -188,7 +190,25 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
               {filteredNeeds.length === 0 ? <EmptyState icon="📋" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
                 <div style={{ display: 'grid', gap: 10 }}>
                   {filteredNeeds.map((n) => (
-                    <ResultRow key={n.id} title={n.club} details={`${needDetails(n)} · ${n.ville}`} distance={n._distance} showContact={n.owner_id !== user.id} onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)} avatarPath={n.profiles?.avatar_path} supabase={supabase} featured={n._featured} extra={<GhostButton onClick={() => onViewGallery(n.owner_id, n.club)} style={{ fontSize: 12 }}>Voir le club</GhostButton>} reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }} />
+                    <ResultRow
+                      key={n.id}
+                      title={<>{n.club} {n.profiles?.verified && <span title="Club vérifié" style={{ color: '#D4FF3F', marginLeft: 4 }}>✓</span>}</>}
+                      details={`${needDetails(n)} · ${n.ville}`}
+                      distance={n._distance}
+                      showContact={n.owner_id !== user.id}
+                      onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)}
+                      avatarPath={n.profiles?.avatar_path}
+                      supabase={supabase}
+                      featured={n._featured}
+                      extra={
+                        <>
+                          <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingClub({ ownerId: n.owner_id, clubName: n.club }); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir le profil du club</button>
+                          <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(n.owner_id, n.club); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
+                        </>
+                      }
+                      reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }}
+                      favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }}
+                    />
                   ))}
                 </div>
               )}
@@ -266,6 +286,16 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
         supabase={supabase}
         currentUserId={user.id}
         onClose={() => setViewingPlayer(null)}
+        onContact={onContact}
+        onViewGallery={onViewGallery}
+      />
+
+      <ClubProfileModal
+        ownerId={viewingClub?.ownerId}
+        clubName={viewingClub?.clubName}
+        supabase={supabase}
+        currentUserId={user.id}
+        onClose={() => setViewingClub(null)}
         onContact={onContact}
         onViewGallery={onViewGallery}
       />

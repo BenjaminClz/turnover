@@ -100,26 +100,17 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
       >
         <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>✕</button>
 
-        <div style={{ display: 'flex', gap: 18, alignItems: 'center', marginBottom: 24 }}>
-          {url ? (
-            <img src={url} alt="" style={{ width: 72, height: 72, borderRadius: 14, objectFit: 'cover', flexShrink: 0 }} />
-          ) : (
-            <div style={{ width: 72, height: 72, borderRadius: 14, background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton', color: '#0B1F1A', fontSize: 24, flexShrink: 0 }}>
-              {initials(player.profiles?.nom)}
+        <div style={{ marginBottom: 24 }}>
+          <div style={{ fontSize: 22, fontWeight: 800 }}>{player.profiles?.nom}</div>
+          <div style={{ fontSize: 14.5, color: '#A4B0A6', marginTop: 4 }}>{player.poste} · {player.niveau}</div>
+          {lastSeenLabel(player.profiles?.last_seen_at) && (
+            <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(player.profiles?.last_seen_at)}</div>
+          )}
+          {player.nationalites?.length > 0 && (
+            <div style={{ fontSize: 13, color: '#8C9A8E', marginTop: 4 }}>
+              {player.nationalites.map(nomNationalite).join(', ')}
             </div>
           )}
-          <div>
-            <div style={{ fontSize: 22, fontWeight: 800 }}>{player.profiles?.nom}</div>
-            <div style={{ fontSize: 14.5, color: '#A4B0A6', marginTop: 4 }}>{player.poste} · {player.niveau}</div>
-            {lastSeenLabel(player.profiles?.last_seen_at) && (
-              <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(player.profiles?.last_seen_at)}</div>
-            )}
-            {player.nationalites?.length > 0 && (
-              <div style={{ fontSize: 13, color: '#8C9A8E', marginTop: 4 }}>
-                {player.nationalites.map(nomNationalite).join(', ')}
-              </div>
-            )}
-          </div>
         </div>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 12, marginBottom: 20 }}>

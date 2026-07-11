@@ -4,6 +4,21 @@ import { useState, useEffect } from 'react';
 import { Badge, GhostButton } from '@/components/ui';
 import { ROLE_LABELS } from '@/lib/constants';
 import { avatarUrl } from '@/components/AvatarUpload';
+import { nationalites } from '@/lib/nationalites';
+
+const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
+
+const criteresLabel = (n) => {
+  const parts = [];
+  if (n.nationalites_recherchees?.length > 0) parts.push(n.nationalites_recherchees.map(nomNationalite).join(', '));
+  if (n.age_min || n.age_max) parts.push(`${n.age_min || '?'}-${n.age_max || '?'} ans`);
+  if (n.besoin_type === 'joueur') {
+    if (n.pied_fort_recherche) parts.push(`Pied ${n.pied_fort_recherche}`);
+    if (n.taille_min_cm) parts.push(`≥ ${n.taille_min_cm} cm`);
+    if (n.poids_min_kg) parts.push(`≥ ${n.poids_min_kg} kg`);
+  }
+  return parts.length > 0 ? parts.join(' · ') : null;
+};
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
@@ -37,7 +52,7 @@ const describeNeed = (n) => {
   if (n.besoin_type === 'joueur' || !n.besoin_type) return `${n.poste || ''} · ${n.niveau || ''}`.trim();
   if (n.besoin_type === 'sante') return `${n.specialite || 'Professionnel de santé'} · ${n.sport || ''}`.trim();
   if (n.besoin_type === 'preparateur') return `Préparateur physique · ${n.sport || ''}`.trim();
-  if (n.besoin_type === 'entraineur') return `Entraîneur ${n.sport || ''} · ${n.niveau || ''}`.trim();
+  if (n.besoin_type === 'entraineur') return `${n.specialite || 'Entraîneur'} ${n.sport || ''} · ${n.niveau || ''}`.trim();
   if (n.besoin_type === 'arbitre') return `Arbitre ${n.sport || ''} · ${n.niveau || ''}`.trim();
   if (n.besoin_type === 'benevole') return n.type_mission === 'Autre' && n.type_mission_autre ? n.type_mission_autre : (n.type_mission || 'Bénévole');
   return '';
@@ -135,6 +150,9 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
                   {n.remuneration && <span style={{ color: '#D4FF3F' }}>💰 {n.remuneration}</span>}
                   {publieDepuis(n.created_at) && <span>{publieDepuis(n.created_at)}</span>}
                 </div>
+                {criteresLabel(n) && (
+                  <div style={{ fontSize: 12.5, color: '#A4B0A6', marginTop: 8 }}>🎯 Critères recherchés : {criteresLabel(n)}</div>
+                )}
                 {n.details && (
                   <div style={{ fontSize: 13.5, color: '#C7CFC8', marginTop: 12, paddingTop: 12, borderTop: '1px solid #1c332a', lineHeight: 1.5 }}>
                     {n.details}

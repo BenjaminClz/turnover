@@ -31,7 +31,7 @@ function needDetails(n) {
   }
   if (n.besoin_type === 'sante') return `${n.specialite || 'Professionnel de santé'}${n.sport ? ' · ' + n.sport : ''}`;
   if (n.besoin_type === 'preparateur') return `Préparateur physique${n.sport ? ' · ' + n.sport : ''}`;
-  if (n.besoin_type === 'entraineur') return `Entraîneur${n.sport ? ' ' + n.sport : ''}${n.niveau ? ' · ' + n.niveau : ''}`;
+  if (n.besoin_type === 'entraineur') return `${n.specialite || 'Entraîneur'}${n.sport ? ' ' + n.sport : ''}${n.niveau ? ' · ' + n.niveau : ''}`;
   if (n.besoin_type === 'arbitre') return `Arbitre${n.sport ? ' ' + n.sport : ''}${n.niveau ? ' · ' + n.niveau : ''}`;
   if (n.besoin_type === 'benevole') return n.type_mission === 'Autre' && n.type_mission_autre ? n.type_mission_autre : (n.type_mission || 'Bénévole');
   return '';

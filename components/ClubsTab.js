@@ -2,13 +2,17 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
-import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
+import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_ENTRAINEUR, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import GalleryTab from '@/components/GalleryTab';
 import { useSubscription } from '@/lib/use-subscription';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import NationaliteSelect from '@/components/NationaliteSelect';
+import { nationalites } from '@/lib/nationalites';
+
+const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
 
 const BESOIN_TYPES = [
   { value: 'joueur', label: 'Un joueur', icon: '🏉' },
@@ -22,6 +26,7 @@ const BESOIN_TYPES = [
 const emptyForm = {
   besoin_type: 'joueur', sport: 'Rugby', poste: '', niveau: 'Régionale 2', ville: '',
   urgence: 'Dès que possible', details: '', specialite: '', diplome: '', type_mission: '', type_mission_autre: '', remuneration: '',
+  nationalites_recherchees: [], pied_fort_recherche: null, age_min: '', age_max: '', taille_min_cm: '', poids_min_kg: '',
 };
 
 export default function ClubsTab({ user, profile, showToast, onContact }) {
@@ -96,6 +101,12 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       type_mission_autre: form.type_mission === 'Autre' ? (form.type_mission_autre || null) : null,
       remuneration: form.besoin_type === 'joueur' ? (form.remuneration || null) : null,
       latitude: geo.latitude, longitude: geo.longitude,
+      nationalites_recherchees: form.nationalites_recherchees,
+      pied_fort_recherche: form.besoin_type === 'joueur' ? form.pied_fort_recherche : null,
+      age_min: form.age_min ? parseInt(form.age_min) : null,
+      age_max: form.age_max ? parseInt(form.age_max) : null,
+      taille_min_cm: form.besoin_type === 'joueur' && form.taille_min_cm ? parseInt(form.taille_min_cm) : null,
+      poids_min_kg: form.besoin_type === 'joueur' && form.poids_min_kg ? parseInt(form.poids_min_kg) : null,
     };
 
     if (editingId) {
@@ -150,6 +161,35 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
           <Field label="Rémunération / défraiement (facultatif)" hint="Texte libre, ex. « Défraiement 50€/match », « Logement + indemnités »…">
             <TextInput value={form.remuneration} onChange={(e) => setForm({ ...form, remuneration: e.target.value })} placeholder="ex. Défraiement 50€/match" />
           </Field>
+
+          <div style={{ marginTop: 8, marginBottom: 8 }}>
+            <h4 style={{ fontSize: 14.5, marginBottom: 4 }}>Critères physiques (facultatif, spécifique aux joueurs)</h4>
+          </div>
+
+          <Field label="Pied fort recherché">
+            <div style={{ display: 'flex', gap: 10 }}>
+              {['', 'gauche', 'droit', 'ambidextre'].map((option) => (
+                <button
+                  key={option || 'indifferent'}
+                  type="button"
+                  onClick={() => setForm({ ...form, pied_fort_recherche: option || null })}
+                  style={{
+                    padding: '10px 16px', borderRadius: 8, cursor: 'pointer', fontWeight: 700, fontSize: 13, textTransform: 'capitalize',
+                    border: (form.pied_fort_recherche || '') === option ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D',
+                    background: (form.pied_fort_recherche || '') === option ? '#D4FF3F' : 'transparent',
+                    color: (form.pied_fort_recherche || '') === option ? '#0B1F1A' : '#A4B0A6',
+                  }}
+                >
+                  {option || 'Indifférent'}
+                </button>
+              ))}
+            </div>
+          </Field>
+
+          <div className="tv-grid-2" style={{ gap: 18 }}>
+            <Field label="Taille minimum (cm)"><TextInput type="number" value={form.taille_min_cm} onChange={(e) => setForm({ ...form, taille_min_cm: e.target.value })} placeholder="ex. 175" /></Field>
+            <Field label="Poids minimum (kg)"><TextInput type="number" value={form.poids_min_kg} onChange={(e) => setForm({ ...form, poids_min_kg: e.target.value })} placeholder="ex. 80" /></Field>
+          </div>
         </>
       );
     }
@@ -168,6 +208,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       return (
         <>
           <Field label="Sport"><Select value={form.sport} onChange={(e) => setForm({ ...form, sport: e.target.value })} options={SPORTS} /></Field>
+          <Field label="Spécialité recherchée"><Select value={form.specialite} onChange={(e) => setForm({ ...form, specialite: e.target.value })} options={['', ...TYPES_ENTRAINEUR]} /></Field>
           <Field label="Niveau à encadrer"><TextInput value={form.niveau || ''} onChange={(e) => setForm({ ...form, niveau: e.target.value })} placeholder="ex. Seniors Régionale 2, U16…" /></Field>
         </>
       );
@@ -196,6 +237,22 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const renderForm = (type) => (
     <form onSubmit={handleSubmit}>
       {renderSpecificFields(type)}
+
+      <div style={{ marginTop: 8, marginBottom: 8 }}>
+        <h4 style={{ fontSize: 14.5, marginBottom: 4 }}>Critères recherchés (facultatif)</h4>
+        <p style={{ fontSize: 12.5, color: '#A4B0A6', marginBottom: 16 }}>Les mêmes catégories que celles renseignées par les profils, quel que soit le poste recherché.</p>
+      </div>
+      <Field label="Nationalité(s) recherchée(s)">
+        <NationaliteSelect
+          value={form.nationalites_recherchees}
+          onChange={(codes) => setForm({ ...form, nationalites_recherchees: codes })}
+        />
+      </Field>
+      <div className="tv-grid-2" style={{ gap: 18 }}>
+        <Field label="Âge minimum"><TextInput type="number" value={form.age_min} onChange={(e) => setForm({ ...form, age_min: e.target.value })} placeholder="ex. 18" /></Field>
+        <Field label="Âge maximum"><TextInput type="number" value={form.age_max} onChange={(e) => setForm({ ...form, age_max: e.target.value })} placeholder="ex. 60" /></Field>
+      </div>
+
       <div className="tv-grid-2" style={{ gap: 18 }}>
         <Field label="Ville"><TextInput value={form.ville} onChange={(e) => setForm({ ...form, ville: e.target.value })} placeholder="Annemasse" /></Field>
         <Field label="Urgence"><Select value={form.urgence} onChange={(e) => setForm({ ...form, urgence: e.target.value })} options={URGENCES} /></Field>
@@ -208,11 +265,23 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
     </form>
   );
 
+  const criteresLabel = (n) => {
+    const parts = [];
+    if (n.nationalites_recherchees?.length > 0) parts.push(n.nationalites_recherchees.map(nomNationalite).join(', '));
+    if (n.age_min || n.age_max) parts.push(`${n.age_min || '?'}-${n.age_max || '?'} ans`);
+    if (n.besoin_type === 'joueur') {
+      if (n.pied_fort_recherche) parts.push(`Pied ${n.pied_fort_recherche}`);
+      if (n.taille_min_cm) parts.push(`≥ ${n.taille_min_cm} cm`);
+      if (n.poids_min_kg) parts.push(`≥ ${n.poids_min_kg} kg`);
+    }
+    return parts.length > 0 ? parts.join(' · ') : null;
+  };
+
   const describeNeed = (n) => {
     if (n.besoin_type === 'joueur' || !n.besoin_type) return `${n.poste || ''} · ${n.niveau || ''}`.trim();
     if (n.besoin_type === 'sante') return `${n.specialite || 'Professionnel de santé'} · ${n.sport || ''}`.trim();
     if (n.besoin_type === 'preparateur') return `Préparateur physique · ${n.sport || ''}`.trim();
-    if (n.besoin_type === 'entraineur') return `Entraîneur ${n.sport || ''} · ${n.niveau || ''}`.trim();
+    if (n.besoin_type === 'entraineur') return `${n.specialite || 'Entraîneur'} ${n.sport || ''} · ${n.niveau || ''}`.trim();
     if (n.besoin_type === 'arbitre') return `Arbitre ${n.sport || ''} · ${n.niveau || ''}`.trim();
     if (n.besoin_type === 'benevole') return n.type_mission === 'Autre' && n.type_mission_autre ? n.type_mission_autre : (n.type_mission || 'Bénévole');
     return '';
@@ -270,6 +339,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
                     <div style={{ fontSize: 14, color: '#A4B0A6' }}>{describeNeed(listing)} · {listing.ville}</div>
                     {listing.remuneration && <div style={{ fontSize: 13, color: '#D4FF3F', marginTop: 4 }}>💰 {listing.remuneration}</div>}
+                    {criteresLabel(listing) && <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>🎯 {criteresLabel(listing)}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => startEditing(listing)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
@@ -331,6 +401,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                 <div style={{ fontWeight: 700, fontSize: 16 }}>{n.club} <span style={{ color: '#A4B0A6', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
                 <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{describeNeed(n)} · {n.ville}</div>
                 {n.remuneration && <div style={{ fontSize: 13.5, color: '#D4FF3F', marginTop: 6 }}>💰 {n.remuneration}</div>}
+                {criteresLabel(n) && <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>🎯 {criteresLabel(n)}</div>}
                 {n.details && <div style={{ fontSize: 14, color: '#C7CFC8', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}
                 <div style={{ marginTop: 12 }}><Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge></div>
               </div>

@@ -1,6 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
-export const revalidate = 3600;
+// Aucune mise en cache : le sitemap est régénéré à chaque requête pour
+// toujours refléter les profils réellement publiés à cet instant.
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 const BASE_URL = 'https://turnover-sport.fr';
 
@@ -14,27 +17,14 @@ export default async function sitemap() {
 
   let playerPages = [];
   try {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
-      console.error('SITEMAP DEBUG: variables Supabase manquantes', {
-        hasUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      });
-    }
-
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
-    const { data, error } = await supabase
+    const { data } = await supabase
       .from('public_player_profiles')
       .select('id, created_at')
       .limit(1000);
-
-    if (error) {
-      console.error('SITEMAP DEBUG: erreur Supabase', error.message, error);
-    } else {
-      console.error('SITEMAP DEBUG: lignes reçues =', data?.length);
-    }
 
     playerPages = (data || []).map((p) => ({
       url: `${BASE_URL}/j/${p.id}`,
@@ -43,7 +33,7 @@ export default async function sitemap() {
       priority: 0.6,
     }));
   } catch (e) {
-    console.error('SITEMAP DEBUG: exception attrapée', e?.message, e);
+    // En cas d'erreur, on renvoie au moins les pages statiques.
   }
 
   return [...staticPages, ...playerPages];

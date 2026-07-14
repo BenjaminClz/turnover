@@ -1,5 +1,9 @@
 import { createClient } from '@supabase/supabase-js';
 
+// Régénère le sitemap au maximum une fois par heure plutôt que de le figer
+// définitivement à l'état du site au moment du build.
+export const revalidate = 3600;
+
 const BASE_URL = 'https://turnover-sport.fr';
 
 export default async function sitemap() {
@@ -28,7 +32,7 @@ export default async function sitemap() {
       priority: 0.6,
     }));
   } catch (e) {
-    // En cas d'erreur (ex. build sans variables d'environnement), on renvoie au moins les pages statiques.
+    // En cas d'erreur, on renvoie au moins les pages statiques.
   }
 
   return [...staticPages, ...playerPages];

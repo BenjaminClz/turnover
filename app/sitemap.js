@@ -1,7 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
 
-// Aucune mise en cache : le sitemap est régénéré à chaque requête pour
-// toujours refléter les profils réellement publiés à cet instant.
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
@@ -15,16 +13,37 @@ export default async function sitemap() {
     { url: `${BASE_URL}/confidentialite`, changeFrequency: 'yearly', priority: 0.3 },
   ];
 
+  const debugPages = [];
   let playerPages = [];
+
+  const hasUrl = !!process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const hasKey = !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  debugPages.push({
+    url: `${BASE_URL}/DEBUG-env-url-${hasUrl}-key-${hasKey}`,
+    priority: 0.01,
+  });
+
   try {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     );
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('public_player_profiles')
       .select('id, created_at')
       .limit(1000);
+
+    if (error) {
+      debugPages.push({
+        url: `${BASE_URL}/DEBUG-supabase-error-${encodeURIComponent(error.message).slice(0, 100)}`,
+        priority: 0.01,
+      });
+    } else {
+      debugPages.push({
+        url: `${BASE_URL}/DEBUG-rows-count-${data?.length ?? 'null'}`,
+        priority: 0.01,
+      });
+    }
 
     playerPages = (data || []).map((p) => ({
       url: `${BASE_URL}/j/${p.id}`,
@@ -33,8 +52,11 @@ export default async function sitemap() {
       priority: 0.6,
     }));
   } catch (e) {
-    // En cas d'erreur, on renvoie au moins les pages statiques.
+    debugPages.push({
+      url: `${BASE_URL}/DEBUG-exception-${encodeURIComponent(e?.message || 'unknown').slice(0, 100)}`,
+      priority: 0.01,
+    });
   }
 
-  return [...staticPages, ...playerPages];
+  return [...staticPages, ...debugPages, ...playerPages];
 }

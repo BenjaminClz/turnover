@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, PrimaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
@@ -12,7 +12,6 @@ import StatsSlider from '@/components/StatsSlider';
 import StatsRadar from '@/components/StatsRadar';
 import PlayerCard from '@/components/PlayerCard';
 import PiedFortSelect from '@/components/PiedFortSelect';
-import ConfirmDialog from '@/components/ConfirmDialog';
 import VilleAutocomplete from '@/components/VilleAutocomplete';
 import { SkeletonList } from '@/components/Skeleton';
 import { nationalites } from '@/lib/nationalites';
@@ -26,6 +25,8 @@ const emptyDetailsForm = {
   stat_vitesse: 50, stat_defense: 50, stat_vision: 50, stat_technique: 50, stat_combat: 50, stat_attaque: 50, stat_physique: 50,
   pied_fort: null,
 };
+
+const DELETE_UNDO_DELAY_MS = 5000;
 
 const calculAge = (dateNaissance) => {
   if (!dateNaissance) return null;
@@ -46,9 +47,10 @@ export default function PlayersTab({ user, profile, showToast }) {
   const [geocoding, setGeocoding] = useState(false);
   const [basicForm, setBasicForm] = useState(emptyBasicForm);
   const [detailsForm, setDetailsForm] = useState(emptyDetailsForm);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
   const [villeCoords, setVilleCoords] = useState(null);
   const [publishing, setPublishing] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
+  const deleteTimerRef = useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -75,6 +77,9 @@ export default function PlayersTab({ user, profile, showToast }) {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Annule la suppression programmée si le composant est démonté entre-temps.
+  useEffect(() => () => { if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current); }, []);
 
   // Avertit avant de quitter la page si un formulaire est en cours de modification.
   useEffect(() => {
@@ -175,15 +180,25 @@ export default function PlayersTab({ user, profile, showToast }) {
     load();
   };
 
-  const handleDelete = async () => {
+  // Suppression réversible : on programme la suppression réelle après un délai
+  // pendant lequel l'utilisateur peut annuler (pattern « Annuler l'envoi » de Gmail).
+  const requestDelete = () => {
     if (!myListing) return;
-    const { error } = await supabase.from('player_listings').delete().eq('id', myListing.id);
-    if (error) { showToast('Erreur lors de la suppression.'); return; }
-    setMyListing(null);
-    setBasicForm(emptyBasicForm);
-    setDetailsForm(emptyDetailsForm);
-    showToast('Profil supprimé.');
-    load();
+    setDeletePending(true);
+    deleteTimerRef.current = setTimeout(async () => {
+      const { error } = await supabase.from('player_listings').delete().eq('id', myListing.id);
+      if (error) { showToast('Erreur lors de la suppression.'); setDeletePending(false); return; }
+      setMyListing(null);
+      setBasicForm(emptyBasicForm);
+      setDetailsForm(emptyDetailsForm);
+      setDeletePending(false);
+      load();
+    }, DELETE_UNDO_DELAY_MS);
+  };
+
+  const cancelDelete = () => {
+    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    setDeletePending(false);
   };
 
   const renderBasicFields = () => (
@@ -245,7 +260,7 @@ export default function PlayersTab({ user, profile, showToast }) {
         <SkeletonList count={1} />
       ) : myListing && (
         <>
-          <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginBottom: 24 }}>
+          <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
               <div>
                 {isPublished ? (
@@ -350,7 +365,7 @@ export default function PlayersTab({ user, profile, showToast }) {
               </form>
             </div>
           ) : (
-            <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
+            <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
                 <h3 style={{ fontSize: 18 }}>Mes informations</h3>
                 <div style={{ display: 'flex', gap: 10 }}>
@@ -388,21 +403,19 @@ export default function PlayersTab({ user, profile, showToast }) {
               )}
 
               <div style={{ marginTop: 28, textAlign: 'right' }}>
-                <button onClick={() => setConfirmDeleteOpen(true)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
+                <button onClick={requestDelete} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
               </div>
             </div>
           )}
         </>
       )}
 
-      <ConfirmDialog
-        open={confirmDeleteOpen}
-        title="Supprimer ton profil ?"
-        message="Cette action est irréversible. Ton profil et tes candidatures seront définitivement supprimés."
-        confirmLabel="Supprimer"
-        onConfirm={() => { setConfirmDeleteOpen(false); handleDelete(); }}
-        onCancel={() => setConfirmDeleteOpen(false)}
-      />
+      {deletePending && (
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#152E26', border: '1.5px solid #D4FF3F', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 16, zIndex: 500, boxShadow: '0 12px 32px rgba(0,0,0,0.45)' }}>
+          <span style={{ fontSize: 14 }}>Profil supprimé.</span>
+          <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: '#D4FF3F', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
+        </div>
+      )}
     </div>
   );
 }

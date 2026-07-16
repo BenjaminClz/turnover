@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_ENTRAINEUR, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, PageTitle, PageSubtitle } from '@/components/ui';
@@ -8,7 +8,6 @@ import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import GalleryTab from '@/components/GalleryTab';
 import { useSubscription } from '@/lib/use-subscription';
-import ConfirmDialog from '@/components/ConfirmDialog';
 import NationaliteSelect from '@/components/NationaliteSelect';
 import { nationalites } from '@/lib/nationalites';
 
@@ -29,6 +28,8 @@ const emptyForm = {
   nationalites_recherchees: [], pied_fort_recherche: null, age_min: '', age_max: '', taille_min_cm: '', poids_min_kg: '',
 };
 
+const DELETE_UNDO_DELAY_MS = 5000;
+
 export default function ClubsTab({ user, profile, showToast, onContact }) {
   const supabase = createClient();
   const { isActive, loading: subLoading } = useSubscription(user.id);
@@ -40,7 +41,8 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const [geocoding, setGeocoding] = useState(false);
   const [form, setForm] = useState(emptyForm);
   const [showInfraGallery, setShowInfraGallery] = useState(false);
-  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [deletePendingId, setDeletePendingId] = useState(null);
+  const deleteTimerRef = useRef(null);
 
   const load = async () => {
     setLoading(true);
@@ -55,6 +57,9 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   };
 
   useEffect(() => { load(); }, []);
+
+  // Annule la suppression programmée si le composant est démonté entre-temps.
+  useEffect(() => () => { if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current); }, []);
 
   // Avertit avant de quitter la page si une annonce est en cours de création/édition.
   useEffect(() => {
@@ -117,7 +122,6 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       const { error } = await supabase.from('club_needs').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
       showToast('Besoin publié ✓');
-      // Alerte les joueurs dont le profil correspond (même sport + même poste), sauf le club lui-même.
       if (payload.besoin_type === 'joueur') {
         const { data: matches } = await supabase
           .from('player_listings')
@@ -145,8 +149,22 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const handleDelete = async (id) => {
     const { error } = await supabase.from('club_needs').delete().eq('id', id);
     if (error) { showToast('Erreur lors de la suppression.'); return; }
-    showToast('Besoin supprimé.');
     load();
+  };
+
+  // Suppression réversible : la suppression réelle est programmée après un délai
+  // pendant lequel on peut annuler (pattern « Annuler l'envoi » de Gmail).
+  const requestDelete = (id) => {
+    setDeletePendingId(id);
+    deleteTimerRef.current = setTimeout(() => {
+      handleDelete(id);
+      setDeletePendingId(null);
+    }, DELETE_UNDO_DELAY_MS);
+  };
+
+  const cancelDelete = () => {
+    if (deleteTimerRef.current) clearTimeout(deleteTimerRef.current);
+    setDeletePendingId(null);
   };
 
   const renderSpecificFields = (type) => {
@@ -328,7 +346,12 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
           <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Mes annonces ({myListings.length})</h2>
           <div style={{ display: 'grid', gap: 12 }}>
             {myListings.map((listing) => (
-              editingId === listing.id ? (
+              deletePendingId === listing.id ? (
+                <div key={listing.id} style={{ background: '#152E26', border: '1.5px solid #D4FF3F', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+                  <span style={{ fontSize: 14, color: '#A4B0A6' }}>Annonce supprimée.</span>
+                  <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: '#D4FF3F', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
+                </div>
+              ) : editingId === listing.id ? (
                 <div key={listing.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28 }}>
                   <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier — {ROLE_LABELS[listing.besoin_type] || 'Joueur'}</h3>
                   {renderForm(listing.besoin_type)}
@@ -343,7 +366,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => startEditing(listing)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
-                    <button onClick={() => setConfirmDeleteId(listing.id)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer</button>
+                    <button onClick={() => requestDelete(listing.id)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer</button>
                   </div>
                 </div>
               )
@@ -410,15 +433,6 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
           ))}
         </div>
       )}
-
-      <ConfirmDialog
-        open={!!confirmDeleteId}
-        title="Supprimer cette annonce ?"
-        message="Cette action est irréversible."
-        confirmLabel="Supprimer"
-        onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); handleDelete(id); }}
-        onCancel={() => setConfirmDeleteId(null)}
-      />
     </div>
   );
 }

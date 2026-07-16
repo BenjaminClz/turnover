@@ -14,6 +14,7 @@ import { SkeletonList } from '@/components/Skeleton';
 
 const RAYONS = [10, 25, 50, 100, 'Toute la France'];
 const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
+const CARD_GRID = { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: 14 };
 
 function staffDetails(l) {
   if (l.role === 'sante') return `${l.specialite || 'Professionnel de santé'}${l.sport ? ' · ' + l.sport : ''}`;
@@ -73,8 +74,6 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
         setPlayerSearches(ps || []);
         setStaff(s || []);
       } else {
-        // Un non-club ne doit voir que les besoins clubs.
-        // On joint le statut d'abonnement pour mettre en avant les clubs Pro dans les résultats.
         const { data: n } = await supabase.from('club_needs').select('*, profiles(avatar_path)').order('created_at', { ascending: false });
         const ownerIds = [...new Set((n || []).map((x) => x.owner_id))];
         let activeOwners = new Set();
@@ -83,7 +82,6 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           activeOwners = new Set((subs || []).map((s) => s.owner_id));
         }
         const withFeatured = (n || []).map((x) => ({ ...x, _featured: activeOwners.has(x.owner_id) }));
-        // Tri : les clubs mis en avant (abonnés) d'abord, puis par date de création
         withFeatured.sort((a, b) => (b._featured ? 1 : 0) - (a._featured ? 1 : 0));
         setNeeds(withFeatured);
       }
@@ -109,8 +107,6 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
     let out = withDistance(list);
     if (searchSport !== 'Tous') out = out.filter((it) => it.sport === searchSport);
     if (originCoords && rayon !== 'Toute la France') out = out.filter((it) => it._distance != null && it._distance <= rayon);
-    // Les annonces mises en avant (clubs abonnés) passent toujours en premier ;
-    // à l'intérieur de chaque groupe, tri par distance si une ville est localisée.
     out = out.sort((a, b) => {
       const featuredDiff = (b._featured ? 1 : 0) - (a._featured ? 1 : 0);
       if (featuredDiff !== 0) return featuredDiff;
@@ -188,11 +184,12 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
             <div>
               <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Besoins clubs ({filteredNeeds.length})</h2>
               {filteredNeeds.length === 0 ? <EmptyState icon="📋" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                <div style={{ display: 'grid', gap: 10 }}>
+                <div style={CARD_GRID}>
                   {filteredNeeds.map((n) => (
-                    <ResultRow
+                    <ResultCard
                       key={n.id}
-                      title={<>{n.club} {n.profiles?.verified && <span title="Club vérifié" style={{ color: '#D4FF3F', marginLeft: 4 }}>✓</span>}</>}
+                      title={n.club}
+                      verified={n.profiles?.verified}
                       details={`${needDetails(n)} · ${n.ville}`}
                       distance={n._distance}
                       showContact={n.owner_id !== user.id}
@@ -202,8 +199,8 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                       featured={n._featured}
                       extra={
                         <>
-                          <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingClub({ ownerId: n.owner_id, clubName: n.club }); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir le profil du club</button>
-                          <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(n.owner_id, n.club); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
+                          <button className="tv-btn" onClick={() => setViewingClub({ ownerId: n.owner_id, clubName: n.club })} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
+                          <GhostButton onClick={() => onViewGallery(n.owner_id, n.club)} style={{ flex: 1, fontSize: 12, textAlign: 'center' }}>Galerie</GhostButton>
                         </>
                       }
                       reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }}
@@ -236,9 +233,9 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                 ))}
               </div>
               {filteredPlayers.length === 0 ? <EmptyState icon="👤" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                <div style={{ display: 'grid', gap: 10 }}>
+                <div style={CARD_GRID}>
                   {filteredPlayers.map((p) => (
-                    <ResultRow
+                    <ResultCard
                       key={p.id}
                       title={p.profiles?.nom}
                       details={`${p.poste} · ${p.niveau} · ${p.ville}`}
@@ -249,8 +246,8 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                       supabase={supabase}
                       extra={
                         <>
-                          <button className="tv-btn" onClick={(e) => { e.stopPropagation(); setViewingPlayer(p); }} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Voir profil</button>
-                          <GhostButton onClick={(e) => { e.stopPropagation(); onViewGallery(p.owner_id, p.profiles?.nom); }} style={{ fontSize: 12 }}>Galerie</GhostButton>
+                          <button className="tv-btn" onClick={() => setViewingPlayer(p)} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
+                          <GhostButton onClick={() => onViewGallery(p.owner_id, p.profiles?.nom)} style={{ flex: 1, fontSize: 12, textAlign: 'center' }}>Galerie</GhostButton>
                         </>
                       }
                       reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }}
@@ -269,9 +266,9 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
               <div key={role}>
                 <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>{ROLE_LABELS[role]} ({list.length})</h2>
                 {list.length === 0 ? <EmptyState icon="🧑‍⚕️" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                  <div style={{ display: 'grid', gap: 10 }}>
+                  <div style={CARD_GRID}>
                     {list.map((s) => (
-                      <ResultRow key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
+                      <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
                     ))}
                   </div>
                 )}
@@ -303,33 +300,44 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   );
 }
 
-function ResultRow({ title, details, distance, showContact, onContact, extra, avatarPath, supabase, featured, onClick, reportProps, favoriteProps }) {
+const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+
+function ResultCard({ title, verified, details, distance, showContact, onContact, extra, avatarPath, supabase, featured, reportProps, favoriteProps }) {
   const url = avatarPath ? avatarUrl(supabase, avatarPath) : null;
   return (
-    <div onClick={onClick} className="tv-card" style={{ background: featured ? 'rgba(212,255,63,0.05)' : '#152E26', border: featured ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D', borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', cursor: onClick ? 'pointer' : 'default' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        {url && <img src={url} alt="" style={{ width: 38, height: 38, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
-        <div>
-          <div style={{ fontWeight: 700, fontSize: 15, display: 'flex', alignItems: 'center', gap: 8 }}>
-            {title}
-            {featured && <span style={{ fontSize: 10.5, fontWeight: 800, color: '#0B1F1A', background: '#D4FF3F', padding: '2px 8px', borderRadius: 10, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
-          </div>
-          <div style={{ fontSize: 13.5, color: '#A4B0A6', marginTop: 3 }}>
-            {details}
-            {distance != null && <span style={{ color: '#D4FF3F' }}> · {distance.toFixed(0)} km</span>}
-          </div>
-        </div>
+    <div className="tv-card" style={{ position: 'relative', background: featured ? 'rgba(212,255,63,0.05)' : '#152E26', border: featured ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D', borderRadius: 14, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+      <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
+        {favoriteProps && <FavoriteButton {...favoriteProps} />}
+        {reportProps && <ReportButton {...reportProps} />}
       </div>
-      <div style={{ display: 'flex', gap: 16, alignItems: 'center', flexShrink: 0 }} onClick={(e) => e.stopPropagation()}>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', paddingRight: 14, borderRight: '1px solid #2C4A3D' }}>
-          {favoriteProps && <FavoriteButton {...favoriteProps} />}
-          {reportProps && <ReportButton {...reportProps} />}
-        </div>
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-          {extra}
-          {showContact && <button className="tv-btn" onClick={onContact} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '8px 16px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Contacter</button>}
-        </div>
+
+      {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 9.5, fontWeight: 800, color: '#0B1F1A', background: '#D4FF3F', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
+
+      <div style={{ position: 'relative', marginTop: featured ? 14 : 0, marginBottom: 10 }}>
+        {url ? (
+          <img src={url} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+        ) : (
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 22 }}>
+            {initials(title)}
+          </div>
+        )}
+        {verified && (
+          <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: '#27500A', color: '#EAF3DE', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, border: '2px solid #152E26' }}>✓</span>
+        )}
       </div>
+
+      <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 4 }}>{title}</div>
+      <div style={{ fontSize: 12.5, color: '#A4B0A6', lineHeight: 1.4, marginBottom: distance != null ? 2 : 14 }}>{details}</div>
+      {distance != null && <div style={{ fontSize: 11.5, color: '#D4FF3F', marginBottom: 14 }}>{distance.toFixed(0)} km</div>}
+
+      <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+        {extra}
+      </div>
+      {showContact && (
+        <button className="tv-btn" onClick={onContact} style={{ width: '100%', marginTop: 8, background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 0', borderRadius: 7, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+          Contacter
+        </button>
+      )}
     </div>
   );
 }

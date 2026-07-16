@@ -69,7 +69,11 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     setUnlocking(true);
     const { error } = await supabase.from('conversations').update({ unlocked_by_club: true }).eq('id', conv.id);
     setUnlocking(false);
-    if (error) return;
+    if (error) {
+      showToast(`Erreur déblocage : ${error.message}`);
+      console.error('DEBUG déblocage conversation :', error);
+      return;
+    }
     await loadConversations();
   };
 

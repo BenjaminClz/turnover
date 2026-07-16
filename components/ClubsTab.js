@@ -365,7 +365,7 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
                     {criteresLabel(listing) && <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>🎯 {criteresLabel(listing)}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => startEditing(listing)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
+                    <button onClick={() => startEditing(listing)} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
                     <button onClick={() => requestDelete(listing.id)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer</button>
                   </div>
                 </div>

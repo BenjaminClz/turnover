@@ -48,8 +48,8 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [loading, setLoading] = useState(true);
 
   const [searchCategory, setSearchCategory] = useState(isClub ? 'Tous' : 'club'); // Tous | Joueurs | Clubs | un rôle staff
-  const [searchSport, setSearchSport] = useState('Tous');
-  const [searchNiveau, setSearchNiveau] = useState('Tous');
+  const [searchSport, setSearchSport] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-sport')) || 'Tous');
+  const [searchNiveau, setSearchNiveau] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-niveau')) || 'Tous');
   const [searchUrgence, setSearchUrgence] = useState('Tous');
   const [playerDispoFilter, setPlayerDispoFilter] = useState('Tous');
   const [villeInput, setVilleInput] = useState('');
@@ -88,6 +88,9 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       setLoading(false);
     })();
   }, []);
+
+  useEffect(() => { localStorage.setItem('tv-search-sport', searchSport); }, [searchSport]);
+  useEffect(() => { localStorage.setItem('tv-search-niveau', searchNiveau); }, [searchNiveau]);
 
   const handleLocate = async () => {
     if (!villeInput.trim()) { setOriginCoords(null); return; }
@@ -137,7 +140,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'end', marginBottom: 18 }}>
           <Field label="Chercher autour de">
-            <TextInput value={villeInput} onChange={(e) => setVilleInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocate(); } }} placeholder="Ta ville (ex. Annemasse, Lyon, Paris…)" />
+            <TextInput autoFocus value={villeInput} onChange={(e) => setVilleInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocate(); } }} placeholder="Ta ville (ex. Annemasse, Lyon, Paris…)" />
           </Field>
           <button onClick={handleLocate} disabled={geocodingOrigin} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '14px 22px', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer', height: 52 }}>
             {geocodingOrigin ? '…' : 'Localiser'}

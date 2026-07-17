@@ -25,6 +25,15 @@ const ROLE_HOME_TAB = {
   entraineur: 'entraineur', arbitre: 'arbitre', benevole: 'benevole',
 };
 
+// Titres d'onglet affichés dans la barre du navigateur (utile quand plusieurs
+// onglets Turnover sont ouverts en même temps).
+const TAB_TITLES = {
+  joueur: 'Mon profil', club: 'Mon espace', sante: 'Mon profil', preparateur: 'Mon profil',
+  entraineur: 'Mon profil', arbitre: 'Mon profil', benevole: 'Mon profil',
+  recherche: 'Rechercher', messages: 'Messages', favoris: 'Favoris', abonnement: 'Abonnement',
+  admin: 'Admin', galerie: 'Galerie',
+};
+
 export default function AppPage() {
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0B1F1A' }} />}>
@@ -43,6 +52,11 @@ function AppPageInner() {
   const setTab = (newTab, { replace = false } = {}) => {
     const method = replace ? 'replace' : 'push';
     router[method](`/app?tab=${newTab}`, { scroll: false });
+    // Ramène en haut de page lors d'un changement d'onglet volontaire (clic),
+    // sans perturber le comportement du bouton retour du navigateur.
+    if (!replace && typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
   };
 
   const [toast, setToast] = useState(null);
@@ -87,6 +101,27 @@ function AppPageInner() {
       setTimeout(() => showToast(msg), 600);
     }
   }, [user, profile]);
+
+  // Titre de l'onglet du navigateur, mis à jour selon l'écran affiché.
+  useEffect(() => {
+    if (!tab) return;
+    document.title = `${TAB_TITLES[tab] || 'Turnover'} — Turnover`;
+  }, [tab]);
+
+  // Raccourci clavier "/" pour aller directement à la recherche, sauf si
+  // l'utilisateur est en train de taper dans un champ.
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.key !== '/') return;
+      const target = e.target;
+      const isTyping = target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable;
+      if (isTyping) return;
+      e.preventDefault();
+      setTab('recherche');
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, []);
 
   const showToast = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2800); };
 
@@ -167,20 +202,23 @@ function AppPageInner() {
 
   const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
 
+  // "Abonnement" est un réglage de compte, pas un contenu à parcourir : il vit
+  // désormais dans le menu déroulant du profil, pas dans la barre d'onglets.
+  // L'ordre des onglets restants reflète la fréquence d'usage réelle :
+  // Messages (consulté au quotidien) passe avant Favoris (consulté occasionnellement).
   const tabs = profile.role === 'club'
     ? [
         { key: 'club', label: 'Mon espace' },
         { key: 'recherche', label: 'Rechercher' },
-        { key: 'favoris', label: 'Favoris' },
-        { key: 'abonnement', label: 'Abonnement' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
+        { key: 'favoris', label: 'Favoris' },
         ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ]
     : [
         { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil' },
         { key: 'recherche', label: 'Rechercher' },
-        { key: 'favoris', label: 'Favoris' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
+        { key: 'favoris', label: 'Favoris' },
         ...(profile.role === 'joueur' ? [{ key: 'galerie', label: 'Ma galerie' }] : []),
         ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ];
@@ -217,6 +255,8 @@ function AppPageInner() {
           <UserMenu
             nom={profile.nom}
             roleLabel={ROLE_LABELS[profile.role]}
+            showSubscription={profile.role === 'club'}
+            onSubscription={() => setTab('abonnement')}
             onExport={exportMyData}
             onDeleteRequest={() => setConfirmDeleteAccount(true)}
             onLogout={logout}
@@ -224,7 +264,7 @@ function AppPageInner() {
         </div>
       </nav>
 
-      <main style={{ maxWidth: 960, margin: '0 auto', padding: '44px 5vw 110px' }}>
+      <main key={tab} className="tv-fade-in" style={{ maxWidth: 960, margin: '0 auto', padding: '44px 5vw 110px' }}>
         {tab === 'joueur' && <PlayersTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
         {STAFF_ROLES.includes(tab) && <StaffTab role={tab} user={user} profile={profile} showToast={showToast} onContact={startConversation} />}

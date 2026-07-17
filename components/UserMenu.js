@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
-export default function UserMenu({ nom, roleLabel, onExport, onDeleteRequest, onLogout }) {
+export default function UserMenu({ nom, roleLabel, showSubscription, onSubscription, onExport, onDeleteRequest, onLogout }) {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef(null);
 
@@ -42,6 +42,17 @@ export default function UserMenu({ nom, roleLabel, onExport, onDeleteRequest, on
 
       {open && (
         <div style={{ position: 'absolute', top: 42, right: 0, width: 'min(220px, calc(100vw - 32px))', background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 12, boxShadow: '0 12px 32px rgba(0,0,0,0.45)', zIndex: 300, overflow: 'hidden' }}>
+          {showSubscription && (
+            <button
+              onClick={() => { setOpen(false); onSubscription(); }}
+              onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,255,63,0.06)'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+              style={{ ...menuItemStyle, borderBottom: '1px solid #2C4A3D' }}
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" /><line x1="1" y1="10" x2="23" y2="10" /></svg>
+              Abonnement
+            </button>
+          )}
           <button
             onClick={() => { setOpen(false); onExport(); }}
             onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,255,63,0.06)'}

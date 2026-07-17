@@ -26,6 +26,9 @@ export default function FeedTab({ user, profile, showToast }) {
   const [likesByPost, setLikesByPost] = useState({}); // { postId: { count, likedByMe } }
   const [loading, setLoading] = useState(true);
   const [composerText, setComposerText] = useState('');
+  const [mediaFile, setMediaFile] = useState(null);
+  const [mediaPreview, setMediaPreview] = useState(null);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [publishing, setPublishing] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
@@ -56,9 +59,28 @@ export default function FeedTab({ user, profile, showToast }) {
   useEffect(() => { load(); }, []);
 
   const publish = async () => {
-    if (!composerText.trim()) return;
+    if (!composerText.trim() && !mediaFile) return;
     setPublishing(true);
-    const { error } = await supabase.from('posts').insert({ author_id: user.id, content: composerText.trim() });
+
+    let media_url = null;
+    let media_type = null;
+    if (mediaFile) {
+      setUploadingMedia(true);
+      const ext = mediaFile.name.split('.').pop();
+      const path = `${user.id}/${Date.now()}.${ext}`;
+      const { error: uploadError } = await supabase.storage.from('posts').upload(path, mediaFile);
+      setUploadingMedia(false);
+      if (uploadError) {
+        showToast(`Erreur média : ${uploadError.message}`);
+        setPublishing(false);
+        return;
+      }
+      const { data: publicUrlData } = supabase.storage.from('posts').getPublicUrl(path);
+      media_url = publicUrlData.publicUrl;
+      media_type = mediaFile.type.startsWith('video') ? 'video' : 'image';
+    }
+
+    const { error } = await supabase.from('posts').insert({ author_id: user.id, content: composerText.trim(), media_url, media_type });
     setPublishing(false);
     if (error) {
       showToast(`Erreur : ${error.message}`);
@@ -66,7 +88,24 @@ export default function FeedTab({ user, profile, showToast }) {
       return;
     }
     setComposerText('');
+    setMediaFile(null);
+    setMediaPreview(null);
     load();
+  };
+
+  const onSelectMedia = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      showToast('Seules les images et vidéos sont acceptées.');
+      return;
+    }
+    if (file.size > 25 * 1024 * 1024) {
+      showToast('Fichier trop volumineux (25 Mo max).');
+      return;
+    }
+    setMediaFile(file);
+    setMediaPreview({ url: URL.createObjectURL(file), type: file.type.startsWith('video') ? 'video' : 'image' });
   };
 
   const toggleLike = async (postId) => {
@@ -112,13 +151,33 @@ export default function FeedTab({ user, profile, showToast }) {
               placeholder="Partage une actualité, un résultat, une info à ta communauté…"
               style={{ minHeight: 70 }}
             />
-            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 10 }}>
+            {mediaPreview && (
+              <div style={{ position: 'relative', marginTop: 10, display: 'inline-block' }}>
+                {mediaPreview.type === 'video' ? (
+                  <video src={mediaPreview.url} style={{ maxHeight: 160, borderRadius: 10 }} controls />
+                ) : (
+                  <img src={mediaPreview.url} alt="" style={{ maxHeight: 160, borderRadius: 10 }} />
+                )}
+                <button
+                  onClick={() => { setMediaFile(null); setMediaPreview(null); }}
+                  style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#0B1F1A', border: '1.5px solid #2C4A3D', color: '#F5F0E6', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#A4B0A6', cursor: 'pointer' }}>
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
+                Photo / vidéo
+                <input type="file" accept="image/*,video/*" onChange={onSelectMedia} style={{ display: 'none' }} />
+              </label>
               <button
                 onClick={publish}
-                disabled={!composerText.trim() || publishing}
-                style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 22px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', opacity: !composerText.trim() || publishing ? 0.5 : 1 }}
+                disabled={(!composerText.trim() && !mediaFile) || publishing}
+                style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 22px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', opacity: (!composerText.trim() && !mediaFile) || publishing ? 0.5 : 1 }}
               >
-                {publishing ? 'Publication…' : 'Publier'}
+                {uploadingMedia ? 'Envoi du média…' : publishing ? 'Publication…' : 'Publier'}
               </button>
             </div>
           </div>
@@ -154,7 +213,14 @@ export default function FeedTab({ user, profile, showToast }) {
                     </button>
                   )}
                 </div>
-                <div style={{ fontSize: 14.5, color: '#F5F0E6', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 12 }}>{post.content}</div>
+                {post.content && <div style={{ fontSize: 14.5, color: '#F5F0E6', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 12 }}>{post.content}</div>}
+                {post.media_url && (
+                  post.media_type === 'video' ? (
+                    <video src={post.media_url} controls style={{ width: '100%', borderRadius: 10, marginBottom: 12, maxHeight: 420 }} />
+                  ) : (
+                    <img src={post.media_url} alt="" style={{ width: '100%', borderRadius: 10, marginBottom: 12, maxHeight: 420, objectFit: 'cover' }} />
+                  )
+                )}
                 <button
                   onClick={() => toggleLike(post.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', cursor: 'pointer', color: likes.likedByMe ? '#D4FF3F' : '#8C9A8E', fontSize: 13, fontWeight: 600, padding: '4px 0' }}

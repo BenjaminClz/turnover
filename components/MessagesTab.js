@@ -140,6 +140,19 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     if (error) {
       setMsgInput(content);
       showToast(error.message?.includes('Trop de messages') ? error.message : "Erreur lors de l'envoi du message.");
+      return;
+    }
+    // Prévient le destinataire par une notification (visible via la cloche).
+    const conv = conversations.find((c) => c.id === activeConvId);
+    const recipient = conv?.participant_1 === user.id ? conv?.participant_2 : conv?.participant_1;
+    if (recipient) {
+      await supabase.from('notifications').insert({
+        user_id: recipient,
+        type: 'nouveau_message',
+        title: `Nouveau message de ${profile?.nom || ''}`,
+        body: content.length > 90 ? `${content.slice(0, 90)}…` : content,
+        link_tab: 'messages',
+      });
     }
   };
 

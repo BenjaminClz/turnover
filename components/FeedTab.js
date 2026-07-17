@@ -7,6 +7,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
+const MAX_FILES = 10;
 
 const timeAgo = (dateStr) => {
   const diffMs = Date.now() - new Date(dateStr).getTime();
@@ -20,16 +21,55 @@ const timeAgo = (dateStr) => {
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
 };
 
+function MediaCarousel({ media }) {
+  const [idx, setIdx] = useState(0);
+  if (!media || media.length === 0) return null;
+  const current = media[idx];
+
+  return (
+    <div style={{ position: 'relative', marginBottom: 12, borderRadius: 10, overflow: 'hidden', background: '#0B1F1A' }}>
+      {current.type === 'video' ? (
+        <video src={current.url} controls style={{ width: '100%', maxHeight: 420, display: 'block' }} />
+      ) : (
+        <img src={current.url} alt="" style={{ width: '100%', maxHeight: 420, objectFit: 'cover', display: 'block' }} />
+      )}
+      {media.length > 1 && (
+        <>
+          <button
+            onClick={() => setIdx((idx - 1 + media.length) % media.length)}
+            style={{ position: 'absolute', top: '50%', left: 8, transform: 'translateY(-50%)', width: 32, height: 32, borderRadius: '50%', background: 'rgba(11,31,26,0.75)', border: '1px solid rgba(255,255,255,0.2)', color: '#F5F0E6', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            ‹
+          </button>
+          <button
+            onClick={() => setIdx((idx + 1) % media.length)}
+            style={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', width: 32, height: 32, borderRadius: '50%', background: 'rgba(11,31,26,0.75)', border: '1px solid rgba(255,255,255,0.2)', color: '#F5F0E6', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+          >
+            ›
+          </button>
+          <div style={{ position: 'absolute', bottom: 10, left: '50%', transform: 'translateX(-50%)', display: 'flex', gap: 5 }}>
+            {media.map((_, i) => (
+              <span key={i} style={{ width: 6, height: 6, borderRadius: '50%', background: i === idx ? '#D4FF3F' : 'rgba(255,255,255,0.4)' }} />
+            ))}
+          </div>
+          <div style={{ position: 'absolute', top: 8, right: 8, background: 'rgba(11,31,26,0.75)', color: '#F5F0E6', fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 10 }}>
+            {idx + 1}/{media.length}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 export default function FeedTab({ user, profile, showToast }) {
   const supabase = createClient();
   const [posts, setPosts] = useState([]);
-  const [likesByPost, setLikesByPost] = useState({}); // { postId: { count, likedByMe } }
+  const [likesByPost, setLikesByPost] = useState({});
   const [loading, setLoading] = useState(true);
   const [composerText, setComposerText] = useState('');
-  const [mediaFile, setMediaFile] = useState(null);
-  const [mediaPreview, setMediaPreview] = useState(null);
-  const [uploadingMedia, setUploadingMedia] = useState(false);
+  const [mediaFiles, setMediaFiles] = useState([]); // [{ file, url, type }]
   const [publishing, setPublishing] = useState(false);
+  const [uploadingMedia, setUploadingMedia] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const load = async () => {
@@ -58,42 +98,65 @@ export default function FeedTab({ user, profile, showToast }) {
 
   useEffect(() => { load(); }, []);
 
+  const onSelectMedia = (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (files.length === 0) return;
+    if (mediaFiles.length + files.length > MAX_FILES) {
+      showToast(`Maximum ${MAX_FILES} fichiers par publication.`);
+      return;
+    }
+    const valid = [];
+    for (const file of files) {
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        showToast(`${file.name} : type non supporté.`);
+        continue;
+      }
+      if (file.size > 25 * 1024 * 1024) {
+        showToast(`${file.name} dépasse 25 Mo.`);
+        continue;
+      }
+      valid.push({ file, url: URL.createObjectURL(file), type: file.type.startsWith('video') ? 'video' : 'image' });
+    }
+    setMediaFiles((prev) => [...prev, ...valid]);
+  };
+
+  const removeMediaAt = (i) => setMediaFiles((prev) => prev.filter((_, idx) => idx !== i));
+
   const publish = async () => {
-    if (!composerText.trim() && !mediaFile) return;
+    if (!composerText.trim() && mediaFiles.length === 0) return;
     setPublishing(true);
 
-    let media_url = null;
-    let media_type = null;
-    if (mediaFile) {
+    const uploadedMedia = [];
+    if (mediaFiles.length > 0) {
       setUploadingMedia(true);
-      const isVideo = mediaFile.type.startsWith('video/');
-      media_type = isVideo ? 'video' : 'image';
-      const ext = mediaFile.name.split('.').pop();
-      const path = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+      for (const { file, type } of mediaFiles) {
+        const ext = file.name.split('.').pop();
+        const path = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
 
-      // On envoie dans le même bucket que la galerie de profil, pour que la photo
-      // publiée dans le fil apparaisse aussi automatiquement dans « Ma galerie ».
-      const { error: uploadError } = await supabase.storage.from('gallery').upload(path, mediaFile);
-      if (uploadError) {
-        setUploadingMedia(false);
-        showToast(`Erreur média : ${uploadError.message}`);
-        setPublishing(false);
-        return;
-      }
-      const { error: galleryError } = await supabase.from('gallery_items').insert({
-        owner_id: user.id, file_path: path, media_type,
-      });
-      if (galleryError) {
-        console.error('DEBUG ajout galerie :', galleryError);
-        // On continue quand même la publication même si l'ajout à la galerie échoue.
-      }
+        // Envoi dans le même bucket que la galerie de profil, pour que les photos
+        // publiées dans le fil apparaissent aussi automatiquement dans « Ma galerie ».
+        const { error: uploadError } = await supabase.storage.from('gallery').upload(path, file);
+        if (uploadError) {
+          showToast(`Erreur média (${file.name}) : ${uploadError.message}`);
+          continue;
+        }
+        const { error: galleryError } = await supabase.from('gallery_items').insert({
+          owner_id: user.id, file_path: path, media_type: type,
+        });
+        if (galleryError) console.error('DEBUG ajout galerie :', galleryError);
 
-      const { data: publicUrlData } = supabase.storage.from('gallery').getPublicUrl(path);
-      media_url = publicUrlData.publicUrl;
+        const { data: publicUrlData } = supabase.storage.from('gallery').getPublicUrl(path);
+        uploadedMedia.push({ url: publicUrlData.publicUrl, type });
+      }
       setUploadingMedia(false);
     }
 
-    const { error } = await supabase.from('posts').insert({ author_id: user.id, content: composerText.trim(), media_url, media_type });
+    const { error } = await supabase.from('posts').insert({
+      author_id: user.id,
+      content: composerText.trim(),
+      media: uploadedMedia,
+    });
     setPublishing(false);
     if (error) {
       showToast(`Erreur : ${error.message}`);
@@ -101,29 +164,12 @@ export default function FeedTab({ user, profile, showToast }) {
       return;
     }
     setComposerText('');
-    setMediaFile(null);
-    setMediaPreview(null);
+    setMediaFiles([]);
     load();
-  };
-
-  const onSelectMedia = (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-      showToast('Seules les images et vidéos sont acceptées.');
-      return;
-    }
-    if (file.size > 25 * 1024 * 1024) {
-      showToast('Fichier trop volumineux (25 Mo max).');
-      return;
-    }
-    setMediaFile(file);
-    setMediaPreview({ url: URL.createObjectURL(file), type: file.type.startsWith('video') ? 'video' : 'image' });
   };
 
   const toggleLike = async (postId) => {
     const current = likesByPost[postId] || { count: 0, likedByMe: false };
-    // Mise à jour optimiste, cohérente avec le reste du site (favoris).
     setLikesByPost((prev) => ({
       ...prev,
       [postId]: { count: current.count + (current.likedByMe ? -1 : 1), likedByMe: !current.likedByMe },
@@ -164,33 +210,37 @@ export default function FeedTab({ user, profile, showToast }) {
               placeholder="Partage une actualité, un résultat, une info à ta communauté…"
               style={{ minHeight: 70 }}
             />
-            {mediaPreview && (
-              <div style={{ position: 'relative', marginTop: 10, display: 'inline-block' }}>
-                {mediaPreview.type === 'video' ? (
-                  <video src={mediaPreview.url} style={{ maxHeight: 160, borderRadius: 10 }} controls />
-                ) : (
-                  <img src={mediaPreview.url} alt="" style={{ maxHeight: 160, borderRadius: 10 }} />
-                )}
-                <button
-                  onClick={() => { setMediaFile(null); setMediaPreview(null); }}
-                  style={{ position: 'absolute', top: -8, right: -8, width: 24, height: 24, borderRadius: '50%', background: '#0B1F1A', border: '1.5px solid #2C4A3D', color: '#F5F0E6', cursor: 'pointer', fontSize: 13, lineHeight: 1 }}
-                >
-                  ✕
-                </button>
+            {mediaFiles.length > 0 && (
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+                {mediaFiles.map((m, i) => (
+                  <div key={i} style={{ position: 'relative' }}>
+                    {m.type === 'video' ? (
+                      <video src={m.url} style={{ width: 76, height: 76, objectFit: 'cover', borderRadius: 8 }} />
+                    ) : (
+                      <img src={m.url} alt="" style={{ width: 76, height: 76, objectFit: 'cover', borderRadius: 8 }} />
+                    )}
+                    <button
+                      onClick={() => removeMediaAt(i)}
+                      style={{ position: 'absolute', top: -6, right: -6, width: 20, height: 20, borderRadius: '50%', background: '#0B1F1A', border: '1.5px solid #2C4A3D', color: '#F5F0E6', cursor: 'pointer', fontSize: 11, lineHeight: 1 }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
               </div>
             )}
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
               <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: '#A4B0A6', cursor: 'pointer' }}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
-                Photo / vidéo
-                <input type="file" accept="image/*,video/*" onChange={onSelectMedia} style={{ display: 'none' }} />
+                Photos / vidéos
+                <input type="file" accept="image/*,video/*" multiple onChange={onSelectMedia} style={{ display: 'none' }} />
               </label>
               <button
                 onClick={publish}
-                disabled={(!composerText.trim() && !mediaFile) || publishing}
-                style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 22px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', opacity: (!composerText.trim() && !mediaFile) || publishing ? 0.5 : 1 }}
+                disabled={(!composerText.trim() && mediaFiles.length === 0) || publishing}
+                style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 22px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', opacity: (!composerText.trim() && mediaFiles.length === 0) || publishing ? 0.5 : 1 }}
               >
-                {uploadingMedia ? 'Envoi du média…' : publishing ? 'Publication…' : 'Publier'}
+                {uploadingMedia ? 'Envoi des médias…' : publishing ? 'Publication…' : 'Publier'}
               </button>
             </div>
           </div>
@@ -206,6 +256,7 @@ export default function FeedTab({ user, profile, showToast }) {
           {posts.map((post) => {
             const likes = likesByPost[post.id] || { count: 0, likedByMe: false };
             const url = post.profiles?.avatar_path ? avatarUrl(supabase, post.profiles.avatar_path) : null;
+            const mediaList = post.media?.length > 0 ? post.media : (post.media_url ? [{ url: post.media_url, type: post.media_type }] : []);
             return (
               <div key={post.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 18 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
@@ -227,13 +278,7 @@ export default function FeedTab({ user, profile, showToast }) {
                   )}
                 </div>
                 {post.content && <div style={{ fontSize: 14.5, color: '#F5F0E6', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 12 }}>{post.content}</div>}
-                {post.media_url && (
-                  post.media_type === 'video' ? (
-                    <video src={post.media_url} controls style={{ width: '100%', borderRadius: 10, marginBottom: 12, maxHeight: 420 }} />
-                  ) : (
-                    <img src={post.media_url} alt="" style={{ width: '100%', borderRadius: 10, marginBottom: 12, maxHeight: 420, objectFit: 'cover' }} />
-                  )
-                )}
+                <MediaCarousel media={mediaList} />
                 <button
                   onClick={() => toggleLike(post.id)}
                   style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', cursor: 'pointer', color: likes.likedByMe ? '#D4FF3F' : '#8C9A8E', fontSize: 13, fontWeight: 600, padding: '4px 0' }}

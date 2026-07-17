@@ -17,7 +17,11 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
   const [msgInput, setMsgInput] = useState('');
   const [loading, setLoading] = useState(true);
   const [unlocking, setUnlocking] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
   const bottomRef = useRef(null);
+  const channelRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+  const lastTypingSentRef = useRef(0);
 
   const loadConversations = async () => {
     setLoading(true);
@@ -98,6 +102,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
         .is('read_at', null);
     })();
 
+    setOtherTyping(false);
     const channel = supabase
       .channel(`messages:${activeConvId}`)
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConvId}` }, async (payload) => {
@@ -109,9 +114,16 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
       .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'messages', filter: `conversation_id=eq.${activeConvId}` }, (payload) => {
         setMessages((prev) => prev.map((m) => (m.id === payload.new.id ? payload.new : m)));
       })
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload.userId === user.id) return; // ignore ses propres notifications de saisie
+        setOtherTyping(true);
+        clearTimeout(typingTimeoutRef.current);
+        typingTimeoutRef.current = setTimeout(() => setOtherTyping(false), 3000);
+      })
       .subscribe();
+    channelRef.current = channel;
 
-    return () => { isMounted = false; supabase.removeChannel(channel); };
+    return () => { isMounted = false; clearTimeout(typingTimeoutRef.current); supabase.removeChannel(channel); channelRef.current = null; };
   }, [activeConvId, conversations]);
 
   useEffect(() => {
@@ -227,8 +239,25 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                   ))}
                   <div ref={bottomRef} />
                 </div>
+                {otherTyping && (
+                  <div style={{ padding: '4px 16px', fontSize: 12.5, color: '#8C9A8E', fontStyle: 'italic' }}>
+                    {otherOf(activeConv)?.nom} est en train d'écrire…
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: 10, padding: 16, borderTop: '1px solid #274238' }}>
-                  <TextInput value={msgInput} onChange={(e) => setMsgInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }} placeholder="Écris un message…" />
+                  <TextInput
+                    value={msgInput}
+                    onChange={(e) => {
+                      setMsgInput(e.target.value);
+                      const now = Date.now();
+                      if (now - lastTypingSentRef.current > 2000) {
+                        lastTypingSentRef.current = now;
+                        channelRef.current?.send({ type: 'broadcast', event: 'typing', payload: { userId: user.id } });
+                      }
+                    }}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }}
+                    placeholder="Écris un message…"
+                  />
                   <button className="tv-btn" onClick={sendMessage} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '0 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>Envoyer</button>
                 </div>
               </>

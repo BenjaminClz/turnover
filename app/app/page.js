@@ -15,6 +15,7 @@ import GalleryTab from '@/components/GalleryTab';
 import SubscriptionTab from '@/components/SubscriptionTab';
 import AdminTab from '@/components/AdminTab';
 import FavoritesTab from '@/components/FavoritesTab';
+import FeedTab from '@/components/FeedTab';
 import NotificationsBell from '@/components/NotificationsBell';
 import UserMenu from '@/components/UserMenu';
 import ConfirmDialog from '@/components/ConfirmDialog';
@@ -31,7 +32,7 @@ const TAB_TITLES = {
   joueur: 'Mon profil', club: 'Mon espace', sante: 'Mon profil', preparateur: 'Mon profil',
   entraineur: 'Mon profil', arbitre: 'Mon profil', benevole: 'Mon profil',
   recherche: 'Rechercher', messages: 'Messages', favoris: 'Favoris', abonnement: 'Abonnement',
-  admin: 'Admin', galerie: 'Galerie',
+  actualites: 'Actualités', admin: 'Admin', galerie: 'Galerie',
 };
 
 export default function AppPage() {
@@ -209,6 +210,7 @@ function AppPageInner() {
   const tabs = profile.role === 'club'
     ? [
         { key: 'club', label: 'Mon espace' },
+        { key: 'actualites', label: 'Actualités' },
         { key: 'recherche', label: 'Rechercher' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
         { key: 'favoris', label: 'Favoris' },
@@ -216,6 +218,7 @@ function AppPageInner() {
       ]
     : [
         { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil' },
+        { key: 'actualites', label: 'Actualités' },
         { key: 'recherche', label: 'Rechercher' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
         { key: 'favoris', label: 'Favoris' },
@@ -268,6 +271,7 @@ function AppPageInner() {
         {tab === 'joueur' && <PlayersTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
         {STAFF_ROLES.includes(tab) && <StaffTab role={tab} user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
+        {tab === 'actualites' && <FeedTab user={user} profile={profile} showToast={showToast} />}
         {tab === 'recherche' && <SearchTab user={user} viewerRole={profile.role} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'messages' && <MessagesTab user={user} profile={profile} setUnreadCount={setUnreadCount} pendingConvTarget={pendingConvTarget} clearPendingConvTarget={() => setPendingConvTarget(null)} showToast={showToast} />}
         {tab === 'abonnement' && <SubscriptionTab user={user} showToast={showToast} />}

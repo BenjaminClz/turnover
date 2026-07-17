@@ -139,6 +139,13 @@ export default function PlayersTab({ user, profile, showToast }) {
 
   const handleSaveDetails = async (e) => {
     e.preventDefault();
+    if (detailsForm.date_naissance) {
+      const age = calculAge(detailsForm.date_naissance);
+      if (age != null && age < 18) {
+        showToast('Turnover est réservé aux personnes de 18 ans et plus.');
+        return;
+      }
+    }
     const payload = {
       date_naissance: detailsForm.date_naissance || null,
       taille_cm: detailsForm.taille_cm ? parseInt(detailsForm.taille_cm) : null,
@@ -312,7 +319,7 @@ export default function PlayersTab({ user, profile, showToast }) {
               <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 20 }}>Date de naissance, taille et poids comptent pour ta progression vers les 80%. Le reste est facultatif.</p>
               <form onSubmit={handleSaveDetails}>
                 <div className="tv-grid-2" style={{ gap: 18 }}>
-                  <Field label="Date de naissance"><TextInput type="date" value={detailsForm.date_naissance} onChange={(e) => setDetailsForm({ ...detailsForm, date_naissance: e.target.value })} /></Field>
+                  <Field label="Date de naissance" hint="Turnover est réservé aux 18 ans et plus."><TextInput type="date" value={detailsForm.date_naissance} onChange={(e) => setDetailsForm({ ...detailsForm, date_naissance: e.target.value })} /></Field>
                   <Field label="Taille (cm)"><TextInput type="number" value={detailsForm.taille_cm} onChange={(e) => setDetailsForm({ ...detailsForm, taille_cm: e.target.value })} placeholder="180" /></Field>
                   <Field label="Poids (kg)"><TextInput type="number" value={detailsForm.poids_kg} onChange={(e) => setDetailsForm({ ...detailsForm, poids_kg: e.target.value })} placeholder="85" /></Field>
                 </div>

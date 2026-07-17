@@ -229,9 +229,9 @@ function AppPageInner() {
   return (
     <div style={{ minHeight: '100vh', color: '#F5F0E6' }}>
       <nav className="tv-navbar" style={{ position: 'sticky', top: 0, zIndex: 50, padding: '18px 5vw', background: 'rgba(11,31,26,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1.5px solid #2C4A3D' }}>
-        <button onClick={() => setTab('actualites')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+        <button onClick={() => setTab('actualites')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: '#F5F0E6' }}>
           <img src="/logo.png" alt="Turnover" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 6 }} />
-          <span className="turnover-anton" style={{ fontSize: 30 }}>TURNOVER</span>
+          <span className="turnover-anton" style={{ fontSize: 30, color: '#F5F0E6' }}>TURNOVER</span>
         </button>
         <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 4, background: '#152E26', padding: 5, borderRadius: 12, border: '1.5px solid #2C4A3D' }}>
           {tabs.map((t) => (

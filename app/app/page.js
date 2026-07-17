@@ -209,16 +209,16 @@ function AppPageInner() {
   // Messages (consulté au quotidien) passe avant Favoris (consulté occasionnellement).
   const tabs = profile.role === 'club'
     ? [
-        { key: 'club', label: 'Mon espace' },
         { key: 'actualites', label: 'Actualités' },
+        { key: 'club', label: 'Mon espace' },
         { key: 'recherche', label: 'Rechercher' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
         { key: 'favoris', label: 'Favoris' },
         ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ]
     : [
-        { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil' },
         { key: 'actualites', label: 'Actualités' },
+        { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil' },
         { key: 'recherche', label: 'Rechercher' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
         { key: 'favoris', label: 'Favoris' },

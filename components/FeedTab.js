@@ -60,7 +60,11 @@ export default function FeedTab({ user, profile, showToast }) {
     setPublishing(true);
     const { error } = await supabase.from('posts').insert({ author_id: user.id, content: composerText.trim() });
     setPublishing(false);
-    if (error) { showToast('Erreur lors de la publication.'); return; }
+    if (error) {
+      showToast(`Erreur : ${error.message}`);
+      console.error('DEBUG publication :', error);
+      return;
+    }
     setComposerText('');
     load();
   };

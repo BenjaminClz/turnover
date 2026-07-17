@@ -66,18 +66,31 @@ export default function FeedTab({ user, profile, showToast }) {
     let media_type = null;
     if (mediaFile) {
       setUploadingMedia(true);
+      const isVideo = mediaFile.type.startsWith('video/');
+      media_type = isVideo ? 'video' : 'image';
       const ext = mediaFile.name.split('.').pop();
-      const path = `${user.id}/${Date.now()}.${ext}`;
-      const { error: uploadError } = await supabase.storage.from('posts').upload(path, mediaFile);
-      setUploadingMedia(false);
+      const path = `${user.id}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+      // On envoie dans le même bucket que la galerie de profil, pour que la photo
+      // publiée dans le fil apparaisse aussi automatiquement dans « Ma galerie ».
+      const { error: uploadError } = await supabase.storage.from('gallery').upload(path, mediaFile);
       if (uploadError) {
+        setUploadingMedia(false);
         showToast(`Erreur média : ${uploadError.message}`);
         setPublishing(false);
         return;
       }
-      const { data: publicUrlData } = supabase.storage.from('posts').getPublicUrl(path);
+      const { error: galleryError } = await supabase.from('gallery_items').insert({
+        owner_id: user.id, file_path: path, media_type,
+      });
+      if (galleryError) {
+        console.error('DEBUG ajout galerie :', galleryError);
+        // On continue quand même la publication même si l'ajout à la galerie échoue.
+      }
+
+      const { data: publicUrlData } = supabase.storage.from('gallery').getPublicUrl(path);
       media_url = publicUrlData.publicUrl;
-      media_type = mediaFile.type.startsWith('video') ? 'video' : 'image';
+      setUploadingMedia(false);
     }
 
     const { error } = await supabase.from('posts').insert({ author_id: user.id, content: composerText.trim(), media_url, media_type });

@@ -287,7 +287,11 @@ export default function PlayersTab({ user, profile, showToast }) {
                 <PrimaryButton onClick={handlePublish} disabled={publishing} style={{ width: 'auto' }}>
                   {publishing ? 'Publication…' : 'Publier mon profil'}
                 </PrimaryButton>
-              ) : null}
+              ) : (
+                <PrimaryButton onClick={() => setEditingDetails(true)} style={{ width: 'auto' }}>
+                  Compléter mon profil ({completion}%)
+                </PrimaryButton>
+              )}
             </div>
             <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
               <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />

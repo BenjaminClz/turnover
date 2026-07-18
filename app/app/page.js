@@ -234,24 +234,32 @@ function AppPageInner() {
           <span className="turnover-anton" style={{ fontSize: 30, color: '#F5F0E6' }}>TURNOVER</span>
         </button>
         <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 4, background: '#152E26', padding: 5, borderRadius: 12, border: '1.5px solid #2C4A3D' }}>
-          {tabs.map((t) => (
-            <button
-              key={t.key}
-              className="tv-tab-btn"
-              onClick={() => {
-                if (t.key === 'messages' && profile.role === 'joueur' && !isProfileComplete(myPlayerListing)) {
-                  showToast('Complète ton profil pour débloquer la messagerie.');
-                  setTab('joueur');
-                  return;
-                }
-                if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
-                setTab(t.key);
-              }}
-              style={{ padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0 }}
-            >
-              {t.label}
-            </button>
-          ))}
+          {tabs.map((t) => {
+            // Le joueur a créé son profil mais ne l'a pas encore publié (ou pas complété à 80%) :
+            // un point visible sur l'onglet le rappelle, où qu'il soit dans l'app.
+            const needsAttention = t.key === 'joueur' && myPlayerListing && myPlayerListing.published !== true;
+            return (
+              <button
+                key={t.key}
+                className="tv-tab-btn"
+                onClick={() => {
+                  if (t.key === 'messages' && profile.role === 'joueur' && !isProfileComplete(myPlayerListing)) {
+                    showToast('Complète ton profil pour débloquer la messagerie.');
+                    setTab('joueur');
+                    return;
+                  }
+                  if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
+                  setTab(t.key);
+                }}
+                style={{ position: 'relative', padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0 }}
+              >
+                {t.label}
+                {needsAttention && (
+                  <span style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: '#FF6B6B', border: '1.5px solid #0B1F1A' }} />
+                )}
+              </button>
+            );
+          })}
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <NotificationsBell user={user} onNavigate={(t) => setTab(t)} />
@@ -268,6 +276,14 @@ function AppPageInner() {
       </nav>
 
       <main key={tab} className="tv-fade-in" style={{ maxWidth: 960, margin: '0 auto', padding: '44px 5vw 110px' }}>
+        {profile.role === 'joueur' && myPlayerListing && myPlayerListing.published !== true && tab !== 'joueur' && (
+          <div style={{ background: 'rgba(255,107,107,0.08)', border: '1.5px solid #FF6B6B', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+            <span style={{ fontSize: 14 }}>Ton profil n'est pas encore publié — les clubs ne peuvent pas te trouver pour l'instant.</span>
+            <button onClick={() => setTab('joueur')} style={{ background: '#FF6B6B', color: '#0B1F1A', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', flexShrink: 0 }}>
+              Finaliser mon profil
+            </button>
+          </div>
+        )}
         {tab === 'joueur' && <PlayersTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
         {STAFF_ROLES.includes(tab) && <StaffTab role={tab} user={user} profile={profile} showToast={showToast} onContact={startConversation} />}

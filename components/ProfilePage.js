@@ -79,6 +79,28 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
   const [isFollowing, setIsFollowing] = useState(false);
+  const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
+  const [loadingFollowList, setLoadingFollowList] = useState(false);
+
+  const openFollowList = async (type) => {
+    setLoadingFollowList(true);
+    setFollowList({ type, users: [] });
+    let ids = [];
+    if (type === 'followers') {
+      const { data } = await supabase.from('follows').select('follower_id').eq('following_id', targetUserId);
+      ids = (data || []).map((f) => f.follower_id);
+    } else {
+      const { data } = await supabase.from('follows').select('following_id').eq('follower_id', targetUserId);
+      ids = (data || []).map((f) => f.following_id);
+    }
+    if (ids.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, nom, avatar_path, role').in('id', ids);
+      setFollowList({ type, users: profiles || [] });
+    } else {
+      setFollowList({ type, users: [] });
+    }
+    setLoadingFollowList(false);
+  };
 
   useEffect(() => {
     if (!targetUserId) return;
@@ -174,8 +196,8 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         )}
         <div style={{ display: 'flex', gap: 24, flex: 1 }}>
           <StatBlock value={galleryItems.length} label="Photos" />
-          <StatBlock value={followersCount} label="Abonnés" />
-          <StatBlock value={followingCount} label="Abonnements" />
+          <StatBlock value={followersCount} label="Abonnés" onClick={() => openFollowList('followers')} />
+          <StatBlock value={followingCount} label="Abonnements" onClick={() => openFollowList('following')} />
           {profile.role === 'joueur' && <StatBlock value={recommendations.length} label="Recos" />}
         </div>
       </div>
@@ -341,16 +363,65 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
           )}
         </div>
       )}
+
+      {/* Modale liste abonnés / abonnements */}
+      {followList && (
+        <div
+          onClick={() => setFollowList(null)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 20 }}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, maxWidth: 400, width: '100%', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid #2C4A3D' }}>
+              <div style={{ fontWeight: 700, fontSize: 16 }}>{followList.type === 'followers' ? 'Abonnés' : 'Abonnements'}</div>
+              <button onClick={() => setFollowList(null)} style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ overflowY: 'auto', flex: 1 }}>
+              {loadingFollowList ? (
+                <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E' }}>Chargement…</div>
+              ) : followList.users.length === 0 ? (
+                <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E', fontSize: 14 }}>
+                  {followList.type === 'followers' ? 'Aucun abonné pour le moment.' : 'Ne suit personne pour le moment.'}
+                </div>
+              ) : (
+                followList.users.map((u) => {
+                  const avatarSrc = u.avatar_path ? avatarUrl(supabase, u.avatar_path) : null;
+                  return (
+                    <button
+                      key={u.id}
+                      onClick={() => { setFollowList(null); onBack(); setTimeout(() => { window.location.href = `/app?tab=profil&uid=${u.id}`; }, 50); }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '14px 20px', background: 'transparent', border: 'none', borderBottom: '1px solid #1c332a', cursor: 'pointer', textAlign: 'left' }}
+                    >
+                      {avatarSrc ? (
+                        <img src={avatarSrc} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 14, flexShrink: 0 }}>
+                          {initials(u.nom)}
+                        </div>
+                      )}
+                      <div>
+                        <div style={{ fontWeight: 700, fontSize: 14, color: '#F5F0E6' }}>{u.nom}</div>
+                        <div style={{ fontSize: 12, color: '#8C9A8E' }}>{ROLE_LABELS[u.role] || u.role}</div>
+                      </div>
+                    </button>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
 
-function StatBlock({ value, label }) {
+function StatBlock({ value, label, onClick }) {
+  const style = { textAlign: 'center' };
+  if (onClick) style.cursor = 'pointer';
   return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 19, fontWeight: 800 }}>{value}</div>
+    <button onClick={onClick} style={{ ...style, background: 'transparent', border: 'none', padding: 0, color: 'inherit' }}>
+      <div style={{ fontSize: 19, fontWeight: 800, color: '#F5F0E6' }}>{value}</div>
       <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
-    </div>
+    </button>
   );
 }
 

@@ -46,7 +46,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [staff, setStaff] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  const [searchCategory, setSearchCategory] = useState(isClub ? 'Tous' : 'club'); // Tous | Joueurs | Clubs | un rôle staff
+  const [searchCategory, setSearchCategory] = useState(isClub ? 'Tous' : 'club');
   const [searchSport, setSearchSport] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-sport')) || 'Tous');
   const [searchNiveau, setSearchNiveau] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-niveau')) || 'Tous');
   const [searchName, setSearchName] = useState('');
@@ -83,6 +83,14 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
         const withFeatured = (n || []).map((x) => ({ ...x, _featured: activeOwners.has(x.owner_id) }));
         withFeatured.sort((a, b) => (b._featured ? 1 : 0) - (a._featured ? 1 : 0));
         setNeeds(withFeatured);
+
+        // Un joueur/staff peut aussi voir les autres profils.
+        const [{ data: p }, { data: s }] = await Promise.all([
+          supabase.from('player_listings').select('*, profiles(nom, avatar_path, last_seen_at)').eq('published', true).order('created_at', { ascending: false }),
+          supabase.from('staff_listings').select('*, profiles(nom, avatar_path)').order('created_at', { ascending: false }),
+        ]);
+        setPlayers(p || []);
+        setStaff(s || []);
       }
       setLoading(false);
     })();
@@ -139,7 +147,9 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const showPlayers = searchCategory === 'Tous' || searchCategory === 'joueur';
   const showStaffRoles = searchCategory === 'Tous' ? STAFF_ROLES : (STAFF_ROLES.includes(searchCategory) ? [searchCategory] : []);
 
-  // Marqueurs de la carte : uniquement les catégories actuellement affichées, avec des couleurs distinctes par type.
+  // On affiche les résultats uniquement si l'utilisateur a renseigné au moins un critère.
+  const hasActiveFilter = originCoords || searchSport !== 'Tous' || searchNiveau !== 'Tous' || searchName.trim() !== '' || searchUrgence !== 'Tous' || playerDispoFilter !== 'Tous';
+
   const mapMarkers = [
     ...(showNeeds ? filteredNeeds.map((n) => ({ lat: n.latitude, lng: n.longitude, title: `${n.club} · ${needDetails(n)}`, color: '#D4FF3F', kind: 'need', data: n })) : []),
     ...(showPlayers ? filteredPlayers.map((p) => ({ lat: p.latitude, lng: p.longitude, title: `${p.profiles?.nom} · ${p.poste}`, color: '#7FD1FF', kind: 'player', data: p })) : []),
@@ -147,15 +157,13 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   ];
 
   const handleMarkerClick = (marker) => {
-    if (marker.kind === 'need') onOpenProfile(marker.data.owner_id);
-    else if (marker.kind === 'player') onOpenProfile(marker.data.owner_id);
-    else if (marker.kind === 'staff') onOpenProfile(marker.data.owner_id);
+    onOpenProfile(marker.data.owner_id);
   };
 
   return (
     <div>
       <PageTitle>Rechercher</PageTitle>
-      <PageSubtitle>{isClub ? 'Trouve les profils les plus proches de toi, partout en France.' : 'Trouve les clubs les plus proches de toi, partout en France.'}</PageSubtitle>
+      <PageSubtitle>{isClub ? 'Trouve les profils les plus proches de toi, partout en France.' : 'Trouve les clubs et profils les plus proches de toi, partout en France.'}</PageSubtitle>
 
       <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'end', marginBottom: 18 }}>
@@ -167,22 +175,19 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           </button>
         </div>
 
-        <div className="tv-grid-2" style={{ gridTemplateColumns: isClub ? undefined : '1fr', gap: 14, marginBottom: 18 }}>
-          {isClub && (
-            <Field label="Catégorie">
-              <Select value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} options={[
-                { value: 'Tous', label: 'Toutes les catégories' },
-                { value: 'joueur', label: 'Joueurs' },
-                ...STAFF_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] })),
-              ]} />
-            </Field>
-          )}
+        <div className="tv-grid-2" style={{ gap: 14, marginBottom: 18 }}>
+          <Field label="Catégorie">
+            <Select value={searchCategory} onChange={(e) => setSearchCategory(e.target.value)} options={
+              isClub
+                ? [{ value: 'Tous', label: 'Toutes les catégories' }, { value: 'joueur', label: 'Joueurs' }, ...STAFF_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))]
+                : [{ value: 'club', label: 'Clubs' }, { value: 'joueur', label: 'Joueurs' }, ...STAFF_ROLES.map((r) => ({ value: r, label: ROLE_LABELS[r] }))]
+            } />
+          </Field>
           <Field label="Sport"><Select value={searchSport} onChange={(e) => setSearchSport(e.target.value)} options={['Tous', ...SPORTS]} /></Field>
         </div>
         <div className="tv-grid-2" style={{ gap: 14, marginBottom: 18 }}>
           <Field label="Niveau"><Select value={searchNiveau} onChange={(e) => setSearchNiveau(e.target.value)} options={['Tous', ...NIVEAUX]} /></Field>
           <Field label="Nom / prénom"><TextInput value={searchName} onChange={(e) => setSearchName(e.target.value)} placeholder="Rechercher par nom…" /></Field>
-          <Field label="Urgence"><Select value={searchUrgence} onChange={(e) => setSearchUrgence(e.target.value)} options={['Tous', ...URGENCES]} /></Field>
         </div>
 
         {originCoords && (
@@ -202,21 +207,13 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
       {loading ? (
         <SkeletonList count={4} />
+      ) : !hasActiveFilter ? (
+        <EmptyState icon="🔍" title="Lance ta recherche" sub="Renseigne une ville, un sport, un niveau ou un nom pour voir les profils correspondants." />
       ) : (
         <>
           <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-            <button
-              onClick={() => setViewMode('liste')}
-              style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'liste' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'liste' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'liste' ? '#D4FF3F' : '#A4B0A6' }}
-            >
-              📋 Liste
-            </button>
-            <button
-              onClick={() => setViewMode('carte')}
-              style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'carte' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'carte' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'carte' ? '#D4FF3F' : '#A4B0A6' }}
-            >
-              🗺️ Carte
-            </button>
+            <button onClick={() => setViewMode('liste')} style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'liste' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'liste' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'liste' ? '#D4FF3F' : '#A4B0A6' }}>📋 Liste</button>
+            <button onClick={() => setViewMode('carte')} style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'carte' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'carte' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'carte' ? '#D4FF3F' : '#A4B0A6' }}>🗺️ Carte</button>
           </div>
 
           {viewMode === 'carte' ? (
@@ -229,105 +226,48 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
               </div>
             </div>
           ) : (
-        <div style={{ display: 'grid', gap: 32 }}>
-          {showNeeds && (
-            <div>
-              <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Besoins clubs ({filteredNeeds.length})</h2>
-              {filteredNeeds.length === 0 ? <EmptyState icon="📋" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                <div style={CARD_GRID}>
-                  {filteredNeeds.map((n) => (
-                    <ResultCard
-                      key={n.id}
-                      title={n.club}
-                      verified={n.profiles?.verified}
-                      details={`${needDetails(n)} · ${n.ville}`}
-                      distance={n._distance}
-                      showContact={n.owner_id !== user.id}
-                      onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)}
-                      onClickProfile={() => onOpenProfile(n.owner_id)}
-                      avatarPath={n.profiles?.avatar_path}
-                      supabase={supabase}
-                      featured={n._featured}
-                      extra={
-                        <>
-                          <button className="tv-btn" onClick={() => onOpenProfile(n.owner_id)} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
-                          <GhostButton onClick={() => onViewGallery(n.owner_id, n.club)} style={{ flex: 1, fontSize: 12, textAlign: 'center' }}>Galerie</GhostButton>
-                        </>
-                      }
-                      reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }}
-                      favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {showPlayers && (
-            <div>
-              <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Profils joueurs ({filteredPlayers.length})</h2>
-              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 18 }}>
-                {['Tous', ...URGENCES].map((option) => (
-                  <button
-                    key={option}
-                    onClick={() => setPlayerDispoFilter(option)}
-                    className="tv-btn"
-                    style={{
-                      padding: '8px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer',
-                      border: '1.5px solid ' + (playerDispoFilter === option ? '#D4FF3F' : '#2C4A3D'),
-                      background: playerDispoFilter === option ? 'rgba(212,255,63,0.12)' : 'transparent',
-                      color: playerDispoFilter === option ? '#D4FF3F' : '#A4B0A6',
-                    }}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-              {filteredPlayers.length === 0 ? <EmptyState icon="👤" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
-                <div style={CARD_GRID}>
-                  {filteredPlayers.map((p) => (
-                    <ResultCard
-                      key={p.id}
-                      title={p.profiles?.nom}
-                      details={`${p.poste} · ${p.niveau} · ${p.ville}`}
-                      distance={p._distance}
-                      showContact={p.owner_id !== user.id}
-                      onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)}
-                      onClickProfile={() => onOpenProfile(p.owner_id)}
-                      avatarPath={p.profiles?.avatar_path}
-                      supabase={supabase}
-                      extra={
-                        <>
-                          <button className="tv-btn" onClick={() => onOpenProfile(p.owner_id)} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
-                          <GhostButton onClick={() => onViewGallery(p.owner_id, p.profiles?.nom)} style={{ flex: 1, fontSize: 12, textAlign: 'center' }}>Galerie</GhostButton>
-                        </>
-                      }
-                      reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }}
-                      favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }}
-                    />
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
-
-          {showStaffRoles.map((role) => {
-            const list = filteredStaff.filter((s) => s.role === role);
-            if (searchCategory === 'Tous' && list.length === 0) return null;
-            return (
-              <div key={role}>
-                <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>{ROLE_LABELS[role]} ({list.length})</h2>
-                {list.length === 0 ? <EmptyState icon="🧑‍⚕️" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
+            <div style={{ display: 'grid', gap: 32 }}>
+              {showNeeds && filteredNeeds.length > 0 && (
+                <div>
+                  <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Besoins clubs ({filteredNeeds.length})</h2>
                   <div style={CARD_GRID}>
-                    {list.map((s) => (
-                      <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} onClickProfile={() => onOpenProfile(s.owner_id)} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
+                    {filteredNeeds.map((n) => (
+                      <ResultCard key={n.id} title={n.club} verified={n.profiles?.verified} details={`${needDetails(n)} · ${n.ville}`} distance={n._distance} showContact={n.owner_id !== user.id} onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)} onClickProfile={() => onOpenProfile(n.owner_id)} avatarPath={n.profiles?.avatar_path} supabase={supabase} featured={n._featured} reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }} />
                     ))}
                   </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                </div>
+              )}
+
+              {showPlayers && filteredPlayers.length > 0 && (
+                <div>
+                  <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Joueurs ({filteredPlayers.length})</h2>
+                  <div style={CARD_GRID}>
+                    {filteredPlayers.map((p) => (
+                      <ResultCard key={p.id} title={p.profiles?.nom} details={`${p.poste} · ${p.niveau} · ${p.ville}`} distance={p._distance} showContact={p.owner_id !== user.id} onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)} onClickProfile={() => onOpenProfile(p.owner_id)} avatarPath={p.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }} />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {showStaffRoles.map((role) => {
+                const list = filteredStaff.filter((s) => s.role === role);
+                if (list.length === 0) return null;
+                return (
+                  <div key={role}>
+                    <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>{ROLE_LABELS[role]} ({list.length})</h2>
+                    <div style={CARD_GRID}>
+                      {list.map((s) => (
+                        <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} onClickProfile={() => onOpenProfile(s.owner_id)} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
+                      ))}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {filteredNeeds.length === 0 && filteredPlayers.length === 0 && filteredStaff.length === 0 && (
+                <EmptyState icon="🔍" title="Aucun résultat" sub="Essaie d'élargir tes critères de recherche." />
+              )}
+            </div>
           )}
         </>
       )}
@@ -337,7 +277,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
-function ResultCard({ title, verified, details, distance, showContact, onContact, onClickProfile, extra, avatarPath, supabase, featured, reportProps, favoriteProps }) {
+function ResultCard({ title, verified, details, distance, showContact, onContact, onClickProfile, avatarPath, supabase, featured, reportProps, favoriteProps }) {
   const url = avatarPath ? avatarUrl(supabase, avatarPath) : null;
   return (
     <div className="tv-card" style={{ position: 'relative', background: featured ? 'rgba(212,255,63,0.05)' : '#152E26', border: featured ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D', borderRadius: 14, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
@@ -345,7 +285,6 @@ function ResultCard({ title, verified, details, distance, showContact, onContact
         {favoriteProps && <FavoriteButton {...favoriteProps} />}
         {reportProps && <ReportButton {...reportProps} />}
       </div>
-
       {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 9.5, fontWeight: 800, color: '#0B1F1A', background: '#D4FF3F', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
 
       <button onClick={onClickProfile} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
@@ -365,10 +304,6 @@ function ResultCard({ title, verified, details, distance, showContact, onContact
       </button>
       <div style={{ fontSize: 12.5, color: '#A4B0A6', lineHeight: 1.4, marginBottom: distance != null ? 2 : 14 }}>{details}</div>
       {distance != null && <div style={{ fontSize: 11.5, color: '#D4FF3F', marginBottom: 14 }}>{distance.toFixed(0)} km</div>}
-
-      <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-        {extra}
-      </div>
       {showContact && (
         <button className="tv-btn" onClick={onContact} style={{ width: '100%', marginTop: 8, background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 0', borderRadius: 7, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
           Contacter

@@ -11,6 +11,7 @@ import ClubProfileModal from '@/components/ClubProfileModal';
 import ReportButton from '@/components/ReportButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import { SkeletonList } from '@/components/Skeleton';
+import SearchMap from '@/components/SearchMap';
 
 const RAYONS = [10, 25, 50, 100, 'Toute la France'];
 const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
@@ -58,6 +59,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [geocodingOrigin, setGeocodingOrigin] = useState(false);
   const [viewingPlayer, setViewingPlayer] = useState(null);
   const [viewingClub, setViewingClub] = useState(null);
+  const [viewMode, setViewMode] = useState('liste');
 
   useEffect(() => {
     (async () => {
@@ -132,6 +134,18 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const showPlayers = searchCategory === 'Tous' || searchCategory === 'joueur';
   const showStaffRoles = searchCategory === 'Tous' ? STAFF_ROLES : (STAFF_ROLES.includes(searchCategory) ? [searchCategory] : []);
 
+  // Marqueurs de la carte : uniquement les catégories actuellement affichées, avec des couleurs distinctes par type.
+  const mapMarkers = [
+    ...(showNeeds ? filteredNeeds.map((n) => ({ lat: n.latitude, lng: n.longitude, title: `${n.club} · ${needDetails(n)}`, color: '#D4FF3F', kind: 'need', data: n })) : []),
+    ...(showPlayers ? filteredPlayers.map((p) => ({ lat: p.latitude, lng: p.longitude, title: `${p.profiles?.nom} · ${p.poste}`, color: '#7FD1FF', kind: 'player', data: p })) : []),
+    ...(showStaffRoles.length > 0 ? filteredStaff.filter((s) => showStaffRoles.includes(s.role)).map((s) => ({ lat: s.latitude, lng: s.longitude, title: `${s.profiles?.nom} · ${ROLE_LABELS[s.role]}`, color: '#FFB86B', kind: 'staff', data: s })) : []),
+  ];
+
+  const handleMarkerClick = (marker) => {
+    if (marker.kind === 'need') setViewingClub({ ownerId: marker.data.owner_id, clubName: marker.data.club });
+    else if (marker.kind === 'player') setViewingPlayer(marker.data);
+  };
+
   return (
     <div>
       <PageTitle>Rechercher</PageTitle>
@@ -182,6 +196,32 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       {loading ? (
         <SkeletonList count={4} />
       ) : (
+        <>
+          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
+            <button
+              onClick={() => setViewMode('liste')}
+              style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'liste' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'liste' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'liste' ? '#D4FF3F' : '#A4B0A6' }}
+            >
+              📋 Liste
+            </button>
+            <button
+              onClick={() => setViewMode('carte')}
+              style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'carte' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'carte' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'carte' ? '#D4FF3F' : '#A4B0A6' }}
+            >
+              🗺️ Carte
+            </button>
+          </div>
+
+          {viewMode === 'carte' ? (
+            <div>
+              <SearchMap markers={mapMarkers} onMarkerClick={handleMarkerClick} />
+              <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginTop: 14, fontSize: 12.5, color: '#A4B0A6' }}>
+                {showNeeds && <span><span style={{ color: '#D4FF3F' }}>●</span> Besoins clubs</span>}
+                {showPlayers && <span><span style={{ color: '#7FD1FF' }}>●</span> Joueurs</span>}
+                {showStaffRoles.length > 0 && <span><span style={{ color: '#FFB86B' }}>●</span> Staff</span>}
+              </div>
+            </div>
+          ) : (
         <div style={{ display: 'grid', gap: 32 }}>
           {showNeeds && (
             <div>
@@ -279,6 +319,8 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
             );
           })}
         </div>
+          )}
+        </>
       )}
 
       <PlayerProfileModal

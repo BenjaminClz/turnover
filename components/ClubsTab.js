@@ -117,6 +117,14 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
       const { error } = await supabase.from('club_needs').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
       showToast('Besoin publié ✓');
+
+      // Publication automatique dans le fil d'actualité.
+      const typeLabel = BESOIN_TYPES.find((t) => t.value === payload.besoin_type)?.label.toLowerCase() || 'un profil';
+      await supabase.from('posts').insert({
+        author_id: user.id,
+        content: `${profile.nom} recherche ${typeLabel} · ${payload.ville}`,
+      });
+
       if (payload.besoin_type === 'joueur') {
         const { data: matches } = await supabase
           .from('player_listings')

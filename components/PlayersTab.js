@@ -177,6 +177,13 @@ export default function PlayersTab({ user, profile, showToast }) {
     setPublishing(false);
     if (error) { showToast('Erreur lors de la publication.'); return; }
     showToast('Profil publié ✓ Les clubs peuvent maintenant te trouver.');
+
+    // Publication automatique dans le fil d'actualité.
+    await supabase.from('posts').insert({
+      author_id: user.id,
+      content: `${profile.nom} est maintenant disponible : ${myListing.poste} · ${myListing.niveau} · ${myListing.ville}`,
+    });
+
     load();
   };
 
@@ -349,12 +356,12 @@ export default function PlayersTab({ user, profile, showToast }) {
                 <div style={{ marginTop: 8, marginBottom: 24 }}>
                   <h4 style={{ fontSize: 15, marginBottom: 4 }}>Points forts</h4>
                   <p style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 16 }}>Positionne les curseurs pour donner une idée de ton profil de jeu.</p>
-                  <div className="tv-grid-2" style={{ gap: 32 }}>
+                  <div className="tv-grid-2 tv-stats-grid" style={{ gap: 32 }}>
                     <StatsSlider
                       stats={detailsForm}
                       onChange={(key, val) => setDetailsForm({ ...detailsForm, [key]: val })}
                     />
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div className="tv-radar-wrap" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                       <StatsRadar stats={detailsForm} />
                     </div>
                   </div>

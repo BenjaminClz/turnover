@@ -290,7 +290,7 @@ function AppPageInner() {
         {tab === 'joueur' && <PlayersTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
         {STAFF_ROLES.includes(tab) && <StaffTab role={tab} user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
-        {tab === 'actualites' && <FeedTab user={user} profile={profile} showToast={showToast} />}
+        {tab === 'actualites' && <FeedTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'recherche' && <SearchTab user={user} viewerRole={profile.role} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'messages' && <MessagesTab user={user} profile={profile} setUnreadCount={setUnreadCount} pendingConvTarget={pendingConvTarget} clearPendingConvTarget={() => setPendingConvTarget(null)} showToast={showToast} />}
         {tab === 'abonnement' && <SubscriptionTab user={user} showToast={showToast} />}

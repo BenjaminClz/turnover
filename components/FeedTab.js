@@ -5,6 +5,8 @@ import { createClient } from '@/lib/supabase-client';
 import { TextArea, EmptyState, PageTitle, PageSubtitle } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import PlayerProfileModal from '@/components/PlayerProfileModal';
+import ClubProfileModal from '@/components/ClubProfileModal';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const MAX_FILES = 10;
@@ -37,12 +39,14 @@ function MediaCarousel({ media }) {
         <>
           <button
             onClick={() => setIdx((idx - 1 + media.length) % media.length)}
+            className="tv-carousel-arrow"
             style={{ position: 'absolute', top: '50%', left: 8, transform: 'translateY(-50%)', width: 32, height: 32, borderRadius: '50%', background: 'rgba(11,31,26,0.75)', border: '1px solid rgba(255,255,255,0.2)', color: '#F5F0E6', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             ‹
           </button>
           <button
             onClick={() => setIdx((idx + 1) % media.length)}
+            className="tv-carousel-arrow"
             style={{ position: 'absolute', top: '50%', right: 8, transform: 'translateY(-50%)', width: 32, height: 32, borderRadius: '50%', background: 'rgba(11,31,26,0.75)', border: '1px solid rgba(255,255,255,0.2)', color: '#F5F0E6', cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
             ›
@@ -61,7 +65,7 @@ function MediaCarousel({ media }) {
   );
 }
 
-export default function FeedTab({ user, profile, showToast }) {
+export default function FeedTab({ user, profile, showToast, onContact, onViewGallery }) {
   const supabase = createClient();
   const [posts, setPosts] = useState([]);
   const [likesByPost, setLikesByPost] = useState({});
@@ -71,6 +75,31 @@ export default function FeedTab({ user, profile, showToast }) {
   const [publishing, setPublishing] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [viewingPlayer, setViewingPlayer] = useState(null);
+  const [viewingClub, setViewingClub] = useState(null);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+
+  // Ouvre la fiche détaillée de l'auteur d'une publication (façon profil Instagram).
+  const openAuthorProfile = async (post) => {
+    const role = post.profiles?.role;
+    if (role === 'club') {
+      setViewingClub({ ownerId: post.author_id, clubName: post.profiles?.nom });
+      return;
+    }
+    if (role === 'joueur') {
+      setLoadingProfile(true);
+      const { data } = await supabase
+        .from('player_listings')
+        .select('*, profiles(nom, avatar_path, last_seen_at)')
+        .eq('owner_id', post.author_id)
+        .maybeSingle();
+      setLoadingProfile(false);
+      if (!data) { showToast('Profil introuvable.'); return; }
+      setViewingPlayer(data);
+      return;
+    }
+    showToast('Fiche détaillée bientôt disponible pour ce type de profil.');
+  };
 
   const load = async () => {
     setLoading(true);
@@ -194,7 +223,7 @@ export default function FeedTab({ user, profile, showToast }) {
       <PageTitle>Actualités</PageTitle>
       <PageSubtitle>Ce que publient les joueurs et les clubs de la communauté Turnover.</PageSubtitle>
 
-      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, padding: 18, marginBottom: 28 }}>
+      <div className="tv-feed-composer" style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, padding: 18, marginBottom: 28 }}>
         <div style={{ display: 'flex', gap: 12 }}>
           {profile?.avatar_path ? (
             <img src={avatarUrl(supabase, profile.avatar_path)} alt="" style={{ width: 40, height: 40, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
@@ -260,17 +289,19 @@ export default function FeedTab({ user, profile, showToast }) {
             return (
               <div key={post.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 18 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  {url ? (
-                    <img src={url} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
-                  ) : (
-                    <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 13, flexShrink: 0 }}>
-                      {initials(post.profiles?.nom)}
+                  <button onClick={() => openAuthorProfile(post)} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
+                    {url ? (
+                      <img src={url} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                    ) : (
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 13, flexShrink: 0 }}>
+                        {initials(post.profiles?.nom)}
+                      </div>
+                    )}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#F5F0E6' }}>{post.profiles?.nom}</div>
+                      <div style={{ fontSize: 12, color: '#8C9A8E' }}>{timeAgo(post.created_at)}</div>
                     </div>
-                  )}
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14 }}>{post.profiles?.nom}</div>
-                    <div style={{ fontSize: 12, color: '#8C9A8E' }}>{timeAgo(post.created_at)}</div>
-                  </div>
+                  </button>
                   {post.author_id === user.id && (
                     <button onClick={() => setConfirmDeleteId(post.id)} title="Supprimer" style={{ background: 'transparent', border: 'none', color: '#8C9A8E', cursor: 'pointer', fontSize: 13, padding: 4 }}>
                       ✕
@@ -299,6 +330,24 @@ export default function FeedTab({ user, profile, showToast }) {
         confirmLabel="Supprimer"
         onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); handleDelete(id); }}
         onCancel={() => setConfirmDeleteId(null)}
+      />
+
+      <PlayerProfileModal
+        player={viewingPlayer}
+        supabase={supabase}
+        currentUserId={user.id}
+        onClose={() => setViewingPlayer(null)}
+        onContact={onContact}
+        onViewGallery={onViewGallery}
+      />
+      <ClubProfileModal
+        ownerId={viewingClub?.ownerId}
+        clubName={viewingClub?.clubName}
+        supabase={supabase}
+        currentUserId={user.id}
+        onClose={() => setViewingClub(null)}
+        onContact={onContact}
+        onViewGallery={onViewGallery}
       />
     </div>
   );

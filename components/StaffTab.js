@@ -88,6 +88,12 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       const { error } = await supabase.from('staff_listings').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
       showToast('Profil publié ✓');
+
+      // Publication automatique dans le fil d'actualité.
+      await supabase.from('posts').insert({
+        author_id: user.id,
+        content: `${profile.nom} propose ses services : ${ROLE_LABELS[role]} · ${payload.ville}`,
+      });
     }
     setEditing(false);
     load();

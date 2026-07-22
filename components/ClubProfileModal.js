@@ -4,21 +4,7 @@ import { useState, useEffect } from 'react';
 import { Badge, GhostButton } from '@/components/ui';
 import { ROLE_LABELS } from '@/lib/constants';
 import { avatarUrl } from '@/components/AvatarUpload';
-import { nationalites } from '@/lib/nationalites';
-
-const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
-
-const criteresLabel = (n) => {
-  const parts = [];
-  if (n.nationalites_recherchees?.length > 0) parts.push(n.nationalites_recherchees.map(nomNationalite).join(', '));
-  if (n.age_min || n.age_max) parts.push(`${n.age_min || '?'}-${n.age_max || '?'} ans`);
-  if (n.besoin_type === 'joueur') {
-    if (n.pied_fort_recherche) parts.push(`Pied ${n.pied_fort_recherche}`);
-    if (n.taille_min_cm) parts.push(`≥ ${n.taille_min_cm} cm`);
-    if (n.poids_min_kg) parts.push(`≥ ${n.poids_min_kg} kg`);
-  }
-  return parts.length > 0 ? parts.join(' · ') : null;
-};
+import SearchMap from '@/components/SearchMap';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
@@ -35,8 +21,14 @@ const lastSeenLabel = (dateStr) => {
   return null;
 };
 
-const BESOIN_ICONS = {
-  joueur: '🏉', sante: '🩺', preparateur: '💪', entraineur: '📋', arbitre: '🟨', benevole: '🤝',
+const postTimeAgo = (dateStr) => {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 60) return `${mins} min`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs} h`;
+  const days = Math.floor(hrs / 24);
+  return `${days} j`;
 };
 
 const publieDepuis = (dateStr) => {
@@ -61,18 +53,24 @@ const describeNeed = (n) => {
 export default function ClubProfileModal({ ownerId, clubName, supabase, currentUserId, onClose, onContact, onViewGallery }) {
   const [profileData, setProfileData] = useState(null);
   const [needs, setNeeds] = useState([]);
+  const [galleryItems, setGalleryItems] = useState([]);
+  const [recentPosts, setRecentPosts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!ownerId) return;
     setLoading(true);
     (async () => {
-      const [{ data: p }, { data: n }] = await Promise.all([
-        supabase.from('profiles').select('nom, avatar_path, verified, last_seen_at').eq('id', ownerId).maybeSingle(),
+      const [{ data: p }, { data: n }, { data: g }, { data: posts }] = await Promise.all([
+        supabase.from('profiles').select('nom, avatar_path, verified, last_seen_at, adresse, latitude, longitude').eq('id', ownerId).maybeSingle(),
         supabase.from('club_needs').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false }),
+        supabase.from('gallery_items').select('*').eq('owner_id', ownerId).order('created_at', { ascending: false }).limit(6),
+        supabase.from('posts').select('*').eq('author_id', ownerId).order('created_at', { ascending: false }).limit(3),
       ]);
       setProfileData(p || null);
       setNeeds(n || []);
+      setGalleryItems((g || []).map((it) => ({ ...it, url: supabase.storage.from('gallery').getPublicUrl(it.file_path).data.publicUrl })));
+      setRecentPosts(posts || []);
       setLoading(false);
     })();
   }, [ownerId]);
@@ -89,6 +87,7 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
   const nom = profileData?.nom || clubName;
   const url = profileData?.avatar_path ? avatarUrl(supabase, profileData.avatar_path) : null;
   const villes = [...new Set(needs.map((n) => n.ville).filter(Boolean))];
+  const hasLocation = profileData?.latitude != null && profileData?.longitude != null;
 
   return (
     <div
@@ -114,7 +113,11 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
               {nom}
               {profileData?.verified && <span title="Club vérifié" style={{ color: '#D4FF3F', fontSize: 16 }}>✓</span>}
             </div>
-            {villes.length > 0 && <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{villes.join(', ')}</div>}
+            {profileData?.adresse ? (
+              <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>📍 {profileData.adresse}</div>
+            ) : villes.length > 0 && (
+              <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{villes.join(', ')}</div>
+            )}
             {needs.length > 0 && (
               <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>
                 Membre depuis {new Date(needs[needs.length - 1].created_at).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })}
@@ -125,6 +128,50 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
             )}
           </div>
         </div>
+
+        {/* Géolocalisation des locaux du club */}
+        {hasLocation && (
+          <div style={{ marginBottom: 24 }}>
+            <SearchMap
+              markers={[{ lat: profileData.latitude, lng: profileData.longitude, title: nom, color: '#D4FF3F' }]}
+            />
+          </div>
+        )}
+
+        {/* Aperçu de la galerie photo */}
+        {galleryItems.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>
+              Photos du club
+            </div>
+            <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
+              {galleryItems.map((it) => (
+                it.media_type === 'video' ? (
+                  <video key={it.id} src={it.url} style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }} />
+                ) : (
+                  <img key={it.id} src={it.url} alt="" style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 10, flexShrink: 0 }} />
+                )
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Dernières actualités publiées par le club */}
+        {recentPosts.length > 0 && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>
+              Dernières actualités
+            </div>
+            <div style={{ display: 'grid', gap: 8 }}>
+              {recentPosts.map((post) => (
+                <div key={post.id} style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '12px 14px' }}>
+                  {post.content && <div style={{ fontSize: 13.5, color: '#C7CFC8', lineHeight: 1.5 }}>{post.content}</div>}
+                  <div style={{ fontSize: 11.5, color: '#8C9A8E', marginTop: 6 }}>Il y a {postTimeAgo(post.created_at)}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 12 }}>
           Besoins publiés {needs.length > 0 && `(${needs.length})`}
@@ -150,9 +197,6 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
                   {n.remuneration && <span style={{ color: '#D4FF3F' }}>💰 {n.remuneration}</span>}
                   {publieDepuis(n.created_at) && <span>{publieDepuis(n.created_at)}</span>}
                 </div>
-                {criteresLabel(n) && (
-                  <div style={{ fontSize: 12.5, color: '#A4B0A6', marginTop: 8 }}>🎯 Critères recherchés : {criteresLabel(n)}</div>
-                )}
                 {n.details && (
                   <div style={{ fontSize: 13.5, color: '#C7CFC8', marginTop: 12, paddingTop: 12, borderTop: '1px solid #1c332a', lineHeight: 1.5 }}>
                     {n.details}
@@ -164,7 +208,7 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
         )}
 
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <GhostButton onClick={() => onViewGallery(ownerId, nom)}>Voir la galerie</GhostButton>
+          <GhostButton onClick={() => onViewGallery(ownerId, nom)}>Voir toute la galerie</GhostButton>
           {ownerId !== currentUserId && (
             <button
               onClick={() => onContact(ownerId, nom, needs[0] ? describeNeed(needs[0]) : 'Contact club')}

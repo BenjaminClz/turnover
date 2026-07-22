@@ -18,6 +18,7 @@ import FavoritesTab from '@/components/FavoritesTab';
 import FeedTab from '@/components/FeedTab';
 import NotificationsBell from '@/components/NotificationsBell';
 import UserMenu from '@/components/UserMenu';
+import AccountSettingsModal from '@/components/AccountSettingsModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { isProfileComplete } from '@/lib/profile-completion';
 
@@ -66,6 +67,7 @@ function AppPageInner() {
   const [pendingConvTarget, setPendingConvTarget] = useState(null);
   const [myPlayerListing, setMyPlayerListing] = useState(null);
   const [confirmDeleteAccount, setConfirmDeleteAccount] = useState(false);
+  const [accountSettingsOpen, setAccountSettingsOpen] = useState(false);
   const [deletingAccount, setDeletingAccount] = useState(false);
 
   useEffect(() => {
@@ -268,6 +270,7 @@ function AppPageInner() {
             roleLabel={ROLE_LABELS[profile.role]}
             showSubscription={profile.role === 'club'}
             onSubscription={() => setTab('abonnement')}
+            onEditAccount={() => setAccountSettingsOpen(true)}
             onExport={exportMyData}
             onDeleteRequest={() => setConfirmDeleteAccount(true)}
             onLogout={logout}
@@ -297,6 +300,13 @@ function AppPageInner() {
           <GalleryTab userId={viewingGallery.userId} ownerName={viewingGallery.ownerName} readOnly={viewingGallery.userId !== user.id} showToast={showToast} />
         )}
       </main>
+
+      <AccountSettingsModal
+        open={accountSettingsOpen}
+        profile={profile}
+        onClose={() => setAccountSettingsOpen(false)}
+        showToast={showToast}
+      />
 
       <ConfirmDialog
         open={confirmDeleteAccount}

@@ -4,11 +4,12 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { Field, TextInput, Select, PrimaryButton, GhostButton } from '@/components/ui';
 import { ROLES } from '@/lib/constants';
+import { geocodeVille } from '@/lib/geo';
 
 export default function AuthPage() {
   const supabase = createClient();
   const [mode, setMode] = useState('login'); // login | signup | verify-phone | sent | forgot | sent-reset
-  const [form, setForm] = useState({ nom: '', prenom: '', email: '', password: '', role: 'joueur', telephone: '' });
+  const [form, setForm] = useState({ nom: '', prenom: '', email: '', password: '', role: 'joueur', telephone: '', adresse: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [simCode, setSimCode] = useState('');
@@ -27,6 +28,9 @@ export default function AuthPage() {
     if (!nomOk || !form.email.trim() || !form.password || !form.telephone.trim()) {
       setError('Tous les champs sont requis, y compris le téléphone.'); return;
     }
+    if (isClub && !form.adresse.trim()) {
+      setError("L'adresse des locaux du club est requise."); return;
+    }
     if (form.password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères.'); return; }
     setSimCode(genCode());
     setOtpInput('');
@@ -38,11 +42,34 @@ export default function AuthPage() {
     e.preventDefault();
     if (otpInput.trim() !== simCode) { setError('Code incorrect.'); return; }
     setError(''); setLoading(true);
+
+    // Pour un club, on géolocalise l'adresse des locaux avant de créer le compte,
+    // pour que les joueurs puissent la situer sur la carte depuis leur domicile.
+    let geo = null;
+    if (isClub) {
+      geo = await geocodeVille(form.adresse);
+      if (!geo) {
+        setLoading(false);
+        setError("Adresse non reconnue. Vérifie l'orthographe (ex. « 12 rue du Stade, Annemasse »).");
+        return;
+      }
+    }
+
     const nomComplet = isClub ? form.nom.trim() : `${form.prenom.trim()} ${form.nom.trim()}`;
     const { error: signUpError } = await supabase.auth.signUp({
       email: form.email,
       password: form.password,
-      options: { data: { nom: nomComplet, prenom: isClub ? null : form.prenom.trim(), role: form.role, telephone: form.telephone } },
+      options: {
+        data: {
+          nom: nomComplet,
+          prenom: isClub ? null : form.prenom.trim(),
+          role: form.role,
+          telephone: form.telephone,
+          adresse: isClub ? form.adresse.trim() : null,
+          latitude: isClub ? geo.latitude : null,
+          longitude: isClub ? geo.longitude : null,
+        },
+      },
     });
     setLoading(false);
     if (signUpError) { setError(signUpError.message); setMode('signup'); return; }
@@ -169,9 +196,14 @@ export default function AuthPage() {
           <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} options={ROLES} />
         </Field>
         {isClub ? (
-          <Field label="Nom du club">
-            <TextInput required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="RC Annemasse" />
-          </Field>
+          <>
+            <Field label="Nom du club">
+              <TextInput required value={form.nom} onChange={(e) => setForm({ ...form, nom: e.target.value })} placeholder="RC Annemasse" />
+            </Field>
+            <Field label="Adresse des locaux" hint="Adresse complète, ex. « 12 rue du Stade, Annemasse ». Visible des joueurs pour situer le club.">
+              <TextInput required value={form.adresse} onChange={(e) => setForm({ ...form, adresse: e.target.value })} placeholder="12 rue du Stade, Annemasse" />
+            </Field>
+          </>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
             <Field label="Prénom">

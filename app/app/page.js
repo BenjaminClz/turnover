@@ -37,6 +37,15 @@ const TAB_TITLES = {
   actualites: 'Actualités', admin: 'Admin', galerie: 'Galerie', profil: 'Profil',
 };
 
+const TAB_ICONS = {
+  home: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>,
+  user: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>,
+  search: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>,
+  message: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>,
+  heart: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" /></svg>,
+  camera: (c) => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" /><circle cx="12" cy="13" r="4" /></svg>,
+};
+
 export default function AppPage() {
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0B1F1A' }} />}>
@@ -217,20 +226,20 @@ function AppPageInner() {
   // Messages (consulté au quotidien) passe avant Favoris (consulté occasionnellement).
   const tabs = profile.role === 'club'
     ? [
-        { key: 'actualites', label: 'Actualités' },
-        { key: 'club', label: 'Mon espace' },
-        { key: 'recherche', label: 'Rechercher' },
-        { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
-        { key: 'favoris', label: 'Favoris' },
+        { key: 'actualites', label: 'Actualités', icon: 'home' },
+        { key: 'club', label: 'Mon espace', icon: 'user' },
+        { key: 'recherche', label: 'Rechercher', icon: 'search' },
+        { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}`, icon: 'message' },
+        { key: 'favoris', label: 'Favoris', icon: 'heart' },
         ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ]
     : [
-        { key: 'actualites', label: 'Actualités' },
-        { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil' },
-        { key: 'recherche', label: 'Rechercher' },
-        { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}` },
-        { key: 'favoris', label: 'Favoris' },
-        ...(profile.role === 'joueur' ? [{ key: 'galerie', label: 'Ma galerie' }] : []),
+        { key: 'actualites', label: 'Actualités', icon: 'home' },
+        { key: ROLE_HOME_TAB[profile.role], label: 'Mon profil', icon: 'user' },
+        { key: 'recherche', label: 'Rechercher', icon: 'search' },
+        { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}`, icon: 'message' },
+        { key: 'favoris', label: 'Favoris', icon: 'heart' },
+        ...(profile.role === 'joueur' ? [{ key: 'galerie', label: 'Ma galerie', icon: 'camera' }] : []),
         ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ];
 
@@ -259,8 +268,9 @@ function AppPageInner() {
                   if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
                   setTab(t.key);
                 }}
-                style={{ position: 'relative', padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0 }}
+                style={{ position: 'relative', padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
               >
+                {t.icon && TAB_ICONS[t.icon] && TAB_ICONS[t.icon](tab === t.key ? '#0B1F1A' : '#A4B0A6')}
                 {t.label}
                 {needsAttention && (
                   <span style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: '#FF6B6B', border: '1.5px solid #0B1F1A' }} />

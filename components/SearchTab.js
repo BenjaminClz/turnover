@@ -6,8 +6,6 @@ import { SPORTS, NIVEAUX, URGENCES, ROLE_LABELS } from '@/lib/constants';
 import { EmptyState, GhostButton, TextInput, Select, Field, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille, distanceKm } from '@/lib/geo';
 import { avatarUrl } from '@/components/AvatarUpload';
-import PlayerProfileModal from '@/components/PlayerProfileModal';
-import ClubProfileModal from '@/components/ClubProfileModal';
 import ReportButton from '@/components/ReportButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import { SkeletonList } from '@/components/Skeleton';
@@ -51,14 +49,13 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [searchCategory, setSearchCategory] = useState(isClub ? 'Tous' : 'club'); // Tous | Joueurs | Clubs | un rôle staff
   const [searchSport, setSearchSport] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-sport')) || 'Tous');
   const [searchNiveau, setSearchNiveau] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-niveau')) || 'Tous');
+  const [searchName, setSearchName] = useState('');
   const [searchUrgence, setSearchUrgence] = useState('Tous');
   const [playerDispoFilter, setPlayerDispoFilter] = useState('Tous');
   const [villeInput, setVilleInput] = useState('');
   const [originCoords, setOriginCoords] = useState(null);
   const [rayon, setRayon] = useState('Toute la France');
   const [geocodingOrigin, setGeocodingOrigin] = useState(false);
-  const [viewingPlayer, setViewingPlayer] = useState(null);
-  const [viewingClub, setViewingClub] = useState(null);
   const [viewMode, setViewMode] = useState('liste');
 
   useEffect(() => {
@@ -121,14 +118,22 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
     return out;
   };
 
+  const nameFilter = (name) => {
+    if (!searchName.trim()) return true;
+    return (name || '').toLowerCase().includes(searchName.trim().toLowerCase());
+  };
+
   const filteredNeeds = applyCommonFilters(
     (searchNiveau !== 'Tous' ? needs.filter((n) => n.niveau === searchNiveau) : needs)
       .filter((n) => searchUrgence === 'Tous' || n.urgence === searchUrgence)
-  );
+  ).filter((n) => nameFilter(n.club));
   const filteredPlayers = applyCommonFilters(searchNiveau !== 'Tous' ? players.filter((p) => p.niveau === searchNiveau) : players)
-    .filter((p) => playerDispoFilter === 'Tous' || p.dispo === playerDispoFilter);
-  const filteredPlayerSearches = applyCommonFilters(searchNiveau !== 'Tous' ? playerSearches.filter((s) => s.niveau === searchNiveau) : playerSearches);
-  const filteredStaff = applyCommonFilters(staff);
+    .filter((p) => playerDispoFilter === 'Tous' || p.dispo === playerDispoFilter)
+    .filter((p) => nameFilter(p.profiles?.nom));
+  const filteredPlayerSearches = applyCommonFilters(searchNiveau !== 'Tous' ? playerSearches.filter((s) => s.niveau === searchNiveau) : playerSearches)
+    .filter((s) => nameFilter(s.profiles?.nom));
+  const filteredStaff = applyCommonFilters(staff)
+    .filter((s) => nameFilter(s.profiles?.nom));
 
   const showNeeds = searchCategory === 'Tous' || searchCategory === 'club';
   const showPlayers = searchCategory === 'Tous' || searchCategory === 'joueur';
@@ -142,8 +147,9 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   ];
 
   const handleMarkerClick = (marker) => {
-    if (marker.kind === 'need') setViewingClub({ ownerId: marker.data.owner_id, clubName: marker.data.club });
-    else if (marker.kind === 'player') setViewingPlayer(marker.data);
+    if (marker.kind === 'need') onOpenProfile(marker.data.owner_id);
+    else if (marker.kind === 'player') onOpenProfile(marker.data.owner_id);
+    else if (marker.kind === 'staff') onOpenProfile(marker.data.owner_id);
   };
 
   return (
@@ -175,6 +181,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
         </div>
         <div className="tv-grid-2" style={{ gap: 14, marginBottom: 18 }}>
           <Field label="Niveau"><Select value={searchNiveau} onChange={(e) => setSearchNiveau(e.target.value)} options={['Tous', ...NIVEAUX]} /></Field>
+          <Field label="Nom / prénom"><TextInput value={searchName} onChange={(e) => setSearchName(e.target.value)} placeholder="Rechercher par nom…" /></Field>
           <Field label="Urgence"><Select value={searchUrgence} onChange={(e) => setSearchUrgence(e.target.value)} options={['Tous', ...URGENCES]} /></Field>
         </div>
 
@@ -324,25 +331,6 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           )}
         </>
       )}
-
-      <PlayerProfileModal
-        player={viewingPlayer}
-        supabase={supabase}
-        currentUserId={user.id}
-        onClose={() => setViewingPlayer(null)}
-        onContact={onContact}
-        onViewGallery={onViewGallery}
-      />
-
-      <ClubProfileModal
-        ownerId={viewingClub?.ownerId}
-        clubName={viewingClub?.clubName}
-        supabase={supabase}
-        currentUserId={user.id}
-        onClose={() => setViewingClub(null)}
-        onContact={onContact}
-        onViewGallery={onViewGallery}
-      />
     </div>
   );
 }

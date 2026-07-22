@@ -5,9 +5,6 @@ import { createClient } from '@/lib/supabase-client';
 import { TextArea, EmptyState, PageTitle, PageSubtitle } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import PlayerProfileModal from '@/components/PlayerProfileModal';
-import ClubProfileModal from '@/components/ClubProfileModal';
-import StaffProfileModal from '@/components/StaffProfileModal';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const MAX_FILES = 10;
@@ -66,55 +63,16 @@ function MediaCarousel({ media }) {
   );
 }
 
-export default function FeedTab({ user, profile, showToast, onContact, onViewGallery }) {
+export default function FeedTab({ user, profile, showToast, onContact, onViewGallery, onOpenProfile }) {
   const supabase = createClient();
   const [posts, setPosts] = useState([]);
   const [likesByPost, setLikesByPost] = useState({});
   const [loading, setLoading] = useState(true);
   const [composerText, setComposerText] = useState('');
-  const [mediaFiles, setMediaFiles] = useState([]); // [{ file, url, type }]
+  const [mediaFiles, setMediaFiles] = useState([]);
   const [publishing, setPublishing] = useState(false);
   const [uploadingMedia, setUploadingMedia] = useState(false);
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
-  const [viewingPlayer, setViewingPlayer] = useState(null);
-  const [viewingClub, setViewingClub] = useState(null);
-  const [viewingStaff, setViewingStaff] = useState(null);
-  const [loadingProfile, setLoadingProfile] = useState(false);
-
-  const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
-
-  const openAuthorProfile = async (post) => {
-    const role = post.profiles?.role;
-    if (role === 'club') {
-      setViewingClub({ ownerId: post.author_id, clubName: post.profiles?.nom });
-      return;
-    }
-    if (role === 'joueur') {
-      setLoadingProfile(true);
-      const { data } = await supabase
-        .from('player_listings')
-        .select('*, profiles(nom, avatar_path, last_seen_at)')
-        .eq('owner_id', post.author_id)
-        .maybeSingle();
-      setLoadingProfile(false);
-      if (!data) { showToast('Profil introuvable.'); return; }
-      setViewingPlayer(data);
-      return;
-    }
-    if (STAFF_ROLES.includes(role)) {
-      setLoadingProfile(true);
-      const { data } = await supabase
-        .from('staff_listings')
-        .select('*, profiles(nom, avatar_path, last_seen_at)')
-        .eq('owner_id', post.author_id)
-        .maybeSingle();
-      setLoadingProfile(false);
-      if (!data) { showToast('Profil introuvable.'); return; }
-      setViewingStaff(data);
-      return;
-    }
-    showToast('Profil introuvable.');
-  };
 
   const load = async () => {
     setLoading(true);
@@ -304,7 +262,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
             return (
               <div key={post.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 18 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-                  <button onClick={() => openAuthorProfile(post)} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
+                  <button onClick={() => onOpenProfile(post.author_id)} style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, textAlign: 'left' }}>
                     {url ? (
                       <img src={url} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                     ) : (
@@ -347,30 +305,6 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
         onCancel={() => setConfirmDeleteId(null)}
       />
 
-      <PlayerProfileModal
-        player={viewingPlayer}
-        supabase={supabase}
-        currentUserId={user.id}
-        onClose={() => setViewingPlayer(null)}
-        onContact={onContact}
-        onViewGallery={onViewGallery}
-      />
-      <ClubProfileModal
-        ownerId={viewingClub?.ownerId}
-        clubName={viewingClub?.clubName}
-        supabase={supabase}
-        currentUserId={user.id}
-        onClose={() => setViewingClub(null)}
-        onContact={onContact}
-        onViewGallery={onViewGallery}
-      />
-      <StaffProfileModal
-        staff={viewingStaff}
-        supabase={supabase}
-        currentUserId={user.id}
-        onClose={() => setViewingStaff(null)}
-        onContact={onContact}
-      />
     </div>
   );
 }

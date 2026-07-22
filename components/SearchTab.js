@@ -52,8 +52,12 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const [searchName, setSearchName] = useState('');
   const [searchUrgence, setSearchUrgence] = useState('Tous');
   const [playerDispoFilter, setPlayerDispoFilter] = useState('Tous');
-  const [villeInput, setVilleInput] = useState('');
-  const [originCoords, setOriginCoords] = useState(null);
+  const [villeInput, setVilleInput] = useState(() => (typeof window !== 'undefined' && localStorage.getItem('tv-search-ville')) || '');
+  const [originCoords, setOriginCoords] = useState(() => {
+    if (typeof window === 'undefined') return null;
+    const saved = localStorage.getItem('tv-search-coords');
+    return saved ? JSON.parse(saved) : null;
+  });
   const [rayon, setRayon] = useState('Toute la France');
   const [geocodingOrigin, setGeocodingOrigin] = useState(false);
   const [viewMode, setViewMode] = useState('liste');
@@ -104,8 +108,10 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
     setGeocodingOrigin(true);
     const geo = await geocodeVille(villeInput);
     setGeocodingOrigin(false);
-    if (!geo) { showToast(`Ville "${villeInput}" non reconnue.`); setOriginCoords(null); return; }
+    if (!geo) { showToast(`Ville "${villeInput}" non reconnue.`); setOriginCoords(null); localStorage.removeItem('tv-search-coords'); return; }
     setOriginCoords(geo);
+    localStorage.setItem('tv-search-ville', villeInput);
+    localStorage.setItem('tv-search-coords', JSON.stringify(geo));
   };
 
   const withDistance = (list) => list.map((item) => ({

@@ -7,6 +7,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import PlayerProfileModal from '@/components/PlayerProfileModal';
 import ClubProfileModal from '@/components/ClubProfileModal';
+import StaffProfileModal from '@/components/StaffProfileModal';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const MAX_FILES = 10;
@@ -77,9 +78,11 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [viewingPlayer, setViewingPlayer] = useState(null);
   const [viewingClub, setViewingClub] = useState(null);
+  const [viewingStaff, setViewingStaff] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(false);
 
-  // Ouvre la fiche détaillée de l'auteur d'une publication (façon profil Instagram).
+  const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
+
   const openAuthorProfile = async (post) => {
     const role = post.profiles?.role;
     if (role === 'club') {
@@ -98,7 +101,19 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
       setViewingPlayer(data);
       return;
     }
-    showToast('Fiche détaillée bientôt disponible pour ce type de profil.');
+    if (STAFF_ROLES.includes(role)) {
+      setLoadingProfile(true);
+      const { data } = await supabase
+        .from('staff_listings')
+        .select('*, profiles(nom, avatar_path, last_seen_at)')
+        .eq('owner_id', post.author_id)
+        .maybeSingle();
+      setLoadingProfile(false);
+      if (!data) { showToast('Profil introuvable.'); return; }
+      setViewingStaff(data);
+      return;
+    }
+    showToast('Profil introuvable.');
   };
 
   const load = async () => {
@@ -348,6 +363,13 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
         onClose={() => setViewingClub(null)}
         onContact={onContact}
         onViewGallery={onViewGallery}
+      />
+      <StaffProfileModal
+        staff={viewingStaff}
+        supabase={supabase}
+        currentUserId={user.id}
+        onClose={() => setViewingStaff(null)}
+        onContact={onContact}
       />
     </div>
   );

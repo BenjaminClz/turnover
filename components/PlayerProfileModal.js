@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Badge, GhostButton, TextArea, PrimaryButton } from '@/components/ui';
+import { Badge, TextArea } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
-import StatsRadar from '@/components/StatsRadar';
 import PlayerCard from '@/components/PlayerCard';
+import ProfileMediaGrid from '@/components/ProfileMediaGrid';
 import { nationalites } from '@/lib/nationalites';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
@@ -33,14 +33,11 @@ const calculAge = (dateNaissance) => {
   return age;
 };
 
-const hasStats = (player) =>
-  [player.stat_vitesse, player.stat_defense, player.stat_vision, player.stat_technique, player.stat_combat, player.stat_attaque, player.stat_physique]
-    .some((v) => v != null);
-
 export default function PlayerProfileModal({ player, supabase, currentUserId, onClose, onContact, onViewGallery }) {
   const [recommendations, setRecommendations] = useState([]);
   const [newRecoText, setNewRecoText] = useState('');
   const [submittingReco, setSubmittingReco] = useState(false);
+  const [galleryItems, setGalleryItems] = useState([]);
 
   useEffect(() => {
     if (!player) return;
@@ -52,12 +49,12 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
   useEffect(() => {
     if (!player) return;
     (async () => {
-      const { data } = await supabase
-        .from('recommendations')
-        .select('*, profiles!recommendations_author_id_fkey(nom)')
-        .eq('target_id', player.owner_id)
-        .order('created_at', { ascending: false });
-      setRecommendations(data || []);
+      const [{ data: recos }, { data: gallery }] = await Promise.all([
+        supabase.from('recommendations').select('*, profiles!recommendations_author_id_fkey(nom)').eq('target_id', player.owner_id).order('created_at', { ascending: false }),
+        supabase.from('gallery_items').select('*').eq('owner_id', player.owner_id).order('created_at', { ascending: false }),
+      ]);
+      setRecommendations(recos || []);
+      setGalleryItems((gallery || []).map((it) => ({ ...it, url: supabase.storage.from('gallery').getPublicUrl(it.file_path).data.publicUrl })));
     })();
   }, [player?.owner_id]);
 
@@ -86,61 +83,67 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
   return (
     <div
       onClick={onClose}
-      style={{
-        position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 20,
-      }}
+      style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 200, padding: 20 }}
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{
-          background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 20, padding: 32,
-          maxWidth: 520, width: '100%', maxHeight: '85vh', overflowY: 'auto', position: 'relative',
-        }}
+        style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 20, maxWidth: 520, width: '100%', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}
       >
-        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 22, cursor: 'pointer', lineHeight: 1 }}>✕</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(11,31,26,0.6)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', lineHeight: 1, width: 32, height: 32, borderRadius: '50%', zIndex: 1 }}>✕</button>
 
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 22, fontWeight: 800 }}>{player.profiles?.nom}</div>
-          <div style={{ fontSize: 14.5, color: '#A4B0A6', marginTop: 4 }}>{player.poste} · {player.niveau}</div>
+        {/* En-tête façon Instagram : avatar, nom, statistiques */}
+        <div style={{ padding: '32px 28px 20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 }}>
+            {url ? (
+              <img src={url} alt="" style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid #2C4A3D' }} />
+            ) : (
+              <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 26, flexShrink: 0 }}>
+                {initials(player.profiles?.nom)}
+              </div>
+            )}
+            <div style={{ display: 'flex', gap: 20, flex: 1 }}>
+              <StatBlock value={galleryItems.length} label="Photos" />
+              <StatBlock value={recommendations.length} label="Recos" />
+              <StatBlock value={age != null ? age : '—'} label="Ans" />
+            </div>
+          </div>
+
+          <div style={{ fontSize: 19, fontWeight: 800 }}>{player.profiles?.nom}</div>
+          <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 2 }}>{player.poste} · {player.niveau}</div>
           {lastSeenLabel(player.profiles?.last_seen_at) && (
             <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(player.profiles?.last_seen_at)}</div>
           )}
-          {player.nationalites?.length > 0 && (
-            <div style={{ fontSize: 13, color: '#8C9A8E', marginTop: 4 }}>
-              {player.nationalites.map(nomNationalite).join(', ')}
-            </div>
-          )}
+          {player.bio && <div style={{ fontSize: 14, color: '#C7CFC8', marginTop: 10, lineHeight: 1.5 }}>{player.bio}</div>}
+
+          {/* Informations saisies par le joueur */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 14 }}>
+            <Pill>📍 {player.ville} ({player.distance} km)</Pill>
+            <Pill><Badge tone="lime">{player.dispo}</Badge></Pill>
+            {player.taille_cm && <Pill>{player.taille_cm} cm</Pill>}
+            {player.poids_kg && <Pill>{player.poids_kg} kg</Pill>}
+            {player.pied_fort && <Pill>Pied {player.pied_fort}</Pill>}
+            {player.annees_pratique != null && <Pill>{player.annees_pratique} ans de pratique</Pill>}
+            {player.nationalites?.length > 0 && <Pill>{player.nationalites.map(nomNationalite).join(', ')}</Pill>}
+            {player.dernier_club && <Pill>Ex. {player.dernier_club} ({player.dernier_club_niveau})</Pill>}
+          </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(110px, 1fr))', gap: 12, marginBottom: 20 }}>
-          {age != null && <InfoBlock label="Âge" value={`${age} ans`} />}
-          {player.taille_cm && <InfoBlock label="Taille" value={`${player.taille_cm} cm`} />}
-          {player.poids_kg && <InfoBlock label="Poids" value={`${player.poids_kg} kg`} />}
-          {player.annees_pratique != null && <InfoBlock label="Pratique" value={`${player.annees_pratique} ans`} />}
-          {player.pied_fort && <InfoBlock label="Pied fort" value={player.pied_fort} />}
-        </div>
-
-        <div style={{ display: 'grid', gap: 10, marginBottom: 20 }}>
-          <DetailRow label="Ville" value={`${player.ville} (rayon ${player.distance} km)`} />
-          <DetailRow label="Disponibilité" value={<Badge tone="lime">{player.dispo}</Badge>} />
-          {player.dernier_club && (
-            <DetailRow label="Dernier club" value={`${player.dernier_club} (${player.dernier_club_niveau})`} />
-          )}
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+        {/* Carte de stats FIFA */}
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '0 28px 24px' }}>
           <PlayerCard player={player} nom={player.profiles?.nom} avatarSrc={url} />
         </div>
 
-        {player.bio && (
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 8 }}>Présentation</div>
-            <div style={{ fontSize: 14.5, color: '#C7CFC8', lineHeight: 1.6 }}>{player.bio}</div>
-          </div>
-        )}
+        {/* Grille photos/vidéos façon Instagram */}
+        <div style={{ borderTop: '1px solid #2C4A3D' }}>
+          {galleryItems.length > 0 ? (
+            <ProfileMediaGrid items={galleryItems} />
+          ) : (
+            <div style={{ padding: '24px 28px', textAlign: 'center', color: '#8C9A8E', fontSize: 13.5 }}>Aucune photo publiée pour le moment.</div>
+          )}
+        </div>
 
-        <div style={{ marginBottom: 24 }}>
+        {/* Recommandations */}
+        <div style={{ padding: '24px 28px' }}>
           <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>
             Recommandations {recommendations.length > 0 && `(${recommendations.length})`}
           </div>
@@ -168,33 +171,31 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
               </button>
             </div>
           )}
-        </div>
 
-        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <GhostButton onClick={() => onViewGallery(player.owner_id, player.profiles?.nom)}>Voir la galerie</GhostButton>
-          {player.owner_id !== currentUserId && (
-            <button onClick={() => onContact(player.owner_id, player.profiles?.nom, `${player.poste} · ${player.ville}`)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '11px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
-          )}
+          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
+            {player.owner_id !== currentUserId && (
+              <button onClick={() => onContact(player.owner_id, player.profiles?.nom, `${player.poste} · ${player.ville}`)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '11px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
+            )}
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-function InfoBlock({ label, value }) {
+function StatBlock({ value, label }) {
   return (
-    <div style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '12px 14px', textAlign: 'center' }}>
-      <div style={{ fontSize: 17, fontWeight: 800, textTransform: 'capitalize' }}>{value}</div>
-      <div style={{ fontSize: 11, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.03em', marginTop: 2 }}>{label}</div>
+    <div style={{ textAlign: 'center' }}>
+      <div style={{ fontSize: 17, fontWeight: 800 }}>{value}</div>
+      <div style={{ fontSize: 11, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
     </div>
   );
 }
 
-function DetailRow({ label, value }) {
+function Pill({ children }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: 14 }}>
-      <span style={{ color: '#8C9A8E' }}>{label}</span>
-      <span style={{ color: '#F5F0E6', fontWeight: 600 }}>{value}</span>
-    </div>
+    <span style={{ fontSize: 12.5, color: '#C7CFC8', background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 20, padding: '5px 12px' }}>
+      {children}
+    </span>
   );
 }

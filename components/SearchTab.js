@@ -147,8 +147,9 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
   const showPlayers = searchCategory === 'Tous' || searchCategory === 'joueur';
   const showStaffRoles = searchCategory === 'Tous' ? STAFF_ROLES : (STAFF_ROLES.includes(searchCategory) ? [searchCategory] : []);
 
-  // On affiche les résultats uniquement si l'utilisateur a renseigné au moins un critère.
-  const hasActiveFilter = originCoords || searchSport !== 'Tous' || searchNiveau !== 'Tous' || searchName.trim() !== '' || searchUrgence !== 'Tous' || playerDispoFilter !== 'Tous';
+  // On affiche les résultats uniquement si l'utilisateur a explicitement lancé une recherche
+  // (localisé une ville ou tapé un nom). Les filtres dropdown seuls ne déclenchent pas l'affichage.
+  const hasActiveFilter = !!originCoords || searchName.trim() !== '';
 
   const mapMarkers = [
     ...(showNeeds ? filteredNeeds.map((n) => ({ lat: n.latitude, lng: n.longitude, title: `${n.club} · ${needDetails(n)}`, color: '#D4FF3F', kind: 'need', data: n })) : []),

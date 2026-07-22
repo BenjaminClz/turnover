@@ -39,7 +39,7 @@ function needDetails(n) {
   return '';
 }
 
-export default function SearchTab({ user, viewerRole, showToast, onContact, onViewGallery }) {
+export default function SearchTab({ user, viewerRole, showToast, onContact, onViewGallery, onOpenProfile }) {
   const supabase = createClient();
   const isClub = viewerRole === 'club';
   const [needs, setNeeds] = useState([]);
@@ -237,12 +237,13 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                       distance={n._distance}
                       showContact={n.owner_id !== user.id}
                       onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)}
+                      onClickProfile={() => onOpenProfile(n.owner_id)}
                       avatarPath={n.profiles?.avatar_path}
                       supabase={supabase}
                       featured={n._featured}
                       extra={
                         <>
-                          <button className="tv-btn" onClick={() => setViewingClub({ ownerId: n.owner_id, clubName: n.club })} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
+                          <button className="tv-btn" onClick={() => onOpenProfile(n.owner_id)} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
                           <GhostButton onClick={() => onViewGallery(n.owner_id, n.club)} style={{ flex: 1, fontSize: 12, textAlign: 'center' }}>Galerie</GhostButton>
                         </>
                       }
@@ -285,11 +286,12 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                       distance={p._distance}
                       showContact={p.owner_id !== user.id}
                       onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)}
+                      onClickProfile={() => onOpenProfile(p.owner_id)}
                       avatarPath={p.profiles?.avatar_path}
                       supabase={supabase}
                       extra={
                         <>
-                          <button className="tv-btn" onClick={() => setViewingPlayer(p)} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
+                          <button className="tv-btn" onClick={() => onOpenProfile(p.owner_id)} style={{ flex: 1, background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '8px 10px', borderRadius: 7, fontWeight: 700, fontSize: 12, cursor: 'pointer' }}>Profil</button>
                           <GhostButton onClick={() => onViewGallery(p.owner_id, p.profiles?.nom)} style={{ flex: 1, fontSize: 12, textAlign: 'center' }}>Galerie</GhostButton>
                         </>
                       }
@@ -311,7 +313,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                 {list.length === 0 ? <EmptyState icon="🧑‍⚕️" title="Rien ici" sub="Aucun résultat pour ces critères." /> : (
                   <div style={CARD_GRID}>
                     {list.map((s) => (
-                      <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
+                      <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} onClickProfile={() => onOpenProfile(s.owner_id)} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
                     ))}
                   </div>
                 )}
@@ -347,7 +349,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 
-function ResultCard({ title, verified, details, distance, showContact, onContact, extra, avatarPath, supabase, featured, reportProps, favoriteProps }) {
+function ResultCard({ title, verified, details, distance, showContact, onContact, onClickProfile, extra, avatarPath, supabase, featured, reportProps, favoriteProps }) {
   const url = avatarPath ? avatarUrl(supabase, avatarPath) : null;
   return (
     <div className="tv-card" style={{ position: 'relative', background: featured ? 'rgba(212,255,63,0.05)' : '#152E26', border: featured ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D', borderRadius: 14, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
@@ -358,20 +360,21 @@ function ResultCard({ title, verified, details, distance, showContact, onContact
 
       {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 9.5, fontWeight: 800, color: '#0B1F1A', background: '#D4FF3F', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
 
-      <div style={{ position: 'relative', marginTop: featured ? 14 : 0, marginBottom: 10 }}>
-        {url ? (
-          <img src={url} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
-        ) : (
-          <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 22 }}>
-            {initials(title)}
-          </div>
-        )}
-        {verified && (
-          <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: '#27500A', color: '#EAF3DE', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, border: '2px solid #152E26' }}>✓</span>
-        )}
-      </div>
-
-      <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 4 }}>{title}</div>
+      <button onClick={onClickProfile} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
+        <div style={{ position: 'relative', marginTop: featured ? 14 : 0, marginBottom: 10 }}>
+          {url ? (
+            <img src={url} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 22 }}>
+              {initials(title)}
+            </div>
+          )}
+          {verified && (
+            <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: '#27500A', color: '#EAF3DE', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, border: '2px solid #152E26' }}>✓</span>
+          )}
+        </div>
+        <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 4, color: '#F5F0E6' }}>{title}</div>
+      </button>
       <div style={{ fontSize: 12.5, color: '#A4B0A6', lineHeight: 1.4, marginBottom: distance != null ? 2 : 14 }}>{details}</div>
       {distance != null && <div style={{ fontSize: 11.5, color: '#D4FF3F', marginBottom: 14 }}>{distance.toFixed(0)} km</div>}
 

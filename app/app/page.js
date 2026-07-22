@@ -16,6 +16,7 @@ import SubscriptionTab from '@/components/SubscriptionTab';
 import AdminTab from '@/components/AdminTab';
 import FavoritesTab from '@/components/FavoritesTab';
 import FeedTab from '@/components/FeedTab';
+import ProfilePage from '@/components/ProfilePage';
 import NotificationsBell from '@/components/NotificationsBell';
 import UserMenu from '@/components/UserMenu';
 import AccountSettingsModal from '@/components/AccountSettingsModal';
@@ -33,7 +34,7 @@ const TAB_TITLES = {
   joueur: 'Mon profil', club: 'Mon espace', sante: 'Mon profil', preparateur: 'Mon profil',
   entraineur: 'Mon profil', arbitre: 'Mon profil', benevole: 'Mon profil',
   recherche: 'Rechercher', messages: 'Messages', favoris: 'Favoris', abonnement: 'Abonnement',
-  actualites: 'Actualités', admin: 'Admin', galerie: 'Galerie',
+  actualites: 'Actualités', admin: 'Admin', galerie: 'Galerie', profil: 'Profil',
 };
 
 export default function AppPage() {
@@ -51,6 +52,7 @@ function AppPageInner() {
   const searchParams = useSearchParams();
 
   const tab = searchParams.get('tab');
+  const profileUid = searchParams.get('uid');
   const setTab = (newTab, { replace = false } = {}) => {
     const method = replace ? 'replace' : 'push';
     router[method](`/app?tab=${newTab}`, { scroll: false });
@@ -178,6 +180,10 @@ function AppPageInner() {
     setTab('messages');
   };
 
+  const openProfile = (userId) => {
+    router.push(`/app?tab=profil&uid=${userId}`);
+  };
+
   const openGallery = (userId, ownerName) => {
     setViewingGallery({ userId, ownerName });
     setTab('galerie');
@@ -290,8 +296,9 @@ function AppPageInner() {
         {tab === 'joueur' && <PlayersTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
         {STAFF_ROLES.includes(tab) && <StaffTab role={tab} user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
-        {tab === 'actualites' && <FeedTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
-        {tab === 'recherche' && <SearchTab user={user} viewerRole={profile.role} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
+        {tab === 'actualites' && <FeedTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} onOpenProfile={openProfile} />}
+        {tab === 'profil' && profileUid && <ProfilePage targetUserId={profileUid} currentUserId={user.id} onBack={() => router.back()} onContact={startConversation} showToast={showToast} />}
+        {tab === 'recherche' && <SearchTab user={user} viewerRole={profile.role} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} onOpenProfile={openProfile} />}
         {tab === 'messages' && <MessagesTab user={user} profile={profile} setUnreadCount={setUnreadCount} pendingConvTarget={pendingConvTarget} clearPendingConvTarget={() => setPendingConvTarget(null)} showToast={showToast} />}
         {tab === 'abonnement' && <SubscriptionTab user={user} showToast={showToast} />}
         {tab === 'favoris' && <FavoritesTab user={user} onContact={startConversation} onViewGallery={openGallery} />}

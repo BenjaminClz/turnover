@@ -410,6 +410,7 @@ export default function PlayersTab({ user, profile, showToast }) {
           )}
 
           <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginTop: 24, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
+            <h3 style={{ fontSize: 18, marginBottom: 16 }}>Mon annonce</h3>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
               <div>
                 {isPublished ? (

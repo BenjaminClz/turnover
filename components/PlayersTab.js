@@ -50,6 +50,8 @@ export default function PlayersTab({ user, profile, showToast }) {
   const [villeCoords, setVilleCoords] = useState(null);
   const [publishing, setPublishing] = useState(false);
   const [deletePending, setDeletePending] = useState(false);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const deleteTimerRef = useRef(null);
 
   const load = async () => {
@@ -73,6 +75,15 @@ export default function PlayersTab({ user, profile, showToast }) {
         pied_fort: mine.pied_fort || null,
       });
     }
+
+    // Compteurs abonnés / abonnements.
+    const [{ count: fwers }, { count: fwing }] = await Promise.all([
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
+    ]);
+    setFollowersCount(fwers || 0);
+    setFollowingCount(fwing || 0);
+
     setLoading(false);
   };
 
@@ -256,8 +267,19 @@ export default function PlayersTab({ user, profile, showToast }) {
       <PageTitle>Mon profil</PageTitle>
       <PageSubtitle>Ton profil joueur, visible des clubs uniquement une fois publié.</PageSubtitle>
 
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 20 }}>
         <AvatarUpload userId={user.id} currentPath={profile.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} />
+      </div>
+
+      <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{followersCount}</div>
+          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnés</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{followingCount}</div>
+          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnements</div>
+        </div>
       </div>
 
       {!myListing && (
@@ -274,45 +296,6 @@ export default function PlayersTab({ user, profile, showToast }) {
         <SkeletonList count={1} />
       ) : myListing && (
         <>
-          <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
-              <div>
-                {isPublished ? (
-                  <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Badge tone="lime">Publié</Badge> Visible par tous les clubs
-                  </div>
-                ) : (
-                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                    {isComplete ? 'Profil prêt à être publié' : 'Complète ton profil pour le publier'}
-                  </div>
-                )}
-                <div style={{ fontSize: 14, color: '#A4B0A6' }}>{myListing.poste} · {myListing.niveau} · {myListing.ville}</div>
-              </div>
-              {isPublished ? (
-                <GhostButton onClick={handleUnpublish} style={{ fontSize: 12.5 }}>Retirer de la recherche</GhostButton>
-              ) : isComplete ? (
-                <PrimaryButton onClick={handlePublish} disabled={publishing} style={{ width: 'auto' }}>
-                  {publishing ? 'Publication…' : 'Publier mon profil'}
-                </PrimaryButton>
-              ) : (
-                <PrimaryButton onClick={() => setEditingDetails(true)} style={{ width: 'auto' }}>
-                  Compléter mon profil ({completion}%)
-                </PrimaryButton>
-              )}
-            </div>
-            <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
-            </div>
-            <div style={{ fontSize: 13, color: '#A4B0A6' }}>
-              Profil complété à {completion}%{!isComplete && ` — ${COMPLETION_THRESHOLD}% requis pour pouvoir publier`}
-            </div>
-            <div style={{ fontSize: 13, marginTop: 12 }}>
-              <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline' }}>
-                Voir / partager mon profil public ↗
-              </a>
-            </div>
-          </div>
-
           {editing ? (
             <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
               <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier mes informations de base</h3>
@@ -425,6 +408,45 @@ export default function PlayersTab({ user, profile, showToast }) {
               </div>
             </div>
           )}
+
+          <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginTop: 24, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
+              <div>
+                {isPublished ? (
+                  <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <Badge tone="lime">Publié</Badge> Visible par tous les clubs
+                  </div>
+                ) : (
+                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                    {isComplete ? 'Profil prêt à être publié' : 'Complète ton profil pour le publier'}
+                  </div>
+                )}
+                <div style={{ fontSize: 14, color: '#A4B0A6' }}>{myListing.poste} · {myListing.niveau} · {myListing.ville}</div>
+              </div>
+              {isPublished ? (
+                <GhostButton onClick={handleUnpublish} style={{ fontSize: 12.5 }}>Retirer de la recherche</GhostButton>
+              ) : isComplete ? (
+                <PrimaryButton onClick={handlePublish} disabled={publishing} style={{ width: 'auto' }}>
+                  {publishing ? 'Publication…' : 'Publier mon profil'}
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton onClick={() => setEditingDetails(true)} style={{ width: 'auto' }}>
+                  Compléter mon profil ({completion}%)
+                </PrimaryButton>
+              )}
+            </div>
+            <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+              <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
+            </div>
+            <div style={{ fontSize: 13, color: '#A4B0A6' }}>
+              Profil complété à {completion}%{!isComplete && ` — ${COMPLETION_THRESHOLD}% requis pour pouvoir publier`}
+            </div>
+            <div style={{ fontSize: 13, marginTop: 12 }}>
+              <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline' }}>
+                Voir / partager mon profil public ↗
+              </a>
+            </div>
+          </div>
         </>
       )}
 

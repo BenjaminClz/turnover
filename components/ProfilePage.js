@@ -156,7 +156,16 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       setIsFollowing(true);
       setFollowersCount((c) => c + 1);
       const { error } = await supabase.from('follows').insert({ follower_id: currentUserId, following_id: targetUserId });
-      if (error) { setIsFollowing(false); setFollowersCount((c) => c - 1); }
+      if (error) { setIsFollowing(false); setFollowersCount((c) => c - 1); return; }
+      // Prévient la personne suivie via une notification (visible sur la cloche).
+      const { data: me } = await supabase.from('profiles').select('nom').eq('id', currentUserId).maybeSingle();
+      await supabase.from('notifications').insert({
+        user_id: targetUserId,
+        type: 'nouvel_abonne',
+        title: 'Nouvel abonné',
+        body: `${me?.nom || 'Quelqu’un'} s’est abonné à ton profil.`,
+        link_tab: profile.role,
+      });
     }
   };
 

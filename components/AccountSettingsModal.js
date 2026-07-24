@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { Field, TextInput, PrimaryButton } from '@/components/ui';
-import { geocodeVille } from '@/lib/geo';
+import { geocodeAdresse } from '@/lib/geo';
 
 export default function AccountSettingsModal({ open, profile, onClose, showToast }) {
   const supabase = createClient();
@@ -47,7 +47,7 @@ export default function AccountSettingsModal({ open, profile, onClose, showToast
 
     // Si l'adresse du club a changé, on la re-géolocalise avant d'enregistrer.
     if (isClub && adresse.trim() !== (profile.adresse || '')) {
-      const geo = await geocodeVille(adresse.trim());
+      const geo = await geocodeAdresse(adresse.trim());
       if (!geo) {
         setSaving(false);
         showToast("Adresse non reconnue. Vérifie l'orthographe.");

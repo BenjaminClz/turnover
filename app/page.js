@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { Field, TextInput, Select, PrimaryButton, GhostButton } from '@/components/ui';
 import { ROLES } from '@/lib/constants';
-import { geocodeVille } from '@/lib/geo';
+import { geocodeAdresse } from '@/lib/geo';
 
 export default function AuthPage() {
   const supabase = createClient();
@@ -47,7 +47,7 @@ export default function AuthPage() {
     // pour que les joueurs puissent la situer sur la carte depuis leur domicile.
     let geo = null;
     if (isClub) {
-      geo = await geocodeVille(form.adresse);
+      geo = await geocodeAdresse(form.adresse);
       if (!geo) {
         setLoading(false);
         setError("Adresse non reconnue. Vérifie l'orthographe (ex. « 12 rue du Stade, Annemasse »).");

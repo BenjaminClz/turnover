@@ -8,7 +8,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import PlayerCard from '@/components/PlayerCard';
 import ProfileMediaGrid from '@/components/ProfileMediaGrid';
 import SearchMap from '@/components/SearchMap';
-import { geocodeVille } from '@/lib/geo';
+import { geocodeAdresse } from '@/lib/geo';
 import { nationalites } from '@/lib/nationalites';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
@@ -155,21 +155,9 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
     setMapCoords(null);
     if (!profile || profile.role !== 'club' || !profile.adresse) return;
     let annulé = false;
-    (async () => {
-      try {
-        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(profile.adresse)}&limit=1`);
-        const data = await res.json();
-        const feature = data?.features?.[0];
-        if (!annulé && feature) {
-          const [lng, lat] = feature.geometry.coordinates;
-          setMapCoords({ lat, lng });
-          return;
-        }
-      } catch { /* repli ci-dessous */ }
-      // Repli : géocodage au niveau de la ville.
-      const geo = await geocodeVille(profile.adresse);
+    geocodeAdresse(profile.adresse).then((geo) => {
       if (!annulé && geo) setMapCoords({ lat: geo.latitude, lng: geo.longitude });
-    })();
+    });
     return () => { annulé = true; };
   }, [profile]);
 

@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui';
 const BUCKET = 'gallery';
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 Mo par fichier (limite raisonnable, Storage gère bien mieux que le stockage clé-valeur)
 
-export default function GalleryTab({ userId, ownerName, readOnly, showToast }) {
+export default function GalleryTab({ userId, ownerName, readOnly, showToast, embedded = false }) {
   const supabase = createClient();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -64,6 +64,55 @@ export default function GalleryTab({ userId, ownerName, readOnly, showToast }) {
     load();
   };
 
+  const mediaGrid = loading ? (
+    <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 40 }}>Chargement…</div>
+  ) : items.length === 0 ? (
+    <EmptyState icon="🎞️" title="Galerie vide" sub={readOnly ? `${ownerName} n'a pas encore ajouté de photo ou vidéo.` : 'Ajoute des photos ou vidéos de toi en action.'} />
+  ) : (
+    <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fill, minmax(${embedded ? 120 : 150}px, 1fr))`, gap: embedded ? 10 : 14 }}>
+      {items.map((it) => (
+        <div key={it.id} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', aspectRatio: '1' }}>
+          {it.media_type === 'video' ? (
+            <video src={it.url} controls style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <img src={it.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          )}
+          {!readOnly && (
+            <button onClick={() => deleteItem(it)} style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(11,31,26,0.85)', border: 'none', color: '#FF5C5C', borderRadius: 6, padding: '4px 8px', fontSize: 11, cursor: 'pointer', fontWeight: 700 }}>✕</button>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+
+  const uploadInput = (
+    <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={(e) => handleFiles(e.target.files)} style={{ display: 'none' }} id="gallery-upload-input" />
+  );
+
+  // Version intégrée dans « Mon profil » : carte compacte, cohérente avec les
+  // autres sections du profil, avec le bouton d'ajout dans l'en-tête.
+  if (embedded) {
+    return (
+      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
+          <h3 style={{ fontSize: 18 }}>Mes photos &amp; vidéos</h3>
+          {!readOnly && (
+            <>
+              {uploadInput}
+              <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: '#D4FF3F', color: '#0B1F1A', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                {uploading ? 'Import en cours…' : '+ Ajouter'}
+              </label>
+            </>
+          )}
+        </div>
+        {!readOnly && (
+          <p style={{ fontSize: 13, color: '#8C9A8E', marginBottom: 18 }}>Montre-toi en action — visible par les clubs qui consultent ton profil. Jusqu'à 20 Mo par fichier.</p>
+        )}
+        {mediaGrid}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 10 }}>
@@ -78,7 +127,7 @@ export default function GalleryTab({ userId, ownerName, readOnly, showToast }) {
       {!readOnly && (
         <div style={{ background: '#152E26', border: '1px solid #274238', borderRadius: 16, padding: 24, marginBottom: 28 }}>
           <h3 style={{ fontSize: 16, marginBottom: 14 }}>Ajouter à ma galerie</h3>
-          <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple onChange={(e) => handleFiles(e.target.files)} style={{ display: 'none' }} id="gallery-upload-input" />
+          {uploadInput}
           <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: '#D4FF3F', color: '#0B1F1A', padding: '12px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
             {uploading ? 'Import en cours…' : '+ Ajouter photos / vidéos'}
           </label>
@@ -86,26 +135,7 @@ export default function GalleryTab({ userId, ownerName, readOnly, showToast }) {
         </div>
       )}
 
-      {loading ? (
-        <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 40 }}>Chargement…</div>
-      ) : items.length === 0 ? (
-        <EmptyState icon="🎞️" title="Galerie vide" sub={readOnly ? `${ownerName} n'a pas encore ajouté de photo ou vidéo.` : 'Ajoute des photos ou vidéos de toi en action.'} />
-      ) : (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 14 }}>
-          {items.map((it) => (
-            <div key={it.id} style={{ position: 'relative', borderRadius: 10, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', aspectRatio: '1' }}>
-              {it.media_type === 'video' ? (
-                <video src={it.url} controls style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              ) : (
-                <img src={it.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
-              )}
-              {!readOnly && (
-                <button onClick={() => deleteItem(it)} style={{ position: 'absolute', top: 6, right: 6, background: 'rgba(11,31,26,0.85)', border: 'none', color: '#FF5C5C', borderRadius: 6, padding: '4px 8px', fontSize: 11, cursor: 'pointer', fontWeight: 700 }}>✕</button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+      {mediaGrid}
     </div>
   );
 }

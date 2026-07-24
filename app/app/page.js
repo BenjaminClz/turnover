@@ -239,7 +239,6 @@ function AppPageInner() {
         { key: 'recherche', label: 'Rechercher', icon: 'search' },
         { key: 'messages', label: `Messages${unreadCount ? ` (${unreadCount})` : ''}`, icon: 'message' },
         { key: 'favoris', label: 'Favoris', icon: 'heart' },
-        ...(profile.role === 'joueur' ? [{ key: 'galerie', label: 'Ma galerie', icon: 'camera' }] : []),
         ...(profile.is_admin ? [{ key: 'admin', label: 'Admin' }] : []),
       ];
 

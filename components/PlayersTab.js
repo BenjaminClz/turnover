@@ -14,6 +14,7 @@ import PlayerCard from '@/components/PlayerCard';
 import PiedFortSelect from '@/components/PiedFortSelect';
 import VilleAutocomplete from '@/components/VilleAutocomplete';
 import { SkeletonList } from '@/components/Skeleton';
+import GalleryTab from '@/components/GalleryTab';
 import { nationalites } from '@/lib/nationalites';
 
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
@@ -52,6 +53,7 @@ export default function PlayersTab({ user, profile, showToast }) {
   const [deletePending, setDeletePending] = useState(false);
   const [followersCount, setFollowersCount] = useState(0);
   const [followingCount, setFollowingCount] = useState(0);
+  const [annonceOpen, setAnnonceOpen] = useState(false);
   const deleteTimerRef = useRef(null);
 
   const load = async () => {
@@ -375,6 +377,22 @@ export default function PlayersTab({ user, profile, showToast }) {
                 </div>
               </div>
 
+              {/* Statut d'annonce compact + accès à la popup de gestion */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, flexWrap: 'wrap', background: '#0B1F1A', border: '1px solid #274238', borderRadius: 10, padding: '12px 14px', marginBottom: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ width: 9, height: 9, borderRadius: '50%', background: (isPublished || isComplete) ? '#D4FF3F' : '#FF6B6B', flexShrink: 0 }} />
+                  <div>
+                    <div style={{ color: '#F5F0E6', fontSize: 13.5, fontWeight: 700 }}>
+                      {isPublished ? 'Annonce publiée' : isComplete ? 'Prête à être publiée' : 'Annonce non publiée'}
+                    </div>
+                    <div style={{ color: '#8C9A8E', fontSize: 12 }}>
+                      {isPublished ? 'Visible par tous les clubs' : 'Les clubs ne peuvent pas encore te trouver'} · complétée à {completion}%
+                    </div>
+                  </div>
+                </div>
+                <button onClick={() => setAnnonceOpen(true)} style={{ background: 'transparent', border: '1px solid #D4FF3F', color: '#D4FF3F', fontSize: 12, padding: '7px 13px', borderRadius: 8, cursor: 'pointer', flexShrink: 0 }}>Gérer mon annonce</button>
+              </div>
+
               <div style={{ marginBottom: 8 }}>
                 <InfoRow label="Sport" value={myListing.sport} />
                 <InfoRow label="Poste" value={myListing.poste} />
@@ -402,52 +420,18 @@ export default function PlayersTab({ user, profile, showToast }) {
                   <PlayerCard player={myListing} nom={profile.nom} avatarSrc={profile.avatar_path ? avatarUrl(supabase, profile.avatar_path) : null} />
                 </div>
               )}
-
-              <div style={{ marginTop: 28, textAlign: 'right' }}>
-                <button onClick={requestDelete} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
-              </div>
             </div>
           )}
 
-          <div style={{ background: isPublished ? 'rgba(212,255,63,0.06)' : 'rgba(255,107,107,0.06)', border: `1.5px solid ${isPublished ? '#D4FF3F' : (isComplete ? '#D4FF3F' : '#FF6B6B')}`, borderRadius: 18, padding: 24, marginTop: 24, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
-            <h3 style={{ fontSize: 18, marginBottom: 16 }}>Mon annonce</h3>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14, marginBottom: 14 }}>
-              <div>
-                {isPublished ? (
-                  <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Badge tone="lime">Publié</Badge> Visible par tous les clubs
-                  </div>
-                ) : (
-                  <div style={{ fontWeight: 700, marginBottom: 4 }}>
-                    {isComplete ? 'Profil prêt à être publié' : 'Complète ton profil pour le publier'}
-                  </div>
-                )}
-                <div style={{ fontSize: 14, color: '#A4B0A6' }}>{myListing.poste} · {myListing.niveau} · {myListing.ville}</div>
+          {!editing && !editingDetails && (
+            <>
+              <GalleryTab userId={user.id} ownerName={profile.nom} readOnly={false} embedded showToast={showToast} />
+
+              <div style={{ textAlign: 'right', marginBottom: 8 }}>
+                <button onClick={requestDelete} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
               </div>
-              {isPublished ? (
-                <GhostButton onClick={handleUnpublish} style={{ fontSize: 12.5 }}>Retirer de la recherche</GhostButton>
-              ) : isComplete ? (
-                <PrimaryButton onClick={handlePublish} disabled={publishing} style={{ width: 'auto' }}>
-                  {publishing ? 'Publication…' : 'Publier mon profil'}
-                </PrimaryButton>
-              ) : (
-                <PrimaryButton onClick={() => setEditingDetails(true)} style={{ width: 'auto' }}>
-                  Compléter mon profil ({completion}%)
-                </PrimaryButton>
-              )}
-            </div>
-            <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
-              <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
-            </div>
-            <div style={{ fontSize: 13, color: '#A4B0A6' }}>
-              Profil complété à {completion}%{!isComplete && ` — ${COMPLETION_THRESHOLD}% requis pour pouvoir publier`}
-            </div>
-            <div style={{ fontSize: 13, marginTop: 12 }}>
-              <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline' }}>
-                Voir / partager mon profil public ↗
-              </a>
-            </div>
-          </div>
+            </>
+          )}
         </>
       )}
 
@@ -455,6 +439,53 @@ export default function PlayersTab({ user, profile, showToast }) {
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: '#152E26', border: '1.5px solid #D4FF3F', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 16, zIndex: 500, boxShadow: '0 12px 32px rgba(0,0,0,0.45)' }}>
           <span style={{ fontSize: 14 }}>Profil supprimé.</span>
           <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: '#D4FF3F', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
+        </div>
+      )}
+
+      {/* Popup de gestion de l'annonce (publier / retirer, complétion, partage) */}
+      {annonceOpen && myListing && (
+        <div
+          onClick={() => setAnnonceOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}
+        >
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#152E26', border: '1.5px solid #D4FF3F', borderRadius: 16, padding: 24 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <h3 style={{ fontSize: 18 }}>Mon annonce</h3>
+              <button onClick={() => setAnnonceOpen(false)} style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+            {isPublished ? (
+              <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Badge tone="lime">Publié</Badge> Visible par tous les clubs
+              </div>
+            ) : (
+              <div style={{ fontWeight: 700, marginBottom: 4 }}>
+                {isComplete ? 'Profil prêt à être publié' : 'Complète ton profil pour le publier'}
+              </div>
+            )}
+            <div style={{ fontSize: 14, color: '#A4B0A6', marginBottom: 14 }}>{myListing.poste} · {myListing.niveau} · {myListing.ville}</div>
+            <div style={{ height: 6, background: '#0B1F1A', borderRadius: 4, overflow: 'hidden', marginBottom: 8 }}>
+              <div style={{ height: '100%', width: `${completion}%`, background: isComplete ? '#D4FF3F' : '#FF6B6B', transition: 'width .2s ease' }} />
+            </div>
+            <div style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 18 }}>
+              Profil complété à {completion}%{!isComplete && ` — ${COMPLETION_THRESHOLD}% requis pour pouvoir publier`}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {isPublished ? (
+                <GhostButton onClick={() => { setAnnonceOpen(false); handleUnpublish(); }} style={{ fontSize: 13 }}>Retirer de la recherche</GhostButton>
+              ) : isComplete ? (
+                <PrimaryButton onClick={() => { setAnnonceOpen(false); handlePublish(); }} disabled={publishing} style={{ width: 'auto' }}>
+                  {publishing ? 'Publication…' : 'Publier mon profil'}
+                </PrimaryButton>
+              ) : (
+                <PrimaryButton onClick={() => { setAnnonceOpen(false); setEditingDetails(true); }} style={{ width: 'auto' }}>
+                  Compléter mon profil ({completion}%)
+                </PrimaryButton>
+              )}
+              <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: '#D4FF3F', textDecoration: 'underline', fontSize: 13, textAlign: 'center' }}>
+                Voir / partager mon profil public ↗
+              </a>
+            </div>
+          </div>
         </div>
       )}
     </div>

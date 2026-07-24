@@ -8,6 +8,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import PlayerCard from '@/components/PlayerCard';
 import ProfileMediaGrid from '@/components/ProfileMediaGrid';
 import SearchMap from '@/components/SearchMap';
+import { geocodeVille } from '@/lib/geo';
 import { nationalites } from '@/lib/nationalites';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
@@ -81,6 +82,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   const [isFollowing, setIsFollowing] = useState(false);
   const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
   const [loadingFollowList, setLoadingFollowList] = useState(false);
+  const [mapCoords, setMapCoords] = useState(null); // coordonnées géocodées depuis l'adresse du club
 
   const openFollowList = async (type) => {
     setLoadingFollowList(true);
@@ -146,6 +148,31 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
     })();
   }, [targetUserId]);
 
+  // Synchronise la carte avec l'adresse renseignée par le club : on géocode
+  // l'adresse complète (niveau rue) à l'affichage pour que le marqueur corresponde
+  // toujours à l'adresse affichée, même si les coordonnées stockées sont anciennes.
+  useEffect(() => {
+    setMapCoords(null);
+    if (!profile || profile.role !== 'club' || !profile.adresse) return;
+    let annulé = false;
+    (async () => {
+      try {
+        const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(profile.adresse)}&limit=1`);
+        const data = await res.json();
+        const feature = data?.features?.[0];
+        if (!annulé && feature) {
+          const [lng, lat] = feature.geometry.coordinates;
+          setMapCoords({ lat, lng });
+          return;
+        }
+      } catch { /* repli ci-dessous */ }
+      // Repli : géocodage au niveau de la ville.
+      const geo = await geocodeVille(profile.adresse);
+      if (!annulé && geo) setMapCoords({ lat: geo.latitude, lng: geo.longitude });
+    })();
+    return () => { annulé = true; };
+  }, [profile]);
+
   const toggleFollow = async () => {
     if (isFollowing) {
       setIsFollowing(false);
@@ -185,7 +212,9 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   const url = profile.avatar_path ? avatarUrl(supabase, profile.avatar_path) : null;
   const isMe = targetUserId === currentUserId;
   const age = profile.role === 'joueur' && playerListing ? calculAge(playerListing.date_naissance) : null;
-  const hasLocation = profile.latitude != null && profile.longitude != null;
+  const clubLat = mapCoords?.lat ?? profile.latitude;
+  const clubLng = mapCoords?.lng ?? profile.longitude;
+  const hasLocation = clubLat != null && clubLng != null;
 
   return (
     <div style={{ maxWidth: 560, margin: '0 auto' }}>
@@ -291,29 +320,47 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         </div>
       )}
 
-      {/* Carte de localisation (club uniquement) */}
-      {profile.role === 'club' && hasLocation && (
-        <div style={{ marginTop: 28, marginBottom: 8 }}>
-          <SectionTitle>Localisation</SectionTitle>
-          <SearchMap markers={[{ lat: profile.latitude, lng: profile.longitude, title: profile.nom, color: '#D4FF3F' }]} />
+      {/* Annonces du club — placées en premier car c'est l'info principale */}
+      {profile.role === 'club' && (
+        <div style={{ marginTop: 28 }}>
+          <SectionTitle>Annonces du club{needs.length > 0 ? ` (${needs.length})` : ''}</SectionTitle>
+          {needs.length === 0 ? (
+            <div style={{ background: '#152E26', border: '1px dashed #2C4A3D', borderRadius: 12, padding: '20px 16px', textAlign: 'center', color: '#8C9A8E', fontSize: 13.5 }}>
+              Ce club n'a pas d'annonce en ligne pour le moment.
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gap: 10 }}>
+              {needs.map((n) => (
+                <div key={n.id} style={{ background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 12, padding: '16px 18px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
+                      <div style={{ fontSize: 13, color: '#A4B0A6', marginTop: 3 }}>{describeNeed(n)}</div>
+                      <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>📍 {n.ville}</div>
+                    </div>
+                    <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>
+                  </div>
+                  {n.remuneration && (
+                    <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 8 }}>💶 {n.remuneration}</div>
+                  )}
+                  {n.details && (
+                    <div style={{ fontSize: 13, color: '#C7CFC8', lineHeight: 1.5, marginTop: 8, paddingTop: 10, borderTop: '1px solid #223a30' }}>{n.details}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       )}
 
-      {/* Besoins actifs (club uniquement) */}
-      {profile.role === 'club' && needs.length > 0 && (
-        <div style={{ marginTop: 28 }}>
-          <SectionTitle>Besoins actifs ({needs.length})</SectionTitle>
-          <div style={{ display: 'grid', gap: 8 }}>
-            {needs.map((n) => (
-              <div key={n.id} style={{ background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, padding: '14px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: 14 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
-                  <div style={{ fontSize: 12.5, color: '#A4B0A6', marginTop: 2 }}>{describeNeed(n)} · {n.ville}</div>
-                </div>
-                <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>
-              </div>
-            ))}
-          </div>
+      {/* Carte de localisation (club uniquement), synchronisée avec l'adresse */}
+      {profile.role === 'club' && hasLocation && (
+        <div style={{ marginTop: 28, marginBottom: 8 }}>
+          <SectionTitle>Localisation</SectionTitle>
+          {profile.adresse && (
+            <div style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 10 }}>📍 {profile.adresse}</div>
+          )}
+          <SearchMap markers={[{ lat: clubLat, lng: clubLng, title: profile.nom, color: '#D4FF3F' }]} />
         </div>
       )}
 

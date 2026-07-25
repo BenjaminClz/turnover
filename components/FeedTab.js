@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-client';
 import { TextArea, EmptyState, PageTitle, PageSubtitle } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import { ROLE_LABELS } from '@/lib/constants';
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const MAX_FILES = 10;
@@ -67,6 +68,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
   const supabase = createClient();
   const [posts, setPosts] = useState([]);
   const [likesByPost, setLikesByPost] = useState({});
+  const [likersModal, setLikersModal] = useState(null); // { loading, users }
   const [loading, setLoading] = useState(true);
   const [composerText, setComposerText] = useState('');
   const [mediaFiles, setMediaFiles] = useState([]);
@@ -185,6 +187,18 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
     }
   };
 
+  const openPostLikers = async (postId) => {
+    setLikersModal({ loading: true, users: [] });
+    const { data: likes } = await supabase.from('post_likes').select('user_id').eq('post_id', postId);
+    const ids = (likes || []).map((l) => l.user_id);
+    let users = [];
+    if (ids.length > 0) {
+      const { data: profiles } = await supabase.from('profiles').select('id, nom, avatar_path, role').in('id', ids);
+      users = profiles || [];
+    }
+    setLikersModal({ loading: false, users });
+  };
+
   const handleDelete = async (id) => {
     const { error } = await supabase.from('posts').delete().eq('id', id);
     if (error) { showToast('Erreur lors de la suppression.'); return; }
@@ -283,13 +297,23 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                 </div>
                 {post.content && <div style={{ fontSize: 14.5, color: '#F5F0E6', lineHeight: 1.6, whiteSpace: 'pre-wrap', marginBottom: 12 }}>{post.content}</div>}
                 <MediaCarousel media={mediaList} />
-                <button
-                  onClick={() => toggleLike(post.id)}
-                  style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', cursor: 'pointer', color: likes.likedByMe ? '#D4FF3F' : '#8C9A8E', fontSize: 13, fontWeight: 600, padding: '4px 0' }}
-                >
-                  <span style={{ fontSize: 16 }}>{likes.likedByMe ? '👍' : '👍🏻'}</span>
-                  {likes.count > 0 ? likes.count : "J'aime"}
-                </button>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '4px 0' }}>
+                  <button
+                    onClick={() => toggleLike(post.id)}
+                    aria-label="J'aime"
+                    style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: likes.likedByMe ? '#FF5C7A' : '#8C9A8E', padding: 0 }}
+                  >
+                    <span style={{ fontSize: 22, lineHeight: 1 }}>{likes.likedByMe ? '♥' : '♡'}</span>
+                  </button>
+                  {likes.count > 0 && (
+                    <button
+                      onClick={() => openPostLikers(post.id)}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#F5F0E6', fontSize: 13, fontWeight: 700, padding: 0 }}
+                    >
+                      {likes.count} {likes.count > 1 ? "j'aime" : "j'aime"}
+                    </button>
+                  )}
+                </div>
               </div>
             );
           })}
@@ -304,6 +328,39 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
         onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); handleDelete(id); }}
         onCancel={() => setConfirmDeleteId(null)}
       />
+
+      {likersModal && (
+        <div onClick={() => setLikersModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: '1px solid #2C4A3D' }}>
+              <span style={{ fontWeight: 700, fontSize: 15 }}>J'aime</span>
+              <button onClick={() => setLikersModal(null)} style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer' }}>✕</button>
+            </div>
+            <div style={{ overflowY: 'auto' }}>
+              {likersModal.loading ? (
+                <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E' }}>Chargement…</div>
+              ) : likersModal.users.length === 0 ? (
+                <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E', fontSize: 14 }}>Personne pour le moment.</div>
+              ) : likersModal.users.map((u) => {
+                const av = u.avatar_path ? avatarUrl(supabase, u.avatar_path) : null;
+                return (
+                  <button key={u.id} onClick={() => { setLikersModal(null); onOpenProfile(u.id); }} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '12px 18px', borderBottom: '1px solid #1c332a', background: 'transparent', border: 'none', cursor: 'pointer', textAlign: 'left' }}>
+                    {av ? (
+                      <img src={av} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 13 }}>{initials(u.nom)}</div>
+                    )}
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: 14, color: '#F5F0E6' }}>{u.nom}</div>
+                      <div style={{ fontSize: 12, color: '#8C9A8E' }}>{ROLE_LABELS[u.role] || u.role}</div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

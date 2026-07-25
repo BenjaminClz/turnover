@@ -313,7 +313,13 @@ function AppPageInner() {
         {tab === 'favoris' && <FavoritesTab user={user} onContact={startConversation} onViewGallery={openGallery} />}
         {tab === 'admin' && profile.is_admin && <AdminTab showToast={showToast} />}
         {tab === 'galerie' && viewingGallery && (
-          <GalleryTab userId={viewingGallery.userId} ownerName={viewingGallery.ownerName} readOnly={viewingGallery.userId !== user.id} showToast={showToast} />
+          <GalleryTab
+            userId={viewingGallery.userId}
+            ownerName={viewingGallery.ownerName}
+            readOnly={viewingGallery.userId !== user.id}
+            showToast={showToast}
+            onShareToMessage={(ownerId, ownerName) => startConversation(ownerId, ownerName, 'Publication partagée')}
+          />
         )}
       </main>
 

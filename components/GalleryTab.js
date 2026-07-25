@@ -22,6 +22,27 @@ const timeAgo = (dateStr) => {
   return `${days} j`;
 };
 
+// Icônes SVG (trait fin, currentColor) cohérentes avec le reste de l'app.
+const HeartIcon = ({ filled, size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 1 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+  </svg>
+);
+const MessageIcon = ({ size = 21 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+  </svg>
+);
+const ShareIcon = ({ size = 20 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="22" y1="2" x2="11" y2="13" />
+    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+  </svg>
+);
+const PlayIcon = ({ size = 15 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4" /></svg>
+);
+
 export default function GalleryTab({
   userId, ownerName, readOnly, showToast, embedded = false,
   title = 'Mes photos & vidéos',
@@ -222,10 +243,10 @@ export default function GalleryTab({
             <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
           )}
           {item.media_type === 'video' && (
-            <span style={{ position: 'absolute', top: 6, right: 8, color: '#fff', fontSize: 14, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>▶</span>
+            <span style={{ position: 'absolute', top: 6, right: 8, color: '#fff', display: 'flex', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))' }}><PlayIcon size={15} /></span>
           )}
           {item.likeCount > 0 && (
-            <span style={{ position: 'absolute', bottom: 6, left: 8, color: '#fff', fontSize: 12, fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>♥ {item.likeCount}</span>
+            <span style={{ position: 'absolute', bottom: 6, left: 8, color: '#fff', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))' }}><HeartIcon filled size={13} /> {item.likeCount}</span>
           )}
         </button>
       ))}
@@ -410,14 +431,14 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
 
       {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '12px 14px 4px', position: 'relative' }}>
-        <button onClick={onToggleLike} aria-label="J'aime" style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'transparent', border: 'none', cursor: 'pointer', color: item.likedByMe ? '#FF5C7A' : '#A4B0A6', fontSize: 14, padding: 0 }}>
-          <span style={{ fontSize: 22, lineHeight: 1 }}>{item.likedByMe ? '♥' : '♡'}</span>
+        <button onClick={onToggleLike} aria-label="J'aime" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: item.likedByMe ? '#FF5C7A' : '#A4B0A6', padding: 0 }}>
+          <HeartIcon filled={item.likedByMe} size={22} />
         </button>
         <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#A4B0A6', fontSize: 14 }}>
-          <span style={{ fontSize: 20, lineHeight: 1 }}>💬</span>{comments.length > 0 ? comments.length : ''}
+          <MessageIcon size={21} />{comments.length > 0 ? comments.length : ''}
         </span>
-        <button onClick={() => setShareOpen((v) => !v)} aria-label="Partager" style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#A4B0A6', fontSize: 18, padding: 0 }}>
-          <span style={{ fontSize: 19, lineHeight: 1 }}>↗</span>
+        <button onClick={() => setShareOpen((v) => !v)} aria-label="Partager" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#A4B0A6', padding: 0 }}>
+          <ShareIcon size={20} />
         </button>
         {shareOpen && (
           <div style={{ position: 'absolute', top: 40, left: 60, background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, zIndex: 20, overflow: 'hidden', minWidth: 200 }}>

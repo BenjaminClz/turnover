@@ -35,6 +35,7 @@ export default function GalleryTab({
   const [meId, setMeId] = useState(null);
   const [owner, setOwner] = useState(null); // { avatar_path, role }
   const [likersModal, setLikersModal] = useState(null); // { itemId, loading, users }
+  const [openIndex, setOpenIndex] = useState(null); // index de la publication ouverte en grand
   const fileInputRef = useRef(null);
 
   const load = async () => {
@@ -181,33 +182,61 @@ export default function GalleryTab({
 
   const ownerAvatar = owner?.avatar_path ? avatarUrl(supabase, owner.avatar_path) : null;
 
-  const posts = loading ? (
+  const renderPostCard = (item, i) => (
+    <PostCard
+      key={item.id}
+      item={item}
+      isOwner={!readOnly && meId === userId}
+      canInteract={!!meId}
+      ownerName={ownerName}
+      ownerAvatar={ownerAvatar}
+      ownerRole={owner?.role}
+      onToggleLike={() => toggleLike(item)}
+      onOpenLikers={() => openLikers(item)}
+      onAddComment={(text) => addComment(item, text)}
+      onDeleteComment={(cid) => deleteComment(item, cid)}
+      onUpdateDescription={(text) => updateDescription(item, text)}
+      onDelete={() => { deleteItem(item); setOpenIndex(null); }}
+      getShareLink={() => shareItem(item)}
+      onShareToMessage={onShareToMessage ? () => onShareToMessage(userId, ownerName) : null}
+      showToast={showToast}
+      modal
+      onClose={() => setOpenIndex(null)}
+      onPrev={i > 0 ? () => setOpenIndex(i - 1) : null}
+      onNext={i < items.length - 1 ? () => setOpenIndex(i + 1) : null}
+      position={`${i + 1} / ${items.length}`}
+    />
+  );
+
+  const grid = loading ? (
     <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 40 }}>Chargement…</div>
   ) : items.length === 0 ? (
     <EmptyState icon="🎞️" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
   ) : (
-    <div style={{ display: 'grid', gap: 18 }}>
-      {items.map((item) => (
-        <PostCard
-          key={item.id}
-          item={item}
-          isOwner={!readOnly && meId === userId}
-          canInteract={!!meId}
-          meId={meId}
-          ownerName={ownerName}
-          ownerAvatar={ownerAvatar}
-          ownerRole={owner?.role}
-          onToggleLike={() => toggleLike(item)}
-          onOpenLikers={() => openLikers(item)}
-          onAddComment={(text) => addComment(item, text)}
-          onDeleteComment={(cid) => deleteComment(item, cid)}
-          onUpdateDescription={(text) => updateDescription(item, text)}
-          onDelete={() => deleteItem(item)}
-          getShareLink={() => shareItem(item)}
-          onShareToMessage={onShareToMessage ? () => onShareToMessage(userId, ownerName) : null}
-          showToast={showToast}
-        />
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+      {items.map((item, i) => (
+        <button key={item.id} onClick={() => setOpenIndex(i)} style={{ position: 'relative', aspectRatio: '1', borderRadius: 8, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', cursor: 'pointer', padding: 0 }}>
+          {item.media_type === 'video' ? (
+            <video src={item.url} muted style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          ) : (
+            <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+          )}
+          {item.media_type === 'video' && (
+            <span style={{ position: 'absolute', top: 6, right: 8, color: '#fff', fontSize: 14, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>▶</span>
+          )}
+          {item.likeCount > 0 && (
+            <span style={{ position: 'absolute', bottom: 6, left: 8, color: '#fff', fontSize: 12, fontWeight: 700, textShadow: '0 1px 3px rgba(0,0,0,0.7)' }}>♥ {item.likeCount}</span>
+          )}
+        </button>
       ))}
+    </div>
+  );
+
+  const lightbox = openIndex != null && items[openIndex] && (
+    <div onClick={() => setOpenIndex(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.85)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 350, padding: 16 }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 440, maxHeight: '92vh', overflowY: 'auto' }}>
+        {renderPostCard(items[openIndex], openIndex)}
+      </div>
     </div>
   );
 
@@ -263,7 +292,8 @@ export default function GalleryTab({
           )}
         </div>
         {!readOnly && <p style={{ fontSize: 13, color: '#8C9A8E', marginBottom: 18 }}>{description}</p>}
-        {posts}
+        {grid}
+        {lightbox}
         {likersModalEl}
       </div>
     );
@@ -289,13 +319,14 @@ export default function GalleryTab({
         </div>
       )}
 
-      {posts}
+      {grid}
+      {lightbox}
       {likersModalEl}
     </div>
   );
 }
 
-function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRole, onToggleLike, onOpenLikers, onAddComment, onDeleteComment, onUpdateDescription, onDelete, getShareLink, onShareToMessage, showToast }) {
+function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRole, onToggleLike, onOpenLikers, onAddComment, onDeleteComment, onUpdateDescription, onDelete, getShareLink, onShareToMessage, showToast, modal = false, onClose, onPrev, onNext, position }) {
   const [commentText, setCommentText] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
   const [editingDesc, setEditingDesc] = useState(false);
@@ -354,14 +385,26 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
             )}
           </>
         )}
+        {modal && onClose && (
+          <button onClick={onClose} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer', lineHeight: 1, marginLeft: 4 }}>✕</button>
+        )}
       </div>
 
       {/* Média */}
-      <div style={{ width: '100%', background: '#152E26', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 560, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', background: '#152E26', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 560, overflow: 'hidden' }}>
         {item.media_type === 'video' ? (
           <video src={item.url} controls style={{ width: '100%', maxHeight: 560, display: 'block' }} />
         ) : (
           <img src={item.url} alt="" style={{ width: '100%', maxHeight: 560, objectFit: 'contain', display: 'block' }} />
+        )}
+        {modal && position && (
+          <span style={{ position: 'absolute', top: 8, left: 10, background: 'rgba(11,31,26,0.6)', color: '#F5F0E6', fontSize: 12, padding: '2px 9px', borderRadius: 10 }}>{position}</span>
+        )}
+        {modal && onPrev && (
+          <button onClick={onPrev} aria-label="Précédent" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, borderRadius: '50%', background: 'rgba(11,31,26,0.65)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
+        )}
+        {modal && onNext && (
+          <button onClick={onNext} aria-label="Suivant" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, borderRadius: '50%', background: 'rgba(11,31,26,0.65)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
         )}
       </div>
 

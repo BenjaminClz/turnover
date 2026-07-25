@@ -303,7 +303,7 @@ function AppPageInner() {
           </div>
         )}
         {tab === 'joueur' && <PlayersTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} />}
-        {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
+        {tab === 'club' && <ClubsTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onEditAccount={() => setAccountSettingsOpen(true)} />}
         {STAFF_ROLES.includes(tab) && <StaffTab role={tab} user={user} profile={profile} showToast={showToast} onContact={startConversation} />}
         {tab === 'actualites' && <FeedTab user={user} profile={profile} showToast={showToast} onContact={startConversation} onViewGallery={openGallery} onOpenProfile={openProfile} />}
         {tab === 'profil' && profileUid && <ProfilePage targetUserId={profileUid} currentUserId={user.id} onBack={() => router.back()} onContact={startConversation} showToast={showToast} />}

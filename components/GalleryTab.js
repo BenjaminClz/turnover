@@ -7,7 +7,7 @@ import { EmptyState } from '@/components/ui';
 const BUCKET = 'gallery';
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 Mo par fichier (limite raisonnable, Storage gère bien mieux que le stockage clé-valeur)
 
-export default function GalleryTab({ userId, ownerName, readOnly, showToast, embedded = false }) {
+export default function GalleryTab({ userId, ownerName, readOnly, showToast, embedded = false, title = 'Mes photos & vidéos', description = 'Montre-toi en action — visible par les clubs qui consultent ton profil. Jusqu\'à 20 Mo par fichier.' }) {
   const supabase = createClient();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -95,7 +95,7 @@ export default function GalleryTab({ userId, ownerName, readOnly, showToast, emb
     return (
       <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
-          <h3 style={{ fontSize: 18 }}>Mes photos &amp; vidéos</h3>
+          <h3 style={{ fontSize: 18 }}>{title}</h3>
           {!readOnly && (
             <>
               {uploadInput}
@@ -106,7 +106,7 @@ export default function GalleryTab({ userId, ownerName, readOnly, showToast, emb
           )}
         </div>
         {!readOnly && (
-          <p style={{ fontSize: 13, color: '#8C9A8E', marginBottom: 18 }}>Montre-toi en action — visible par les clubs qui consultent ton profil. Jusqu'à 20 Mo par fichier.</p>
+          <p style={{ fontSize: 13, color: '#8C9A8E', marginBottom: 18 }}>{description}</p>
         )}
         {mediaGrid}
       </div>

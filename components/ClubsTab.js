@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_ENTRAINEUR, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
-import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, PageTitle, PageSubtitle } from '@/components/ui';
+import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import GalleryTab from '@/components/GalleryTab';
@@ -25,7 +25,7 @@ const emptyForm = {
 
 const DELETE_UNDO_DELAY_MS = 5000;
 
-export default function ClubsTab({ user, profile, showToast, onContact }) {
+export default function ClubsTab({ user, profile, showToast, onContact, onEditAccount }) {
   const supabase = createClient();
   const { isActive, loading: subLoading } = useSubscription(user.id);
   const [needs, setNeeds] = useState([]);
@@ -35,8 +35,9 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
   const [creatingType, setCreatingType] = useState(null); // type choisi pour une NOUVELLE annonce
   const [geocoding, setGeocoding] = useState(false);
   const [form, setForm] = useState(emptyForm);
-  const [showInfraGallery, setShowInfraGallery] = useState(false);
   const [deletePendingId, setDeletePendingId] = useState(null);
+  const [followersCount, setFollowersCount] = useState(0);
+  const [followingCount, setFollowingCount] = useState(0);
   const deleteTimerRef = useRef(null);
 
   const load = async () => {
@@ -48,6 +49,15 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
     if (error) { showToast('Erreur de chargement.'); setLoading(false); return; }
     setNeeds(data || []);
     setMyListings((data || []).filter((n) => n.owner_id === user.id));
+
+    // Compteurs abonnés / abonnements (même principe que le profil joueur).
+    const [{ count: fwers }, { count: fwing }] = await Promise.all([
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id),
+      supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id),
+    ]);
+    setFollowersCount(fwers || 0);
+    setFollowingCount(fwing || 0);
+
     setLoading(false);
   };
 
@@ -254,37 +264,55 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
 
   const othersNeeds = needs.filter((n) => n.owner_id !== user.id);
 
+  const InfoRow = ({ label, value }) => value ? (
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '10px 0', borderBottom: '1px solid #1c332a' }}>
+      <span style={{ color: '#8C9A8E' }}>{label}</span>
+      <span style={{ color: '#F5F0E6', fontWeight: 600, textAlign: 'right' }}>{value}</span>
+    </div>
+  ) : null;
+
   return (
     <div>
-      <PageTitle>Mon espace club</PageTitle>
-      <PageSubtitle>Publie autant de besoins que nécessaire — joueur, staff médical, encadrement technique ou bénévole.</PageSubtitle>
+      <PageTitle>Mon espace</PageTitle>
+      <PageSubtitle>Ton club, tes annonces et tes photos, visibles par les joueurs.</PageSubtitle>
 
-      <div style={{ marginBottom: 28 }}>
+      <div style={{ marginBottom: 20 }}>
         <AvatarUpload userId={user.id} currentPath={profile?.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} size={84} />
       </div>
 
-      {isActive && (
-        <div style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid #D4FF3F', borderRadius: 14, padding: 18, marginBottom: 28, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <Badge tone="lime">Pro</Badge>
-          <span style={{ fontSize: 14, color: '#A4B0A6' }}>Abonnement actif — annonces illimitées et mise en avant débloquées.</span>
+      <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{myListings.length}</div>
+          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Annonces</div>
         </div>
-      )}
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{followersCount}</div>
+          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnés</div>
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{followingCount}</div>
+          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnements</div>
+        </div>
+      </div>
 
-      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 36 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
-          <div>
-            <h3 style={{ fontSize: 17, marginBottom: 4 }}>Infrastructures du club</h3>
-            <p style={{ fontSize: 13.5, color: '#A4B0A6' }}>Terrain, vestiaires, club-house… visible par tous les joueurs et profils que tu contactes.</p>
-          </div>
-          <SecondaryButton onClick={() => setShowInfraGallery((v) => !v)} style={{ width: 'auto' }}>
-            {showInfraGallery ? 'Masquer' : 'Gérer la galerie'}
-          </SecondaryButton>
+      {/* Mes informations club — même principe que la carte du profil joueur */}
+      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
+          <h3 style={{ fontSize: 18 }}>Mes informations</h3>
+          {onEditAccount && <GhostButton onClick={onEditAccount} style={{ fontSize: 13 }}>Modifier</GhostButton>}
         </div>
-        {showInfraGallery && (
-          <div style={{ marginTop: 24 }}>
-            <GalleryTab userId={user.id} ownerName={profile?.nom} readOnly={false} showToast={showToast} />
-          </div>
-        )}
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#0B1F1A', border: '1px solid #274238', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+          <Badge tone={isActive ? 'lime' : 'default'}>{isActive ? 'Pro' : 'Gratuit'}</Badge>
+          <span style={{ fontSize: 12.5, color: '#8C9A8E' }}>
+            {isActive ? 'Abonnement actif — annonces illimitées et mise en avant.' : 'Compte gratuit — 1 annonce active à la fois.'}
+          </span>
+        </div>
+
+        <div style={{ marginBottom: 8 }}>
+          <InfoRow label="Nom du club" value={profile?.nom} />
+          <InfoRow label="Adresse" value={profile?.adresse} />
+        </div>
       </div>
 
       {/* Mes annonces actives, chacune avec son propre Modifier/Supprimer */}
@@ -356,6 +384,19 @@ export default function ClubsTab({ user, profile, showToast, onContact }) {
           {renderForm(creatingType)}
         </div>
       )}
+
+      {/* Galerie photos du club, intégrée comme sur le profil joueur */}
+      <div style={{ marginBottom: 36 }}>
+        <GalleryTab
+          userId={user.id}
+          ownerName={profile?.nom}
+          readOnly={false}
+          embedded
+          title="Photos du club"
+          description="Terrain, vestiaires, club-house… visible par les joueurs que tu contactes. Jusqu'à 20 Mo par fichier."
+          showToast={showToast}
+        />
+      </div>
 
       {loading ? (
         <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>

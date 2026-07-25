@@ -350,31 +350,21 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       )}
 
       {/* Bouton pour ajouter une nouvelle annonce, ou sélecteur de type si pas encore d'annonce */}
-      {!creatingType && !editingId && (
-        myListings.length >= 1 && !isActive && !subLoading ? (
-          <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36, textAlign: 'center' }}>
-            <div style={{ fontSize: 32, marginBottom: 12 }}>🔒</div>
-            <h3 style={{ fontSize: 17, marginBottom: 8 }}>Limite gratuite atteinte</h3>
-            <p style={{ fontSize: 14, color: '#A4B0A6', marginBottom: 20, maxWidth: 360, marginLeft: 'auto', marginRight: 'auto' }}>
-              Le compte gratuit permet 1 annonce active. Passe par l'onglet <strong style={{ color: '#F5F0E6' }}>Abonnement</strong> pour en publier davantage.
-            </p>
+      {!creatingType && !editingId && !(myListings.length >= 1 && !isActive && !subLoading) && (
+        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
+          <h3 style={{ marginBottom: 20, fontSize: 18 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
+            {BESOIN_TYPES.map((t) => (
+              <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: '#F5F0E6', transition: 'border-color .15s ease' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#D4FF3F'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2C4A3D'}
+              >
+                <div style={{ fontSize: 26, marginBottom: 8 }}>{t.icon}</div>
+                <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
+              </button>
+            ))}
           </div>
-        ) : (
-          <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
-            <h3 style={{ marginBottom: 20, fontSize: 18 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
-              {BESOIN_TYPES.map((t) => (
-                <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: '#F5F0E6', transition: 'border-color .15s ease' }}
-                  onMouseEnter={(e) => e.currentTarget.style.borderColor = '#D4FF3F'}
-                  onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2C4A3D'}
-                >
-                  <div style={{ fontSize: 26, marginBottom: 8 }}>{t.icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )
+        </div>
       )}
 
       {/* Formulaire de création d'une nouvelle annonce */}

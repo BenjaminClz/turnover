@@ -295,6 +295,9 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
         </div>
       </div>
 
+      <div className="tv-two-col">
+      <div>
+
       {/* Mes informations club — même principe que la carte du profil joueur */}
       <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
@@ -375,6 +378,9 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
         </div>
       )}
 
+      </div>
+      <div>
+
       {/* Galerie photos du club, intégrée comme sur le profil joueur */}
       <div style={{ marginBottom: 36 }}>
         <GalleryTab
@@ -386,6 +392,9 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
           description="Terrain, vestiaires, club-house… visible par les joueurs que tu contactes. Jusqu'à 20 Mo par fichier."
           showToast={showToast}
         />
+      </div>
+
+      </div>
       </div>
 
       {loading ? (

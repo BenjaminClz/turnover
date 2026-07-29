@@ -234,7 +234,7 @@ export default function GalleryTab({
   ) : items.length === 0 ? (
     <EmptyState icon="🎞️" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
   ) : (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 6 }}>
       {items.map((item, i) => (
         <button key={item.id} onClick={() => setOpenIndex(i)} style={{ position: 'relative', aspectRatio: '1', borderRadius: 8, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', cursor: 'pointer', padding: 0 }}>
           {item.media_type === 'video' ? (

@@ -149,3 +149,37 @@ h1, h2, h3 { line-height: 1.15; }
   from { opacity: 0; transform: translateY(4px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* Conteneur principal : s'élargit avec l'écran, marges maîtrisées */
+.tv-main {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 44px 5vw 110px;
+}
+@media (min-width: 1400px) {
+  .tv-main { max-width: 1360px; }
+}
+
+/* Disposition deux colonnes (profil / espace club) : une seule colonne sur
+   petit écran, deux colonnes dès qu'il y a de la place. */
+.tv-two-col {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  align-items: start;
+}
+@media (min-width: 1024px) {
+  .tv-two-col {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+    gap: 28px;
+  }
+}
+.tv-two-col > * { min-width: 0; }
+
+/* Colonne de gauche : les cartes s'empilent verticalement */
+.tv-col-stack {
+  display: grid;
+  gap: 24px;
+  align-content: start;
+}

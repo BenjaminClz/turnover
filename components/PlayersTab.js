@@ -368,6 +368,9 @@ export default function PlayersTab({ user, profile, showToast }) {
               </form>
             </div>
           ) : (
+            <>
+            <div className="tv-two-col">
+            <div>
             <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
                 <h3 style={{ fontSize: 18 }}>Mes informations</h3>
@@ -421,15 +424,15 @@ export default function PlayersTab({ user, profile, showToast }) {
                 </div>
               )}
             </div>
-          )}
-
-          {!editing && !editingDetails && (
-            <>
+            </div>
+            <div>
               <GalleryTab userId={user.id} ownerName={profile.nom} readOnly={false} embedded showToast={showToast} />
+            </div>
+            </div>
 
-              <div style={{ textAlign: 'right', marginBottom: 8 }}>
-                <button onClick={requestDelete} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
-              </div>
+            <div style={{ textAlign: 'right', marginTop: 24, marginBottom: 8 }}>
+              <button onClick={requestDelete} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer mon profil</button>
+            </div>
             </>
           )}
         </>

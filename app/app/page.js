@@ -293,7 +293,7 @@ function AppPageInner() {
         </div>
       </nav>
 
-      <main key={tab} className="tv-fade-in" style={{ maxWidth: 960, margin: '0 auto', padding: '44px 5vw 110px' }}>
+      <main key={tab} className="tv-fade-in tv-main">
         {profile.role === 'joueur' && myPlayerListing && myPlayerListing.published !== true && tab !== 'joueur' && (
           <div style={{ background: 'rgba(255,107,107,0.08)', border: '1.5px solid #FF6B6B', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <span style={{ fontSize: 14 }}>Ton profil n'est pas encore publié — les clubs ne peuvent pas te trouver pour l'instant.</span>

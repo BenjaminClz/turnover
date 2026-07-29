@@ -8,20 +8,16 @@ import { geocodeAdresse } from '@/lib/geo';
 
 export default function AuthPage() {
   const supabase = createClient();
-  const [mode, setMode] = useState('login'); // login | signup | verify-phone | sent | forgot | sent-reset
+  const [mode, setMode] = useState('login'); // login | signup | sent | forgot | sent-reset
   const [form, setForm] = useState({ nom: '', prenom: '', email: '', password: '', role: 'joueur', telephone: '', adresse: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-  const [simCode, setSimCode] = useState('');
-  const [otpInput, setOtpInput] = useState('');
 
   const isClub = form.role === 'club';
 
-  const genCode = () => String(Math.floor(100000 + Math.random() * 900000));
-
-  // Étape 1 du signup : valider les champs, puis passer à la vérification du téléphone
-  // (pas encore de vraie création de compte à ce stade).
-  const handleSignupStart = (e) => {
+  // Inscription : validation puis création du compte. Supabase envoie un email de
+  // confirmation ; le compte n'est actif qu'une fois le lien du mail cliqué.
+  const handleSignup = async (e) => {
     e.preventDefault();
     setError('');
     const nomOk = isClub ? form.nom.trim() : (form.prenom.trim() && form.nom.trim());
@@ -32,17 +28,8 @@ export default function AuthPage() {
       setError("L'adresse des locaux du club est requise."); return;
     }
     if (form.password.length < 6) { setError('Le mot de passe doit faire au moins 6 caractères.'); return; }
-    setSimCode(genCode());
-    setOtpInput('');
-    setMode('verify-phone');
-  };
 
-  // Étape 2 : vérification du code SMS simulé, puis création réelle du compte Supabase
-  const handleVerifyPhone = async (e) => {
-    e.preventDefault();
-    if (otpInput.trim() !== simCode) { setError('Code incorrect.'); return; }
-    setError(''); setLoading(true);
-
+    setLoading(true);
     // Pour un club, on géolocalise l'adresse des locaux avant de créer le compte,
     // pour que les joueurs puissent la situer sur la carte depuis leur domicile.
     let geo = null;
@@ -60,6 +47,7 @@ export default function AuthPage() {
       email: form.email,
       password: form.password,
       options: {
+        emailRedirectTo: `${window.location.origin}/app`,
         data: {
           nom: nomComplet,
           prenom: isClub ? null : form.prenom.trim(),
@@ -72,7 +60,7 @@ export default function AuthPage() {
       },
     });
     setLoading(false);
-    if (signUpError) { setError(signUpError.message); setMode('signup'); return; }
+    if (signUpError) { setError(signUpError.message); return; }
     setMode('sent');
   };
 
@@ -166,31 +154,9 @@ export default function AuthPage() {
     );
   }
 
-  if (mode === 'verify-phone') {
-    return wrap(
-      <form onSubmit={handleVerifyPhone}>
-        <h2 style={{ fontSize: 20, marginBottom: 6 }}>Vérification du téléphone</h2>
-        <p style={{ color: '#8C9A8E', fontSize: 13, marginBottom: 18 }}>Entre le code envoyé au {form.telephone}.</p>
-        <div style={{ background: 'rgba(212,255,63,0.08)', border: '1px dashed #D4FF3F', borderRadius: 10, padding: 16, marginBottom: 20 }}>
-          <div style={{ fontSize: 11, color: '#D4FF3F', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 6 }}>Code SMS (simulé)</div>
-          <div style={{ fontFamily: 'monospace', fontSize: 26, fontWeight: 700, letterSpacing: '0.1em' }}>{simCode}</div>
-          <div style={{ fontSize: 12, color: '#8C9A8E', marginTop: 6 }}>Simulation — dans la vraie appli, ce code serait envoyé par SMS.</div>
-        </div>
-        <Field label="Code à 6 chiffres">
-          <TextInput value={otpInput} onChange={(e) => setOtpInput(e.target.value)} placeholder="000000" maxLength={6} />
-        </Field>
-        {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
-        <PrimaryButton type="submit" disabled={loading}>{loading ? 'Création du compte…' : 'Valider et créer mon compte'}</PrimaryButton>
-        <div style={{ textAlign: 'center', marginTop: 16 }}>
-          <GhostButton type="button" onClick={() => { setMode('signup'); setError(''); }}>Retour</GhostButton>
-        </div>
-      </form>
-    );
-  }
-
   if (mode === 'signup') {
     return wrap(
-      <form onSubmit={handleSignupStart}>
+      <form onSubmit={handleSignup}>
         <h2 style={{ fontSize: 20, marginBottom: 18 }}>Créer un compte</h2>
         <Field label="Je suis…">
           <Select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} options={ROLES} />
@@ -224,7 +190,7 @@ export default function AuthPage() {
           <TextInput type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="6 caractères minimum" />
         </Field>
         {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
-        <PrimaryButton type="submit" disabled={loading}>{loading ? '…' : 'Continuer'}</PrimaryButton>
+        <PrimaryButton type="submit" disabled={loading}>{loading ? 'Création du compte…' : 'Créer mon compte'}</PrimaryButton>
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <GhostButton type="button" onClick={() => { setMode('login'); setError(''); }}>J'ai déjà un compte</GhostButton>
         </div>

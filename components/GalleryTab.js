@@ -234,13 +234,13 @@ export default function GalleryTab({
   ) : items.length === 0 ? (
     <EmptyState icon="🎞️" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
   ) : (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 6 }}>
+    <div className="tv-masonry">
       {items.map((item, i) => (
-        <button key={item.id} onClick={() => setOpenIndex(i)} style={{ position: 'relative', aspectRatio: '1', borderRadius: 8, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', cursor: 'pointer', padding: 0 }}>
+        <button key={item.id} onClick={() => setOpenIndex(i)} style={{ position: 'relative', display: 'block', borderRadius: 8, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', cursor: 'pointer', padding: 0 }}>
           {item.media_type === 'video' ? (
-            <video src={item.url} muted style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <video src={item.url} muted style={{ width: '100%', height: 'auto', display: 'block' }} />
           ) : (
-            <img src={item.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+            <img src={item.url} alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
           )}
           {item.media_type === 'video' && (
             <span style={{ position: 'absolute', top: 6, right: 8, color: '#fff', display: 'flex', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))' }}><PlayIcon size={15} /></span>

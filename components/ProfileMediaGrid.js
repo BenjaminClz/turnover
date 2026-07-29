@@ -9,17 +9,17 @@ export default function ProfileMediaGrid({ items }) {
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 3 }}>
+      <div className="tv-masonry">
         {items.map((it, i) => (
           <button
             key={it.id}
             onClick={() => setLightboxIdx(i)}
-            style={{ position: 'relative', aspectRatio: '1', overflow: 'hidden', border: 'none', padding: 0, cursor: 'pointer', background: '#0B1F1A' }}
+            style={{ position: 'relative', display: 'block', borderRadius: 8, overflow: 'hidden', border: '1px solid #274238', padding: 0, cursor: 'pointer', background: '#0B1F1A' }}
           >
             {it.media_type === 'video' ? (
-              <video src={it.url} style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <video src={it.url} style={{ width: '100%', height: 'auto', display: 'block' }} />
             ) : (
-              <img src={it.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+              <img src={it.url} alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
             )}
             {it.media_type === 'video' && (
               <span style={{ position: 'absolute', top: 6, right: 6, fontSize: 15, filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.6))' }}>▶️</span>

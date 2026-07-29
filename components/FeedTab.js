@@ -30,9 +30,9 @@ function MediaCarousel({ media }) {
   return (
     <div style={{ position: 'relative', marginBottom: 12, borderRadius: 10, overflow: 'hidden', background: '#0B1F1A' }}>
       {current.type === 'video' ? (
-        <video src={current.url} controls style={{ width: '100%', maxHeight: 420, display: 'block' }} />
+        <video src={current.url} controls style={{ width: '100%', maxHeight: 600, objectFit: 'contain', display: 'block' }} />
       ) : (
-        <img src={current.url} alt="" style={{ width: '100%', maxHeight: 420, objectFit: 'cover', display: 'block' }} />
+        <img src={current.url} alt="" style={{ width: '100%', maxHeight: 600, objectFit: 'contain', display: 'block' }} />
       )}
       {media.length > 1 && (
         <>

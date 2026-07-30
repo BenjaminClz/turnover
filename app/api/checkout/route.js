@@ -53,6 +53,7 @@ export async function POST(request) {
         success_url: `${origin}/app?upgrade=success`,
         cancel_url: `${origin}/app?upgrade=cancelled`,
         metadata: { supabase_user_id: userId, plan: 'yearly' },
+        subscription_data: { metadata: { supabase_user_id: userId, plan: 'yearly' } },
       });
       return Response.json({ url: session.url });
     }

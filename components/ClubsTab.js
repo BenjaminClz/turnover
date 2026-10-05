@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
+import ClubFacilitiesEditor from './ClubFacilities';
 import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_ENTRAINEUR, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
@@ -316,6 +317,10 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
           <InfoRow label="Nom du club" value={profile?.nom} />
           <InfoRow label="Adresse" value={profile?.adresse} />
         </div>
+      </div>
+
+      <div style={{ marginBottom: 24 }}>
+        <ClubFacilitiesEditor userId={user.id} />
       </div>
 
       {/* Mes annonces actives, chacune avec son propre Modifier/Supprimer */}

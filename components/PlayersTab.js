@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
+import ExperienceEditor from './ExperienceEditor';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, PrimaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
@@ -428,6 +429,10 @@ export default function PlayersTab({ user, profile, showToast }) {
             <div>
               <GalleryTab userId={user.id} ownerName={profile.nom} readOnly={false} embedded showToast={showToast} />
             </div>
+            </div>
+
+            <div style={{ marginTop: 24 }}>
+              <ExperienceEditor userId={user.id} />
             </div>
 
             <div style={{ textAlign: 'right', marginTop: 24, marginBottom: 8 }}>

@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
+import { ClubFacilitiesList } from './ClubFacilities';
+import ExperienceTimeline from './ExperienceTimeline';
 import { Badge, TextArea } from '@/components/ui';
 import { ROLE_LABELS } from '@/lib/constants';
 import { avatarUrl } from '@/components/AvatarUpload';
@@ -341,6 +343,8 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         </div>
       )}
 
+      {profile.role === 'club' && <ClubFacilitiesList items={profile.infrastructures} />}
+
       {/* Carte de localisation (club uniquement), synchronisée avec l'adresse */}
       {profile.role === 'club' && hasLocation && (
         <div style={{ marginTop: 28, marginBottom: 8 }}>
@@ -376,6 +380,9 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
           <div style={{ textAlign: 'center', color: '#8C9A8E', fontSize: 13.5, padding: 20 }}>Aucune photo publiée pour le moment.</div>
         )}
       </div>
+
+      {/* Parcours (joueur) */}
+      <ExperienceTimeline userId={targetUserId} />
 
       {/* Recommandations (joueur uniquement) */}
       {profile.role === 'joueur' && (

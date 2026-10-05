@@ -8,5 +8,5 @@ export async function GET(req) {
   }
   const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
   const { error } = await supabase.from('profiles').select('id').limit(1);
-  return Response.json({ ok: !error, error: error?.message ?? null });
+  return Response.json({ ok: !error, error: error?.message ?? null }, { status: error ? 500 : 200 });
 }

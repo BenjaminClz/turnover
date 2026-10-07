@@ -13,6 +13,9 @@ import SearchMap from '@/components/SearchMap';
 import { geocodeAdresse } from '@/lib/geo';
 import { nationalites } from '@/lib/nationalites';
 
+// Palette partagée avec components/ui.js
+const C = { bg: '#0B1F1A', panel: '#0F241E', line: '#24423A', soft: '#1A332B', text: '#E8EEE9', muted: '#8FA096', sub: '#C7CFC8', lime: '#D4FF3F', ink: '#0B1F1A' };
+
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
 
@@ -22,7 +25,7 @@ const lastSeenLabel = (dateStr) => {
   if (!dateStr) return null;
   const diffMs = Date.now() - new Date(dateStr).getTime();
   const mins = diffMs / 60000;
-  if (mins < 5) return 'En ligne maintenant';
+  if (mins < 5) return 'En ligne';
   if (mins < 60) return `Actif il y a ${Math.floor(mins)} min`;
   const hrs = mins / 60;
   if (hrs < 24) return `Actif il y a ${Math.floor(hrs)} h`;
@@ -48,24 +51,57 @@ const postTimeAgo = (dateStr) => {
   return `${Math.floor(hrs / 24)} j`;
 };
 
+const join = (...parts) => parts.filter(Boolean).join(', ');
+
 const describeNeed = (n) => {
-  if (n.besoin_type === 'joueur' || !n.besoin_type) return `${n.poste || ''} · ${n.niveau || ''}`.trim();
-  if (n.besoin_type === 'sante') return `${n.specialite || 'Pro santé'} · ${n.sport || ''}`.trim();
-  if (n.besoin_type === 'preparateur') return `Prép. physique · ${n.sport || ''}`.trim();
-  if (n.besoin_type === 'entraineur') return `${n.specialite || 'Entraîneur'} · ${n.niveau || ''}`.trim();
-  if (n.besoin_type === 'arbitre') return `Arbitre · ${n.niveau || ''}`.trim();
+  if (n.besoin_type === 'joueur' || !n.besoin_type) return join(n.poste, n.niveau);
+  if (n.besoin_type === 'sante') return join(n.specialite || 'Pro santé', n.sport);
+  if (n.besoin_type === 'preparateur') return join('Prép. physique', n.sport);
+  if (n.besoin_type === 'entraineur') return join(n.specialite || 'Entraîneur', n.niveau);
+  if (n.besoin_type === 'arbitre') return join('Arbitre', n.niveau);
   if (n.besoin_type === 'benevole') return n.type_mission || 'Bénévole';
   return '';
 };
 
 const describeStaff = (s) => {
-  if (s.role === 'sante') return `${s.specialite || 'Pro santé'} · ${s.sport || ''}`.trim();
-  if (s.role === 'preparateur') return `Prép. physique · ${s.sport || ''}`.trim();
-  if (s.role === 'entraineur') return `${s.specialite || 'Entraîneur'} · ${s.niveau || ''}`.trim();
-  if (s.role === 'arbitre') return `Arbitre · ${s.niveau || ''}`.trim();
+  if (s.role === 'sante') return join(s.specialite || 'Pro santé', s.sport);
+  if (s.role === 'preparateur') return join('Prép. physique', s.sport);
+  if (s.role === 'entraineur') return join(s.specialite || 'Entraîneur', s.niveau);
+  if (s.role === 'arbitre') return join('Arbitre', s.niveau);
   if (s.role === 'benevole') return s.type_mission || 'Bénévole';
   return ROLE_LABELS[s.role] || '';
 };
+
+// Icônes fines (remplacent les emojis)
+const Icon = ({ d, size = 14 }) => (
+  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true" style={{ flexShrink: 0 }}>
+    <path d={d} />
+  </svg>
+);
+const PIN = 'M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z';
+const BACK = 'M15 18l-6-6 6-6';
+const CHECK = 'M20 6 9 17l-5-5';
+const CLOSE = 'M18 6 6 18M6 6l12 12';
+
+const css = `
+.pp-row { transition: background .12s ease; }
+.pp-row:hover { background: ${C.soft}; }
+.pp-tab { background: transparent; border: none; border-bottom: 2px solid transparent; color: ${C.muted}; padding: 12px 0; margin-right: 24px; font-size: 14px; font-weight: 500; cursor: pointer; }
+.pp-tab:hover { color: ${C.text}; }
+.pp-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
+.pp-stat { background: transparent; border: none; color: inherit; text-align: left; padding: 12px 16px; border-left: 1px solid ${C.line}; }
+.pp-stat:first-child { border-left: none; padding-left: 0; }
+.pp-stat[data-click="1"] { cursor: pointer; }
+.pp-stat[data-click="1"]:hover .pp-stat-v { color: ${C.lime}; }
+.pp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+@media (max-width: 640px) {
+  .pp-head { flex-wrap: wrap; }
+  .pp-actions { width: 100%; }
+  .pp-actions button { flex: 1; }
+  .pp-stat { padding: 10px 12px; }
+  .pp-cols { grid-template-columns: 1fr !important; }
+}
+`;
 
 export default function ProfilePage({ targetUserId, currentUserId, onBack, onContact, showToast }) {
   const supabase = createClient();
@@ -85,6 +121,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   const [followList, setFollowList] = useState(null); // { type: 'followers'|'following', users: [] }
   const [loadingFollowList, setLoadingFollowList] = useState(false);
   const [mapCoords, setMapCoords] = useState(null); // coordonnées géocodées depuis l'adresse du club
+  const [tab, setTab] = useState('apercu');
 
   const openFollowList = async (type) => {
     setLoadingFollowList(true);
@@ -109,6 +146,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   useEffect(() => {
     if (!targetUserId) return;
     setLoading(true);
+    setTab('apercu');
     (async () => {
       const { data: p } = await supabase.from('profiles').select('*').eq('id', targetUserId).maybeSingle();
       setProfile(p);
@@ -136,7 +174,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         setStaffListing(sl);
       }
 
-      // Charger les compteurs abonnés/abonnements et le statut de suivi.
+      // Compteurs abonnés/abonnements et statut de suivi
       const [{ count: fwersCount }, { count: fwingCount }, { data: meFollowing }] = await Promise.all([
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', targetUserId),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', targetUserId),
@@ -150,17 +188,15 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
     })();
   }, [targetUserId]);
 
-  // Synchronise la carte avec l'adresse renseignée par le club : on géocode
-  // l'adresse complète (niveau rue) à l'affichage pour que le marqueur corresponde
-  // toujours à l'adresse affichée, même si les coordonnées stockées sont anciennes.
+  // Géocode l'adresse du club à l'affichage pour que le marqueur corresponde toujours à l'adresse affichée
   useEffect(() => {
     setMapCoords(null);
     if (!profile || profile.role !== 'club' || !profile.adresse) return;
-    let annulé = false;
+    let annule = false;
     geocodeAdresse(profile.adresse).then((geo) => {
-      if (!annulé && geo) setMapCoords({ lat: geo.latitude, lng: geo.longitude });
+      if (!annule && geo) setMapCoords({ lat: geo.latitude, lng: geo.longitude });
     });
-    return () => { annulé = true; };
+    return () => { annule = true; };
   }, [profile]);
 
   const toggleFollow = async () => {
@@ -174,7 +210,6 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       setFollowersCount((c) => c + 1);
       const { error } = await supabase.from('follows').insert({ follower_id: currentUserId, following_id: targetUserId });
       if (error) { setIsFollowing(false); setFollowersCount((c) => c - 1); return; }
-      // Prévient la personne suivie via une notification (visible sur la cloche).
       const { data: me } = await supabase.from('profiles').select('nom').eq('id', currentUserId).maybeSingle();
       await supabase.from('notifications').insert({
         user_id: targetUserId,
@@ -196,241 +231,270 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
     setRecommendations(data || []);
   };
 
-  if (loading) return <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 60 }}>Chargement du profil…</div>;
-  if (!profile) return <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 60 }}>Profil introuvable.</div>;
+  if (loading) return <div style={{ color: C.muted, textAlign: 'center', padding: 60 }}>Chargement du profil…</div>;
+  if (!profile) return <div style={{ color: C.muted, textAlign: 'center', padding: 60 }}>Profil introuvable.</div>;
 
   const url = profile.avatar_path ? avatarUrl(supabase, profile.avatar_path) : null;
   const isMe = targetUserId === currentUserId;
-  const age = profile.role === 'joueur' && playerListing ? calculAge(playerListing.date_naissance) : null;
+  const isPlayer = profile.role === 'joueur';
+  const isClub = profile.role === 'club';
+  const isStaff = STAFF_ROLES.includes(profile.role);
+  const age = isPlayer && playerListing ? calculAge(playerListing.date_naissance) : null;
   const clubLat = mapCoords?.lat ?? profile.latitude;
   const clubLng = mapCoords?.lng ?? profile.longitude;
   const hasLocation = clubLat != null && clubLng != null;
+  const seen = lastSeenLabel(profile.last_seen_at);
+  const listing = isPlayer ? playerListing : isStaff ? staffListing : null;
+  const bio = listing?.bio;
+
+  const subtitle = isPlayer && playerListing ? join(playerListing.poste, playerListing.niveau, age ? `${age} ans` : null)
+    : isStaff && staffListing ? describeStaff(staffListing)
+    : null;
+  const ville = isPlayer || isStaff ? listing?.ville : profile.adresse;
+
+  const contact = () => {
+    const context = isPlayer && playerListing ? join(playerListing.poste, playerListing.ville)
+      : isClub && needs[0] ? describeNeed(needs[0])
+      : isStaff && staffListing ? describeStaff(staffListing) : 'Contact';
+    onContact(targetUserId, profile.nom, context);
+  };
+
+  // Lignes « clé : valeur » de la colonne Profil
+  const facts = [];
+  if (isPlayer && playerListing) {
+    if (playerListing.ville) facts.push(['Ville', `${playerListing.ville}${playerListing.distance != null ? ` (${playerListing.distance} km)` : ''}`]);
+    if (playerListing.taille_cm) facts.push(['Taille', `${playerListing.taille_cm} cm`]);
+    if (playerListing.poids_kg) facts.push(['Poids', `${playerListing.poids_kg} kg`]);
+    if (playerListing.pied_fort) facts.push(['Pied fort', playerListing.pied_fort]);
+    if (playerListing.annees_pratique != null) facts.push(['Pratique', `${playerListing.annees_pratique} ans`]);
+    if (playerListing.nationalites?.length > 0) facts.push(['Nationalité', playerListing.nationalites.map(nomNationalite).join(', ')]);
+    if (playerListing.dernier_club) facts.push(['Dernier club', join(playerListing.dernier_club, playerListing.dernier_club_niveau)]);
+  }
+  if (isStaff && staffListing) {
+    if (staffListing.ville) facts.push(['Ville', `${staffListing.ville}${staffListing.distance != null ? ` (${staffListing.distance} km)` : ''}`]);
+    if (staffListing.diplome) facts.push(['Diplôme', staffListing.diplome]);
+    if (staffListing.sport) facts.push(['Sport', staffListing.sport]);
+  }
+
+  const tabs = [
+    ['apercu', 'Aperçu'],
+    ['photos', `Photos${galleryItems.length ? ` ${galleryItems.length}` : ''}`],
+    ['actus', 'Actualités'],
+    ...(isPlayer ? [['recos', `Recommandations${recommendations.length ? ` ${recommendations.length}` : ''}`]] : []),
+  ];
 
   return (
-    <div style={{ maxWidth: 560, margin: '0 auto' }}>
-      {/* Bouton retour */}
-      <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: '#A4B0A6', cursor: 'pointer', fontSize: 14, fontWeight: 600, marginBottom: 20, display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span style={{ fontSize: 18 }}>←</span> Retour
+    <div style={{ maxWidth: 880, margin: '0 auto', color: C.text }}>
+      <style>{css}</style>
+
+      <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 13.5, fontWeight: 500, marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0 }}>
+        <Icon d={BACK} size={16} /> Retour
       </button>
 
-      {/* En-tête façon Instagram */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 24 }}>
+      {/* En-tête */}
+      <div className="pp-head" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
         {url ? (
-          <img src={url} alt="" style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '3px solid #2C4A3D' }} />
+          <img src={url} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: `1px solid ${C.line}` }} />
         ) : (
-          <div style={{ width: 96, height: 96, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 30, flexShrink: 0 }}>
+          <div style={{ width: 64, height: 64, borderRadius: '50%', background: C.soft, border: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.text, fontSize: 20, fontWeight: 600, flexShrink: 0 }}>
             {initials(profile.nom)}
           </div>
         )}
-        <div style={{ display: 'flex', gap: 24, flex: 1 }}>
-          <StatBlock value={galleryItems.length} label="Photos" />
-          <StatBlock value={followersCount} label="Abonnés" onClick={() => openFollowList('followers')} />
-          <StatBlock value={followingCount} label="Abonnements" onClick={() => openFollowList('following')} />
-          {profile.role === 'joueur' && <StatBlock value={recommendations.length} label="Recos" />}
-        </div>
-      </div>
 
-      {/* Nom, rôle, infos */}
-      <div style={{ fontSize: 22, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
-        {profile.nom}
-        {profile.verified && <span style={{ color: '#D4FF3F', fontSize: 16 }}>✓</span>}
-      </div>
-
-      {profile.role === 'joueur' && playerListing && (
-        <div style={{ fontSize: 15, color: '#A4B0A6', marginTop: 4 }}>{playerListing.poste} · {playerListing.niveau}</div>
-      )}
-      {profile.role === 'club' && profile.adresse && (
-        <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>📍 {profile.adresse}</div>
-      )}
-      {STAFF_ROLES.includes(profile.role) && staffListing && (
-        <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{ROLE_LABELS[profile.role]} · {describeStaff(staffListing)}</div>
-      )}
-      {lastSeenLabel(profile.last_seen_at) && (
-        <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 6, fontWeight: 600 }}>{lastSeenLabel(profile.last_seen_at)}</div>
-      )}
-
-      {/* Pills d'infos */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 16 }}>
-        {profile.role === 'joueur' && playerListing && (
-          <>
-            <Pill>📍 {playerListing.ville} ({playerListing.distance} km)</Pill>
-            <Pill><Badge tone="lime">{playerListing.dispo}</Badge></Pill>
-            {playerListing.taille_cm && <Pill>{playerListing.taille_cm} cm</Pill>}
-            {playerListing.poids_kg && <Pill>{playerListing.poids_kg} kg</Pill>}
-            {playerListing.pied_fort && <Pill>Pied {playerListing.pied_fort}</Pill>}
-            {playerListing.annees_pratique != null && <Pill>{playerListing.annees_pratique} ans de pratique</Pill>}
-            {playerListing.nationalites?.length > 0 && <Pill>{playerListing.nationalites.map(nomNationalite).join(', ')}</Pill>}
-            {playerListing.dernier_club && <Pill>Ex. {playerListing.dernier_club} ({playerListing.dernier_club_niveau})</Pill>}
-          </>
-        )}
-        {STAFF_ROLES.includes(profile.role) && staffListing && (
-          <>
-            <Pill>📍 {staffListing.ville} ({staffListing.distance} km)</Pill>
-            <Pill><Badge tone="lime">{staffListing.dispo}</Badge></Pill>
-            {staffListing.diplome && <Pill>🎓 {staffListing.diplome}</Pill>}
-            {staffListing.sport && <Pill>🏅 {staffListing.sport}</Pill>}
-          </>
-        )}
-      </div>
-
-      {/* Bio */}
-      {((profile.role === 'joueur' && playerListing?.bio) || (STAFF_ROLES.includes(profile.role) && staffListing?.bio)) && (
-        <div style={{ fontSize: 14.5, color: '#C7CFC8', marginTop: 16, lineHeight: 1.6 }}>
-          {profile.role === 'joueur' ? playerListing.bio : staffListing?.bio}
-        </div>
-      )}
-
-      {/* Boutons Suivre + Contacter */}
-      {!isMe && (
-        <div style={{ display: 'flex', gap: 10, marginTop: 20 }}>
-          <button
-            onClick={toggleFollow}
-            style={{ flex: 1, background: isFollowing ? 'transparent' : '#D4FF3F', color: isFollowing ? '#A4B0A6' : '#0B1F1A', border: isFollowing ? '1.5px solid #2C4A3D' : 'none', padding: '13px 24px', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}
-          >
-            {isFollowing ? 'Abonné ✓' : 'Suivre'}
-          </button>
-          <button
-            onClick={() => {
-            const context = profile.role === 'joueur' && playerListing ? `${playerListing.poste} · ${playerListing.ville}` :
-              profile.role === 'club' && needs[0] ? describeNeed(needs[0]) :
-              STAFF_ROLES.includes(profile.role) && staffListing ? describeStaff(staffListing) : 'Contact';
-            onContact(targetUserId, profile.nom, context);
-          }}
-          style={{ flex: 1, background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '13px 24px', borderRadius: 10, fontWeight: 700, fontSize: 15, cursor: 'pointer' }}
-        >
-          Contacter
-        </button>
-        </div>
-      )}
-
-      {/* Carte FIFA (joueur uniquement) */}
-      {profile.role === 'joueur' && playerListing && (
-        <div style={{ display: 'flex', justifyContent: 'center', marginTop: 28, marginBottom: 8 }}>
-          <PlayerCard player={playerListing} nom={profile.nom} avatarSrc={url} />
-        </div>
-      )}
-
-      {/* Annonces du club — placées en premier car c'est l'info principale */}
-      {profile.role === 'club' && (
-        <div style={{ marginTop: 28 }}>
-          <SectionTitle>Annonces du club{needs.length > 0 ? ` (${needs.length})` : ''}</SectionTitle>
-          {needs.length === 0 ? (
-            <div style={{ background: '#152E26', border: '1px dashed #2C4A3D', borderRadius: 12, padding: '20px 16px', textAlign: 'center', color: '#8C9A8E', fontSize: 13.5 }}>
-              Ce club n'a pas d'annonce en ligne pour le moment.
-            </div>
-          ) : (
-            <div style={{ display: 'grid', gap: 10 }}>
-              {needs.map((n) => (
-                <div key={n.id} style={{ background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 12, padding: '16px 18px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10, flexWrap: 'wrap' }}>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
-                      <div style={{ fontSize: 13, color: '#A4B0A6', marginTop: 3 }}>{describeNeed(n)}</div>
-                      <div style={{ fontSize: 12.5, color: '#8C9A8E', marginTop: 4 }}>📍 {n.ville}</div>
-                    </div>
-                    <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>
-                  </div>
-                  {n.remuneration && (
-                    <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 8 }}>💶 {n.remuneration}</div>
-                  )}
-                  {n.details && (
-                    <div style={{ fontSize: 13, color: '#C7CFC8', lineHeight: 1.5, marginTop: 8, paddingTop: 10, borderTop: '1px solid #223a30' }}>{n.details}</div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      )}
-
-      {profile.role === 'club' && <ClubFacilitiesList items={profile.infrastructures} />}
-
-      {/* Carte de localisation (club uniquement), synchronisée avec l'adresse */}
-      {profile.role === 'club' && hasLocation && (
-        <div style={{ marginTop: 28, marginBottom: 8 }}>
-          <SectionTitle>Localisation</SectionTitle>
-          {profile.adresse && (
-            <div style={{ fontSize: 13, color: '#A4B0A6', marginBottom: 10 }}>📍 {profile.adresse}</div>
-          )}
-          <SearchMap markers={[{ lat: clubLat, lng: clubLng, title: profile.nom, color: '#D4FF3F' }]} />
-        </div>
-      )}
-
-      {/* Dernières actualités */}
-      {recentPosts.length > 0 && (
-        <div style={{ marginTop: 28 }}>
-          <SectionTitle>Dernières actualités</SectionTitle>
-          <div style={{ display: 'grid', gap: 8 }}>
-            {recentPosts.map((post) => (
-              <div key={post.id} style={{ background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, padding: '12px 14px' }}>
-                {post.content && <div style={{ fontSize: 13.5, color: '#C7CFC8', lineHeight: 1.5 }}>{post.content}</div>}
-                <div style={{ fontSize: 11.5, color: '#8C9A8E', marginTop: 6 }}>Il y a {postTimeAgo(post.created_at)}</div>
-              </div>
-            ))}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <h1 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', margin: 0 }}>{profile.nom}</h1>
+            {profile.verified && <span title="Profil vérifié" style={{ color: C.lime, display: 'inline-flex' }}><Icon d={CHECK} size={16} /></span>}
+            <Badge>{ROLE_LABELS[profile.role] || profile.role}</Badge>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px 12px', marginTop: 4, fontSize: 13.5, color: C.muted }}>
+            {subtitle && <span>{subtitle}</span>}
+            {ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={13} />{ville}</span>}
+            {seen && (
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: seen === 'En ligne' ? C.lime : C.muted }} />{seen}
+              </span>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Grille photos/vidéos façon Instagram */}
-      <div style={{ marginTop: 28 }}>
-        <SectionTitle>Photos & vidéos</SectionTitle>
-        {galleryItems.length > 0 ? (
-          <ProfileMediaGrid items={galleryItems} />
-        ) : (
-          <div style={{ textAlign: 'center', color: '#8C9A8E', fontSize: 13.5, padding: 20 }}>Aucune photo publiée pour le moment.</div>
+        {!isMe && (
+          <div className="pp-actions" style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={toggleFollow}
+              style={{ background: 'transparent', color: C.text, border: `1px solid ${C.line}`, padding: '9px 16px', borderRadius: 8, fontWeight: 500, fontSize: 14, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+            >
+              {isFollowing ? <><Icon d={CHECK} size={14} />Abonné</> : 'Suivre'}
+            </button>
+            <button
+              onClick={contact}
+              style={{ background: C.lime, color: C.ink, border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}
+            >
+              Contacter
+            </button>
+          </div>
         )}
       </div>
 
-      {/* Parcours (joueur) */}
-      <ExperienceTimeline userId={targetUserId} />
+      {/* Bandeau de chiffres clés */}
+      <div className="pp-stats" style={{ marginTop: 20, borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}` }}>
+        <Stat label="Abonnés" value={followersCount} onClick={() => openFollowList('followers')} />
+        <Stat label="Abonnements" value={followingCount} onClick={() => openFollowList('following')} />
+        <Stat label="Photos" value={galleryItems.length} onClick={() => setTab('photos')} />
+        {isPlayer && <Stat label="Recommandations" value={recommendations.length} onClick={() => setTab('recos')} />}
+        {isClub && <Stat label="Annonces" value={needs.length} />}
+        {listing?.dispo && (
+          <div className="pp-stat">
+            <div style={{ fontSize: 11.5, color: C.muted }}>Disponibilité</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: 14.5, fontWeight: 500, color: C.lime }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.lime }} />{listing.dispo}
+            </div>
+          </div>
+        )}
+      </div>
 
-      {/* Recommandations (joueur uniquement) */}
-      {profile.role === 'joueur' && (
-        <div style={{ marginTop: 28, paddingBottom: 20 }}>
-          <SectionTitle>Recommandations {recommendations.length > 0 && `(${recommendations.length})`}</SectionTitle>
-          {recommendations.length === 0 ? (
-            <div style={{ fontSize: 13.5, color: '#8C9A8E', marginBottom: 12 }}>Aucune recommandation pour le moment.</div>
-          ) : (
-            <div style={{ display: 'grid', gap: 10, marginBottom: 14 }}>
-              {recommendations.map((r) => (
-                <div key={r.id} style={{ background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, padding: '12px 14px' }}>
-                  <div style={{ fontSize: 13.5, color: '#C7CFC8', lineHeight: 1.5 }}>{r.content}</div>
-                  <div style={{ fontSize: 12, color: '#8C9A8E', marginTop: 6 }}>— {r.profiles?.nom || 'Utilisateur'}</div>
+      {/* Onglets */}
+      <div role="tablist" style={{ display: 'flex', borderBottom: `1px solid ${C.line}`, overflowX: 'auto' }}>
+        {tabs.map(([id, label]) => (
+          <button key={id} role="tab" aria-selected={tab === id} className="pp-tab" onClick={() => setTab(id)}>{label}</button>
+        ))}
+      </div>
+
+      <div style={{ paddingTop: 20, paddingBottom: 32 }}>
+        {tab === 'apercu' && (
+          <>
+            {bio && <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, margin: '0 0 20px', maxWidth: 680 }}>{bio}</p>}
+
+            {(isPlayer || isStaff) && (facts.length > 0 || (isPlayer && playerListing)) && (
+              <div className="pp-cols" style={{ display: 'grid', gridTemplateColumns: isPlayer && playerListing ? 'minmax(0,1fr) auto' : '1fr', gap: 28, alignItems: 'start', marginBottom: 28 }}>
+                {facts.length > 0 && (
+                  <div>
+                    <SectionTitle>Profil</SectionTitle>
+                    {facts.map(([k, v], i) => (
+                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, padding: '9px 0', borderBottom: i < facts.length - 1 ? `1px solid ${C.line}` : 'none', fontSize: 14 }}>
+                        <span style={{ color: C.muted }}>{k}</span>
+                        <span style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{v}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {isPlayer && playerListing && (
+                  <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <PlayerCard player={playerListing} nom={profile.nom} avatarSrc={url} />
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isPlayer && <div style={{ marginBottom: 28 }}><ExperienceTimeline userId={targetUserId} /></div>}
+
+            {isClub && (
+              <div style={{ marginBottom: 28 }}>
+                <SectionTitle>Annonces du club</SectionTitle>
+                {needs.length === 0 ? (
+                  <Empty>Ce club n'a pas d'annonce en ligne pour le moment.</Empty>
+                ) : (
+                  <div style={{ borderTop: `1px solid ${C.line}` }}>
+                    {needs.map((n) => (
+                      <div key={n.id} className="pp-row" style={{ padding: '14px 8px', borderBottom: `1px solid ${C.line}` }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ fontWeight: 600, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 12px', fontSize: 13.5, color: C.muted, marginTop: 3 }}>
+                              {describeNeed(n) && <span>{describeNeed(n)}</span>}
+                              {n.ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={12} />{n.ville}</span>}
+                              {n.remuneration && <span style={{ color: C.text }}>{n.remuneration}</span>}
+                            </div>
+                          </div>
+                          {n.urgence && <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>}
+                        </div>
+                        {n.details && <div style={{ fontSize: 13.5, color: C.sub, lineHeight: 1.55, marginTop: 8 }}>{n.details}</div>}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {isClub && <div style={{ marginBottom: 28 }}><ClubFacilitiesList items={profile.infrastructures} /></div>}
+
+            {isClub && hasLocation && (
+              <div>
+                <SectionTitle>Localisation</SectionTitle>
+                {profile.adresse && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, color: C.muted, marginBottom: 10 }}><Icon d={PIN} size={13} />{profile.adresse}</div>
+                )}
+                <div style={{ borderRadius: 8, overflow: 'hidden', border: `1px solid ${C.line}` }}>
+                  <SearchMap markers={[{ lat: clubLat, lng: clubLng, title: profile.nom, color: C.lime }]} />
+                </div>
+              </div>
+            )}
+          </>
+        )}
+
+        {tab === 'photos' && (
+          galleryItems.length > 0 ? <ProfileMediaGrid items={galleryItems} /> : <Empty>Aucune photo publiée pour le moment.</Empty>
+        )}
+
+        {tab === 'actus' && (
+          recentPosts.length === 0 ? <Empty>Aucune publication pour le moment.</Empty> : (
+            <div style={{ borderTop: `1px solid ${C.line}` }}>
+              {recentPosts.map((post) => (
+                <div key={post.id} className="pp-row" style={{ padding: '14px 8px', borderBottom: `1px solid ${C.line}` }}>
+                  {post.content && <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.55 }}>{post.content}</div>}
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Il y a {postTimeAgo(post.created_at)}</div>
                 </div>
               ))}
             </div>
-          )}
-          {!isMe && (
-            <div>
-              <TextArea value={newRecoText} onChange={(e) => setNewRecoText(e.target.value)} placeholder="Laisser une recommandation…" style={{ minHeight: 70, marginBottom: 8 }} />
-              <button
-                onClick={submitRecommendation}
-                disabled={submittingReco || !newRecoText.trim()}
-                style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: newRecoText.trim() ? 'pointer' : 'default', opacity: newRecoText.trim() ? 1 : 0.5 }}
-              >
-                {submittingReco ? 'Envoi…' : 'Publier la recommandation'}
-              </button>
-            </div>
-          )}
-        </div>
-      )}
+          )
+        )}
 
-      {/* Modale liste abonnés / abonnements */}
+        {tab === 'recos' && isPlayer && (
+          <>
+            {recommendations.length === 0 ? (
+              <Empty>Aucune recommandation pour le moment.</Empty>
+            ) : (
+              <div style={{ borderTop: `1px solid ${C.line}`, marginBottom: 20 }}>
+                {recommendations.map((r) => (
+                  <div key={r.id} style={{ padding: '14px 8px', borderBottom: `1px solid ${C.line}` }}>
+                    <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.55 }}>{r.content}</div>
+                    <div style={{ fontSize: 12.5, color: C.muted, marginTop: 6 }}>{r.profiles?.nom || 'Utilisateur'}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {!isMe && (
+              <div style={{ maxWidth: 560 }}>
+                <TextArea value={newRecoText} onChange={(e) => setNewRecoText(e.target.value)} placeholder="Laisser une recommandation…" style={{ minHeight: 80, marginBottom: 10 }} />
+                <button
+                  onClick={submitRecommendation}
+                  disabled={submittingReco || !newRecoText.trim()}
+                  style={{ background: C.lime, color: C.ink, border: 'none', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: newRecoText.trim() ? 'pointer' : 'default', opacity: newRecoText.trim() ? 1 : 0.5 }}
+                >
+                  {submittingReco ? 'Envoi…' : 'Publier'}
+                </button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {/* Liste abonnés / abonnements */}
       {followList && (
         <div
           onClick={() => setFollowList(null)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 20 }}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(5,15,12,0.7)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 20 }}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, maxWidth: 400, width: '100%', maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '18px 20px', borderBottom: '1px solid #2C4A3D' }}>
-              <div style={{ fontWeight: 700, fontSize: 16 }}>{followList.type === 'followers' ? 'Abonnés' : 'Abonnements'}</div>
-              <button onClick={() => setFollowList(null)} style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer' }}>✕</button>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, maxWidth: 400, width: '100%', maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 40px rgba(0,0,0,0.4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${C.line}` }}>
+              <div style={{ fontWeight: 600, fontSize: 15 }}>{followList.type === 'followers' ? 'Abonnés' : 'Abonnements'}</div>
+              <button onClick={() => setFollowList(null)} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', display: 'inline-flex', padding: 4 }}><Icon d={CLOSE} size={18} /></button>
             </div>
             <div style={{ overflowY: 'auto', flex: 1 }}>
               {loadingFollowList ? (
-                <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E' }}>Chargement…</div>
+                <div style={{ padding: 24, textAlign: 'center', color: C.muted, fontSize: 14 }}>Chargement…</div>
               ) : followList.users.length === 0 ? (
-                <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E', fontSize: 14 }}>
+                <div style={{ padding: 24, textAlign: 'center', color: C.muted, fontSize: 14 }}>
                   {followList.type === 'followers' ? 'Aucun abonné pour le moment.' : 'Ne suit personne pour le moment.'}
                 </div>
               ) : (
@@ -439,19 +503,20 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                   return (
                     <button
                       key={u.id}
+                      className="pp-row"
                       onClick={() => { setFollowList(null); onBack(); setTimeout(() => { window.location.href = `/app?tab=profil&uid=${u.id}`; }, 50); }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', padding: '14px 20px', background: 'transparent', border: 'none', borderBottom: '1px solid #1c332a', cursor: 'pointer', textAlign: 'left' }}
+                      style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '10px 16px', background: 'transparent', border: 'none', borderBottom: `1px solid ${C.line}`, cursor: 'pointer', textAlign: 'left', color: C.text }}
                     >
                       {avatarSrc ? (
-                        <img src={avatarSrc} alt="" style={{ width: 42, height: 42, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
+                        <img src={avatarSrc} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover', flexShrink: 0 }} />
                       ) : (
-                        <div style={{ width: 42, height: 42, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 14, flexShrink: 0 }}>
+                        <div style={{ width: 36, height: 36, borderRadius: '50%', background: C.soft, border: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 600, flexShrink: 0 }}>
                           {initials(u.nom)}
                         </div>
                       )}
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: 14, color: '#F5F0E6' }}>{u.nom}</div>
-                        <div style={{ fontSize: 12, color: '#8C9A8E' }}>{ROLE_LABELS[u.role] || u.role}</div>
+                        <div style={{ fontWeight: 500, fontSize: 14 }}>{u.nom}</div>
+                        <div style={{ fontSize: 12.5, color: C.muted }}>{ROLE_LABELS[u.role] || u.role}</div>
                       </div>
                     </button>
                   );
@@ -465,29 +530,19 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   );
 }
 
-function StatBlock({ value, label, onClick }) {
-  const style = { textAlign: 'center' };
-  if (onClick) style.cursor = 'pointer';
+function Stat({ label, value, onClick }) {
   return (
-    <button onClick={onClick} style={{ ...style, background: 'transparent', border: 'none', padding: 0, color: 'inherit' }}>
-      <div style={{ fontSize: 19, fontWeight: 800, color: '#F5F0E6' }}>{value}</div>
-      <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
+    <button className="pp-stat" data-click={onClick ? '1' : '0'} onClick={onClick} disabled={!onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
+      <div style={{ fontSize: 11.5, color: C.muted }}>{label}</div>
+      <div className="pp-stat-v" style={{ fontSize: 18, fontWeight: 600, marginTop: 2, fontVariantNumeric: 'tabular-nums', color: C.text, transition: 'color .12s ease' }}>{value}</div>
     </button>
   );
 }
 
-function Pill({ children }) {
-  return (
-    <span style={{ fontSize: 13, color: '#C7CFC8', background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 20, padding: '6px 14px' }}>
-      {children}
-    </span>
-  );
+function SectionTitle({ children }) {
+  return <h2 style={{ fontSize: 15, fontWeight: 600, color: C.text, margin: '0 0 10px' }}>{children}</h2>;
 }
 
-function SectionTitle({ children }) {
-  return (
-    <div style={{ fontSize: 13, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 12 }}>
-      {children}
-    </div>
-  );
+function Empty({ children }) {
+  return <div style={{ padding: '28px 0', color: C.muted, fontSize: 14 }}>{children}</div>;
 }

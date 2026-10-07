@@ -202,3 +202,7 @@ h1, h2, h3 { line-height: 1.15; }
   .tv-msg-fab { bottom: 16px !important; right: 16px !important; padding: 14px !important; }
   .tv-msg-fab .tv-msg-label { display: none; }
 }
+
+.tv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.tv-tab-btn svg { width: 24px; height: 24px; }
+.tv-tab-btn { padding: 9px 12px !important; }

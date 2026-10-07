@@ -520,7 +520,6 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
           </>
         )}
       </aside>
-
       <ConfirmDialog
         open={!!confirmDeleteId}
         title="Supprimer cette publication ?"
@@ -529,7 +528,31 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
         onConfirm={() => { const id = confirmDeleteId; setConfirmDeleteId(null); handleDelete(id); }}
         onCancel={() => setConfirmDeleteId(null)}
       />
-
       {likersModal && (
         <div onClick={() => setLikersModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(5,15,12,0.7)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth:
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 40px rgba(0,0,0,0.4)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${C.line}` }}>
+              <span style={{ fontWeight: 600, fontSize: 15 }}>J'aime</span>
+              <button onClick={() => setLikersModal(null)} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', display: 'inline-flex', padding: 4 }}><Icon d={CLOSE} size={18} /></button>
+            </div>
+            <div style={{ overflowY: 'auto' }}>
+              {likersModal.loading ? (
+                <div style={{ padding: 24, textAlign: 'center', color: C.muted, fontSize: 14 }}>Chargement…</div>
+              ) : likersModal.users.length === 0 ? (
+                <div style={{ padding: 24, textAlign: 'center', color: C.muted, fontSize: 14 }}>Personne pour le moment.</div>
+              ) : likersModal.users.map((u) => (
+                <button key={u.id} onClick={() => { setLikersModal(null); onOpenProfile(u.id); }} style={{ display: 'flex', alignItems: 'center', gap: 12, width: '100%', padding: '10px 16px', background: 'transparent', border: 'none', borderBottom: `1px solid ${C.line}`, cursor: 'pointer', textAlign: 'left', color: C.text }}>
+                  <Avatar supabase={supabase} path={u.avatar_path} name={u.nom} size={36} />
+                  <div>
+                    <div style={{ fontWeight: 500, fontSize: 14 }}>{u.nom}</div>
+                    <div style={{ fontSize: 12.5, color: C.muted }}>{ROLE_LABELS[u.role] || u.role}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

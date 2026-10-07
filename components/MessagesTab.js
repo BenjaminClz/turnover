@@ -164,7 +164,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
 
   return (
     <div>
-      <h1 className="turnover-anton" style={{ fontSize: 'clamp(1.8rem,4.5vw,2.6rem)', marginBottom: 24 }}>Messages</h1>
+      <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(1.5rem, 3.2vw, 1.9rem)', fontWeight: 600, letterSpacing: '-0.015em', color: '#E8EEE9', marginBottom: 24 }}>Messages</h1>
       {conversations.length === 0 ? (
         <EmptyState icon="💬" title="Aucune conversation" sub="Clique sur « Contacter » depuis un profil ou un besoin pour démarrer une discussion." />
       ) : (

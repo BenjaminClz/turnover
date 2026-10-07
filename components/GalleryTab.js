@@ -322,7 +322,7 @@ export default function GalleryTab({
 
   return (
     <div>
-      <h1 className="turnover-anton" style={{ fontSize: 'clamp(1.8rem,4.5vw,2.6rem)', marginBottom: 10 }}>
+      <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(1.5rem, 3.2vw, 1.9rem)', fontWeight: 600, letterSpacing: '-0.015em', color: '#E8EEE9', marginBottom: 10 }}>
         {readOnly ? `Galerie de ${ownerName}` : 'Ma galerie'}
       </h1>
       <p style={{ color: '#8C9A8E', marginBottom: 24, maxWidth: 520 }}>

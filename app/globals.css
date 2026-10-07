@@ -204,5 +204,4 @@ h1, h2, h3 { line-height: 1.15; }
 }
 
 .tv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-.tv-tab-btn svg { width: 24px; height: 24px; }
-.tv-tab-btn { padding: 10px 14px !important; }
+.tv-tab-btn { padding: 8px 14px !important; }

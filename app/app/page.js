@@ -249,7 +249,7 @@ function AppPageInner() {
           <img src="/logo.png" alt="Turnover" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 5 }} />
           <span className="turnover-anton" style={{ fontSize: 22, color: '#E8EEE9', letterSpacing: '0.02em' }}>TURNOVER</span>
         </button>
-        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 28 }}>
+        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 4 }}>
           {tabs.map((t) => {
             // Le joueur a créé son profil mais ne l'a pas encore publié (ou pas complété à 80%) :
             // un point visible sur l'onglet le rappelle, où qu'il soit dans l'app.
@@ -270,11 +270,7 @@ function AppPageInner() {
                 }}
                 style={{ position: 'relative', padding: '8px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, background: tab === t.key ? 'rgba(255,255,255,0.06)' : 'transparent', boxShadow: tab === t.key ? 'inset 0 -2px 0 #D4FF3F' : 'none', color: tab === t.key ? '#E8EEE9' : '#8FA096', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
               >
-                {t.icon && TAB_ICONS[t.icon] && TAB_ICONS[t.icon](tab === t.key ? '#E8EEE9' : '#8FA096')}
-                {t.icon ? <span className="tv-sr">{t.label}</span> : t.label}
-                {t.key === 'messages' && unreadCount > 0 && (
-                  <span style={{ position: 'absolute', top: 2, right: 2, minWidth: 17, height: 17, padding: '0 4px', borderRadius: 9, background: '#FF6B6B', color: '#0B1F1A', fontSize: 10.5, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B1F1A' }}>{unreadCount}</span>
-                )}
+                {t.label}
                 {needsAttention && (
                   <span style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: '#FF6B6B', border: '1.5px solid #0B1F1A' }} />
                 )}

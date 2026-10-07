@@ -323,6 +323,30 @@ function AppPageInner() {
         )}
       </main>
 
+      {tab !== 'messages' && (
+        <button
+          className="tv-msg-fab"
+          onClick={() => {
+            if (profile.role === 'joueur' && !isProfileComplete(myPlayerListing)) {
+              showToast('Complète ton profil pour débloquer la messagerie.');
+              setTab('joueur');
+              return;
+            }
+            setTab('messages');
+          }}
+          aria-label={unreadCount ? `Messages, ${unreadCount} non lus` : 'Messages'}
+          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 60, display: 'flex', alignItems: 'center', gap: 12, background: '#0F241E', color: '#E8EEE9', border: '1px solid #24423A', borderRadius: 999, padding: '13px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 12px 32px rgba(0,0,0,0.45)' }}
+        >
+          <span style={{ position: 'relative', display: 'inline-flex' }}>
+            {TAB_ICONS.message && TAB_ICONS.message('#E8EEE9')}
+            {unreadCount > 0 && (
+              <span style={{ position: 'absolute', top: -8, right: -10, minWidth: 18, height: 18, padding: '0 5px', borderRadius: 9, background: '#FF6B6B', color: '#0B1F1A', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0F241E' }}>{unreadCount}</span>
+            )}
+          </span>
+          <span className="tv-msg-label">Messages</span>
+        </button>
+      )}
+
       <AccountSettingsModal
         open={accountSettingsOpen}
         profile={profile}

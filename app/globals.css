@@ -194,3 +194,11 @@ h1, h2, h3 { line-height: 1.15; }
   margin-bottom: 8px;
   width: 100%;
 }
+
+.tv-msg-fab { transition: border-color .15s ease, transform .1s ease; }
+.tv-msg-fab:hover { border-color: #3A5A4F; }
+.tv-msg-fab:active { transform: scale(0.97); }
+@media (max-width: 640px) {
+  .tv-msg-fab { bottom: 16px !important; right: 16px !important; padding: 14px !important; }
+  .tv-msg-fab .tv-msg-label { display: none; }
+}

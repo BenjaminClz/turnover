@@ -39,9 +39,9 @@ const CHEV_L = 'M15 18l-6-6 6-6';
 const CHEV_R = 'M9 18l6-6-6-6';
 
 const css = `
-.fd-layout { display: grid; grid-template-columns: minmax(0, 480px) 300px; gap: 56px; justify-content: center; }
+.fd-layout { display: grid; grid-template-columns: minmax(0, 580px) 320px; gap: 88px; justify-content: center; padding-top: 8px; }
 .fd-side { position: sticky; top: 84px; align-self: start; }
-@media (max-width: 1000px) { .fd-layout { grid-template-columns: minmax(0, 520px); } .fd-side { display: none; } }
+@media (max-width: 1100px) { .fd-layout { grid-template-columns: minmax(0, 600px); } .fd-side { display: none; } }
 .fd-tab { background: transparent; border: none; border-bottom: 2px solid transparent; padding: 12px 0; margin-right: 24px; color: ${C.muted}; font-size: 15px; font-weight: 600; cursor: pointer; }
 .fd-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
 .fd-icon { background: transparent; border: none; padding: 6px; margin-left: -6px; color: ${C.text}; cursor: pointer; display: inline-flex; border-radius: 50%; transition: color .12s ease, transform .1s ease; }
@@ -292,13 +292,13 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
 
       {/* Colonne principale */}
       <div style={{ minWidth: 0 }}>
-        <div role="tablist" style={{ display: 'flex', borderBottom: `1px solid ${C.line}`, marginBottom: 16 }}>
+        <div role="tablist" style={{ display: 'flex', borderBottom: `1px solid ${C.line}`, marginBottom: 24 }}>
           <button role="tab" aria-selected={feedTab === 'tous'} className="fd-tab" onClick={() => setFeedTab('tous')}>Pour toi</button>
           <button role="tab" aria-selected={feedTab === 'abonnements'} className="fd-tab" onClick={() => setFeedTab('abonnements')}>Abonnements</button>
         </div>
 
         {/* Composeur */}
-        <div style={{ borderBottom: `1px solid ${C.line}`, paddingBottom: 16, marginBottom: 20 }}>
+        <div style={{ borderBottom: `1px solid ${C.line}`, paddingBottom: 24, marginBottom: 28 }}>
           {!composerOpen ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <Avatar supabase={supabase} path={profile?.avatar_path} name={profile?.nom} size={36} />
@@ -391,7 +391,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
             const shownText = isLong && !expanded[post.id] ? `${text.slice(0, LONG_TEXT).trimEnd()}…` : text;
 
             return (
-              <article key={post.id} style={{ borderBottom: `1px solid ${C.line}`, paddingBottom: 18, marginBottom: 18 }}>
+              <article key={post.id} style={{ borderBottom: `1px solid ${C.line}`, paddingBottom: 28, marginBottom: 28 }}>
                 {/* En-tête */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <button className="fd-link" onClick={() => onOpenProfile(post.author_id)} style={{ display: 'flex' }}>
@@ -499,7 +499,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
             {suggestions.map((p) => {
               const followed = followingIds.has(p.id);
               return (
-                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '7px 0' }}>
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
                   <button className="fd-link" onClick={() => onOpenProfile(p.id)} style={{ display: 'flex' }}>
                     <Avatar supabase={supabase} path={p.avatar_path} name={p.nom} size={36} />
                   </button>

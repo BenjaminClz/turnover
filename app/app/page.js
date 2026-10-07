@@ -249,7 +249,7 @@ function AppPageInner() {
           <img src="/logo.png" alt="Turnover" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 5 }} />
           <span className="turnover-anton" style={{ fontSize: 22, color: '#E8EEE9', letterSpacing: '0.02em' }}>TURNOVER</span>
         </button>
-        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 10 }}>
+        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 28 }}>
           {tabs.map((t) => {
             // Le joueur a créé son profil mais ne l'a pas encore publié (ou pas complété à 80%) :
             // un point visible sur l'onglet le rappelle, où qu'il soit dans l'app.

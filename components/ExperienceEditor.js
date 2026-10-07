@@ -183,6 +183,7 @@ export default function ExperienceEditor({ userId }) {
     setSaving(false);
 
     if (dbError) {
+      console.error("Supabase:", dbError);
       setError("L'enregistrement a échoué. Vérifie ta connexion et réessaie.");
       return;
     }
@@ -201,6 +202,7 @@ export default function ExperienceEditor({ userId }) {
     setPending(null);
     const { error: dbError } = await supabase.from('player_experiences').delete().eq('id', p.item.id);
     if (dbError) {
+      console.error("Supabase:", dbError);
       setItems((prev) => sortExperiences([...prev, p.item]));
       setError('La suppression a échoué. Réessaie.');
     }

@@ -39,10 +39,10 @@ const CHEV_L = 'M15 18l-6-6 6-6';
 const CHEV_R = 'M9 18l6-6-6-6';
 
 const css = `
-.fd-layout { display: grid; grid-template-columns: minmax(0, 760px) 240px; gap: 48px; justify-content: center; padding-top: 8px; }
-.fd-side { zoom: 0.85; }
+.fd-layout { display: grid; grid-template-columns: minmax(0, 820px) 240px; gap: 48px; justify-content: center; padding-top: 8px; }
+.fd-side { zoom: 0.8; }
 .fd-side { position: sticky; top: 84px; align-self: start; }
-@media (max-width: 1100px) { .fd-layout { grid-template-columns: minmax(0, 760px); } .fd-side { display: none; } }
+@media (max-width: 1100px) { .fd-layout { grid-template-columns: minmax(0, 820px); } .fd-side { display: none; } }
 .fd-tab { background: transparent; border: none; border-bottom: 2px solid transparent; padding: 12px 0; margin-right: 24px; color: ${C.muted}; font-size: 15px; font-weight: 600; cursor: pointer; }
 .fd-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
 .fd-icon { background: transparent; border: none; padding: 6px; margin-left: -6px; color: ${C.text}; cursor: pointer; display: inline-flex; border-radius: 50%; transition: color .12s ease, transform .1s ease; }

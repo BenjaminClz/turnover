@@ -244,12 +244,12 @@ function AppPageInner() {
 
   return (
     <div style={{ minHeight: '100vh', color: '#F5F0E6' }}>
-      <nav className="tv-navbar" style={{ position: 'sticky', top: 0, zIndex: 50, padding: '18px 5vw', background: 'rgba(11,31,26,0.95)', backdropFilter: 'blur(10px)', borderBottom: '1.5px solid #2C4A3D' }}>
+      <nav className="tv-navbar" style={{ position: 'sticky', top: 0, zIndex: 50, padding: '10px 5vw', background: 'rgba(11,31,26,0.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #24423A' }}>
         <button onClick={() => setTab('actualites')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: '#F5F0E6' }}>
-          <img src="/logo.png" alt="Turnover" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 6 }} />
-          <span className="turnover-anton" style={{ fontSize: 30, color: '#F5F0E6' }}>TURNOVER</span>
+          <img src="/logo.png" alt="Turnover" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 5 }} />
+          <span className="turnover-anton" style={{ fontSize: 22, color: '#E8EEE9', letterSpacing: '0.02em' }}>TURNOVER</span>
         </button>
-        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 4, background: '#152E26', padding: 5, borderRadius: 12, border: '1.5px solid #2C4A3D' }}>
+        <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 2 }}>
           {tabs.map((t) => {
             // Le joueur a créé son profil mais ne l'a pas encore publié (ou pas complété à 80%) :
             // un point visible sur l'onglet le rappelle, où qu'il soit dans l'app.
@@ -267,9 +267,9 @@ function AppPageInner() {
                   if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
                   setTab(t.key);
                 }}
-                style={{ position: 'relative', padding: '10px 16px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 14.5, fontWeight: 600, background: tab === t.key ? '#D4FF3F' : 'transparent', color: tab === t.key ? '#0B1F1A' : '#A4B0A6', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
+                style={{ position: 'relative', padding: '8px 12px', borderRadius: 6, border: 'none', cursor: 'pointer', fontSize: 14, fontWeight: 500, background: tab === t.key ? 'rgba(255,255,255,0.06)' : 'transparent', boxShadow: tab === t.key ? 'inset 0 -2px 0 #D4FF3F' : 'none', color: tab === t.key ? '#E8EEE9' : '#8FA096', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
               >
-                {t.icon && TAB_ICONS[t.icon] && TAB_ICONS[t.icon](tab === t.key ? '#0B1F1A' : '#A4B0A6')}
+                {t.icon && TAB_ICONS[t.icon] && TAB_ICONS[t.icon](tab === t.key ? '#E8EEE9' : '#8FA096')}
                 {t.label}
                 {needsAttention && (
                   <span style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: '#FF6B6B', border: '1.5px solid #0B1F1A' }} />

@@ -29,9 +29,8 @@ export default function CookieBanner() {
         préférences). Aucun cookie publicitaire ou de traçage n'est utilisé.{' '}
         <a href="/confidentialite" style={{ color: 'var(--lime)', textDecoration: 'underline' }}>En savoir plus</a>
       </p>
-      <button
-        onClick={accept}
-        style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '11px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}
+      <button className="tv-b tv-b-primary"
+        onClick={accept} style={{ flexShrink: 0 }}
       >
         J'ai compris
       </button>

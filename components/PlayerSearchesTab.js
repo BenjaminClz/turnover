@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-client';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
+import { SkeletonList } from '@/components/Skeleton';
 
 const emptyForm = { sport: 'Rugby', poste: '', niveau: 'Régionale 2', ville: '', urgence: 'Dès que possible', details: '' };
 
@@ -113,8 +114,8 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{listing.ville}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
-                    <button onClick={() => startEditing(listing)} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Modifier</button>
-                    <button onClick={() => handleDelete(listing.id)} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '8px 14px', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Supprimer</button>
+                    <button className="tv-b tv-b-primary" onClick={() => startEditing(listing)}>Modifier</button>
+                    <button className="tv-b tv-b-secondary" onClick={() => handleDelete(listing.id)}>Supprimer</button>
                   </div>
                 </div>
               )
@@ -125,7 +126,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
 
       {!creating && !editingId && (
         <div style={{ marginBottom: 28 }}>
-          <button onClick={startCreating} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '12px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+          <button className="tv-b tv-b-primary" onClick={startCreating}>
             + Publier une recherche de club
           </button>
         </div>
@@ -139,7 +140,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
       )}
 
       {loading ? (
-        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 30 }}>Chargement…</div>
+        <SkeletonList count={2} />
       ) : othersSearches.length === 0 ? (
         <EmptyState icon="🔍" title="Aucune autre recherche pour le moment" sub="Les recherches publiées par d'autres joueurs apparaîtront ici." />
       ) : (
@@ -154,7 +155,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
                   {s.details && <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 6, maxWidth: 420 }}>{s.details}</div>}
                   <div style={{ marginTop: 8 }}><Badge tone={s.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{s.urgence}</Badge></div>
                 </div>
-                <button onClick={() => onContact(s.owner_id, s.profiles?.nom, `${s.poste} · ${s.ville}`)} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Contacter</button>
+                <button className="tv-b tv-b-primary" onClick={() => onContact(s.owner_id, s.profiles?.nom, `${s.poste} · ${s.ville}`)}>Contacter</button>
               </div>
             ))}
           </div>

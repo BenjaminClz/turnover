@@ -269,3 +269,59 @@ input::placeholder, textarea::placeholder { color: var(--faint); }
 /* Focus global : pas de contour bleu au clic, contour lime au clavier */
 button:focus:not(:focus-visible), a:focus:not(:focus-visible), [role="tab"]:focus:not(:focus-visible) { outline: none; }
 :focus-visible { outline: 2px solid var(--lime); outline-offset: 2px; }
+
+/* ==========================================================================
+   COMPOSANTS — une seule grammaire pour tout le site
+   ========================================================================== */
+
+/* Boutons : même hauteur, même rayon, même graisse partout */
+.tv-b {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  height: 40px; padding: 0 18px;
+  border-radius: var(--radius-md); border: 1px solid transparent;
+  font-size: 14px; font-weight: 600; line-height: 1; white-space: nowrap;
+  cursor: pointer; user-select: none;
+  transition: background .12s var(--ease), border-color .12s var(--ease), color .12s var(--ease), transform .08s var(--ease);
+}
+.tv-b:active:not(:disabled) { transform: scale(0.98); }
+.tv-b:disabled { opacity: .45; cursor: not-allowed; }
+.tv-b svg { flex-shrink: 0; }
+
+.tv-b-primary { background: var(--lime); color: var(--on-lime); }
+.tv-b-primary:hover:not(:disabled) { background: var(--lime-hover); }
+
+.tv-b-secondary { background: transparent; color: var(--text); border-color: var(--line); }
+.tv-b-secondary:hover:not(:disabled) { border-color: var(--line-strong); background: rgba(255,255,255,0.04); }
+
+.tv-b-ghost { background: transparent; color: var(--muted); height: auto; padding: 6px 8px; font-weight: 500; }
+.tv-b-ghost:hover:not(:disabled) { color: var(--text); background: rgba(255,255,255,0.05); }
+
+.tv-b-danger { background: transparent; color: var(--danger); border-color: rgba(255,107,107,0.35); }
+.tv-b-danger:hover:not(:disabled) { background: rgba(255,107,107,0.08); border-color: var(--danger); }
+
+.tv-b-sm { height: 32px; padding: 0 12px; font-size: 13px; }
+.tv-b-lg { height: 48px; padding: 0 24px; font-size: 15px; }
+.tv-b-block { width: 100%; }
+
+/* Champs de saisie */
+.tv-input {
+  width: 100%; background: var(--surface); color: var(--text);
+  border: 1px solid var(--line); border-radius: var(--radius-md);
+  padding: 10px 12px; font-size: 15px; outline: none;
+  transition: border-color .12s var(--ease), box-shadow .12s var(--ease);
+}
+.tv-input:hover { border-color: var(--line-strong); }
+.tv-input:focus { border-color: var(--lime); box-shadow: 0 0 0 3px var(--lime-soft); }
+.tv-input:disabled { opacity: .5; cursor: not-allowed; }
+
+/* Panneau / carte standard */
+.tv-panel {
+  background: var(--surface); border: 1px solid var(--line);
+  border-radius: var(--radius-lg); padding: 20px;
+}
+
+/* En-tête de section : petit titre en capitales, façon terminal */
+.tv-section-label {
+  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); margin-bottom: 12px;
+}

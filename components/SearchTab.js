@@ -177,7 +177,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
           <Field label="Chercher autour de">
             <TextInput autoFocus value={villeInput} onChange={(e) => setVilleInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocate(); } }} placeholder="Ta ville (ex. Annemasse, Lyon, Paris…)" />
           </Field>
-          <button onClick={handleLocate} disabled={geocodingOrigin} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '14px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', height: 52 }}>
+          <button className="tv-b tv-b-primary" onClick={handleLocate} disabled={geocodingOrigin} style={{ height: 52 }}>
             {geocodingOrigin ? '…' : 'Localiser'}
           </button>
         </div>

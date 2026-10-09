@@ -11,7 +11,7 @@ export default function GlobalError({ error, reset }) {
             <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
               Le site a rencontré un problème inattendu. Réessaie dans un instant.
             </p>
-            <button onClick={() => reset()} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
+            <button className="tv-b tv-b-primary" onClick={() => reset()}>
               Réessayer
             </button>
           </div>

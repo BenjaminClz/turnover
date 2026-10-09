@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-client';
 import { EmptyState } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import { ROLE_LABELS } from '@/lib/constants';
+import { SkeletonGrid } from '@/components/Skeleton';
 
 const BUCKET = 'gallery';
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 Mo par fichier
@@ -245,7 +246,7 @@ export default function GalleryTab({
   );
 
   const grid = loading ? (
-    <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
+    <SkeletonGrid />
   ) : items.length === 0 ? (
     <EmptyState icon="🎞️" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
   ) : (
@@ -485,8 +486,8 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
         <div style={{ padding: '8px 14px' }}>
           <textarea value={descText} onChange={(e) => setDescText(e.target.value)} placeholder="Écris une description…" style={{ width: '100%', minHeight: 60, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--text)', fontSize: 14, padding: 10, outline: 'none', boxSizing: 'border-box', resize: 'vertical' }} />
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button onClick={() => { onUpdateDescription(descText); setEditingDesc(false); }} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '7px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Enregistrer</button>
-            <button onClick={() => { setDescText(item.description || ''); setEditingDesc(false); }} style={{ background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)', padding: '7px 14px', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Annuler</button>
+            <button className="tv-b tv-b-primary" onClick={() => { onUpdateDescription(descText); setEditingDesc(false); }}>Enregistrer</button>
+            <button className="tv-b tv-b-secondary" onClick={() => { setDescText(item.description || ''); setEditingDesc(false); }}>Annuler</button>
           </div>
         </div>
       ) : item.description ? (

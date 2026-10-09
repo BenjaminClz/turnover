@@ -10,7 +10,7 @@ export default function Error({ error, reset }) {
           Quelque chose s'est mal passé de notre côté. Réessaie, ou reviens un peu plus tard si le problème persiste.
         </p>
         <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-          <button onClick={() => reset()} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '12px 24px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>
+          <button className="tv-b tv-b-primary" onClick={() => reset()}>
             Réessayer
           </button>
           <a href="/app" style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '12px 24px', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>

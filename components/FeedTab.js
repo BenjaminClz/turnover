@@ -6,6 +6,7 @@ import { TextArea } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { ROLE_LABELS } from '@/lib/constants';
+import { SkeletonFeed } from '@/components/Skeleton';
 
 const C = { bg: 'var(--bg)', panel: 'var(--surface)', line: 'var(--line)', soft: 'var(--surface-2)', text: 'var(--text)', muted: 'var(--muted)', sub: 'var(--text-2)', lime: 'var(--lime)', ink: 'var(--on-lime)' };
 const MAX_FILES = 10;
@@ -371,7 +372,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
 
         {/* Publications */}
         {loading ? (
-          <div style={{ color: C.muted, textAlign: 'center', padding: 40, fontSize: 14 }}>Chargement…</div>
+          <SkeletonFeed />
         ) : visiblePosts.length === 0 ? (
           <div style={{ textAlign: 'center', padding: '48px 20px' }}>
             <div style={{ fontWeight: 600, fontSize: 16, marginBottom: 6 }}>

@@ -9,6 +9,7 @@ import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import GalleryTab from '@/components/GalleryTab';
 import { useSubscription } from '@/lib/use-subscription';
+import { SkeletonList } from '@/components/Skeleton';
 
 const BESOIN_TYPES = [
   { value: 'joueur', label: 'Un joueur', icon: '🏉' },
@@ -348,7 +349,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button onClick={() => startEditing(listing)} style={{ background: 'transparent', border: '1.5px solid var(--lime)', color: 'var(--lime)', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Modifier</button>
-                    <button onClick={() => requestDelete(listing.id)} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer</button>
+                    <button className="tv-b tv-b-secondary" onClick={() => requestDelete(listing.id)}>Supprimer</button>
                   </div>
                 </div>
               )
@@ -403,7 +404,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       </div>
 
       {loading ? (
-        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <SkeletonList count={3} />
       ) : othersNeeds.length === 0 ? (
         <EmptyState icon="📋" title="Aucune autre annonce pour le moment" sub="Les annonces des autres clubs apparaîtront ici." />
       ) : (
@@ -418,7 +419,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                 {n.details && <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}
                 <div style={{ marginTop: 12 }}><Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge></div>
               </div>
-              <button onClick={() => onContact(n.owner_id, n.club, describeNeed(n))} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
+              <button className="tv-b tv-b-primary" onClick={() => onContact(n.owner_id, n.club, describeNeed(n))}>Contacter</button>
             </div>
           ))}
         </div>

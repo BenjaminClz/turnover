@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-client';
 import { PageTitle, PageSubtitle, EmptyState } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import FavoriteButton from '@/components/FavoriteButton';
+import { SkeletonList } from '@/components/Skeleton';
 
 function staffDetails(l) {
   if (l.role === 'sante') return `${l.specialite || 'Professionnel de santé'}${l.sport ? ' · ' + l.sport : ''}`;
@@ -64,7 +65,7 @@ export default function FavoritesTab({ user, onContact, onViewGallery }) {
       <PageSubtitle>Les profils et annonces que tu as mis de côté.</PageSubtitle>
 
       {loading ? (
-        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <SkeletonList count={3} />
       ) : favorites.length === 0 ? (
         <EmptyState icon="🤍" title="Aucun favori pour le moment" sub="Clique sur le cœur depuis une annonce ou un profil pour le retrouver ici." />
       ) : (
@@ -83,7 +84,7 @@ export default function FavoritesTab({ user, onContact, onViewGallery }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <FavoriteButton targetType={item._favType} targetId={item.id} ownerId={user.id} />
                   {item.owner_id !== user.id && (
-                    <button onClick={() => onContact(item.owner_id, titleOf(item), describe(item))} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
+                    <button className="tv-b tv-b-primary" onClick={() => onContact(item.owner_id, titleOf(item), describe(item))}>Contacter</button>
                   )}
                 </div>
               </div>

@@ -98,9 +98,8 @@ export default function StaffProfileModal({ staff, supabase, currentUserId, onCl
 
           {/* Bouton contacter */}
           {staff.owner_id !== currentUserId && (
-            <button
-              onClick={() => onContact(staff.owner_id, nom, describeStaff(staff))}
-              style={{ width: '100%', background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '11px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 16 }}
+            <button className="tv-b tv-b-primary"
+              onClick={() => onContact(staff.owner_id, nom, describeStaff(staff))} style={{ width: '100%', marginTop: 16 }}
             >
               Contacter
             </button>

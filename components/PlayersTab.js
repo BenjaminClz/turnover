@@ -306,7 +306,7 @@ export default function PlayersTab({ user, profile, showToast }) {
                 {renderBasicFields()}
                 <div style={{ display: 'flex', gap: 12 }}>
                   <PrimaryButton type="submit" disabled={geocoding} style={{ width: 'auto', flex: 1 }}>{geocoding ? 'Localisation…' : 'Enregistrer'}</PrimaryButton>
-                  <button type="button" onClick={() => { setEditing(false); setBasicForm({ ...emptyBasicForm, ...myListing, distance: String(myListing.distance) }); }} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '15px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
+                  <button className="tv-b tv-b-secondary" type="button" onClick={() => { setEditing(false); setBasicForm({ ...emptyBasicForm, ...myListing, distance: String(myListing.distance) }); }}>Annuler</button>
                 </div>
               </form>
             </div>
@@ -364,7 +364,7 @@ export default function PlayersTab({ user, profile, showToast }) {
 
                 <div style={{ display: 'flex', gap: 12 }}>
                   <PrimaryButton type="submit" style={{ width: 'auto', flex: 1 }}>Enregistrer</PrimaryButton>
-                  <button type="button" onClick={() => setEditingDetails(false)} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '15px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
+                  <button className="tv-b tv-b-secondary" type="button" onClick={() => setEditingDetails(false)}>Annuler</button>
                 </div>
               </form>
             </div>
@@ -436,7 +436,7 @@ export default function PlayersTab({ user, profile, showToast }) {
             </div>
 
             <div style={{ textAlign: 'right', marginTop: 24, marginBottom: 8 }}>
-              <button onClick={requestDelete} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer mon profil</button>
+              <button className="tv-b tv-b-secondary" onClick={requestDelete}>Supprimer mon profil</button>
             </div>
             </>
           )}

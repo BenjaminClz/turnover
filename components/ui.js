@@ -3,13 +3,9 @@
 // Style épuré inspiré de TradingView : traits fins, lime réservé à l'action principale
 const C = { bg: 'var(--surface)', line: 'var(--line)', lineHover: 'var(--line-strong)', text: 'var(--text)', muted: 'var(--muted)', lime: 'var(--lime)', ink: 'var(--on-lime)', red: 'var(--danger)' };
 
-const inputStyle = {
-  width: '100%', background: C.bg, border: `1px solid ${C.line}`, borderRadius: 8,
-  color: C.text, padding: '10px 12px', fontSize: 15, outline: 'none', boxSizing: 'border-box',
-  transition: 'border-color .12s ease, box-shadow .12s ease',
-};
-const onFocus = (e) => { e.target.style.borderColor = C.lime; e.target.style.boxShadow = '0 0 0 2px rgba(212,255,63,0.12)'; };
-const onBlur = (e) => { e.target.style.borderColor = C.line; e.target.style.boxShadow = 'none'; };
+// Les styles vivent dans globals.css (.tv-input, .tv-b…) : survol, focus et
+// désactivation sont gérés en CSS, plus besoin de handlers JS.
+const cx = (...c) => c.filter(Boolean).join(' ');
 
 export function Field({ label, hint, children }) {
   return (
@@ -21,18 +17,18 @@ export function Field({ label, hint, children }) {
   );
 }
 
-export function TextInput(props) {
-  return <input {...props} style={{ ...inputStyle, ...props.style }} onFocus={onFocus} onBlur={onBlur} />;
+export function TextInput({ className, ...props }) {
+  return <input {...props} className={cx('tv-input', className)} />;
 }
 
-export function TextArea(props) {
-  return <textarea {...props} style={{ ...inputStyle, minHeight: 100, resize: 'vertical', fontFamily: 'Inter, sans-serif', lineHeight: 1.5, ...props.style }} onFocus={onFocus} onBlur={onBlur} />;
+export function TextArea({ className, ...props }) {
+  return <textarea {...props} className={cx('tv-input', className)} style={{ minHeight: 100, resize: 'vertical', lineHeight: 1.5, ...props.style }} />;
 }
 
 export function Select({ value, onChange, options, ...props }) {
   const normalized = options.map((o) => (typeof o === 'string' ? { value: o, label: o === '' ? '—' : o } : o));
   return (
-    <select value={value} onChange={onChange} {...props} onFocus={onFocus} onBlur={onBlur} style={{ ...inputStyle, cursor: 'pointer', appearance: 'none', paddingRight: 36, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%238FA096' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', ...props.style }}>
+    <select value={value} onChange={onChange} {...props} className={cx('tv-input', props.className)} style={{ cursor: 'pointer', appearance: 'none', paddingRight: 36, backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%238FA096' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E\")", backgroundRepeat: 'no-repeat', backgroundPosition: 'right 12px center', ...props.style }}>
       {normalized.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
     </select>
   );
@@ -58,50 +54,28 @@ export function EmptyState({ icon, title, sub }) {
   );
 }
 
-const press = (e) => { e.currentTarget.style.transform = 'scale(0.98)'; };
-const release = (e) => { e.currentTarget.style.transform = 'scale(1)'; };
-
-export function PrimaryButton({ children, ...props }) {
-  return (
-    <button
-      {...props}
-      style={{ background: C.lime, color: C.ink, border: 'none', padding: '11px 20px', borderRadius: 8, fontWeight: 600, fontSize: 15, cursor: 'pointer', width: '100%', transition: 'transform .1s ease, background .12s ease', ...props.style }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--lime-hover)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.background = C.lime; release(e); }}
-      onMouseDown={press}
-      onMouseUp={release}
-    >
-      {children}
-    </button>
-  );
+export function PrimaryButton({ children, className, block = true, size, ...props }) {
+  return <button {...props} className={cx('tv-b tv-b-primary', block && 'tv-b-block', size && `tv-b-${size}`, className)}>{children}</button>;
 }
 
-export function SecondaryButton({ children, ...props }) {
-  return (
-    <button
-      {...props}
-      style={{ background: 'transparent', color: C.text, border: `1px solid ${C.line}`, padding: '10px 18px', borderRadius: 8, fontWeight: 500, fontSize: 15, cursor: 'pointer', transition: 'border-color .12s ease, background .12s ease, transform .1s ease', ...props.style }}
-      onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lineHover; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = 'transparent'; release(e); }}
-      onMouseDown={press}
-      onMouseUp={release}
-    >
-      {children}
-    </button>
-  );
+export function SecondaryButton({ children, className, size, ...props }) {
+  return <button {...props} className={cx('tv-b tv-b-secondary', size && `tv-b-${size}`, className)}>{children}</button>;
 }
 
-export function GhostButton({ children, ...props }) {
-  return (
-    <button
-      {...props}
-      style={{ background: 'transparent', color: C.muted, border: 'none', padding: '4px 6px', borderRadius: 6, fontSize: 14, cursor: 'pointer', fontWeight: 500, transition: 'color .12s ease, background .12s ease', ...props.style }}
-      onMouseEnter={(e) => { e.currentTarget.style.color = C.text; e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.color = C.muted; e.currentTarget.style.background = 'transparent'; }}
-    >
-      {children}
-    </button>
-  );
+export function GhostButton({ children, className, ...props }) {
+  return <button {...props} className={cx('tv-b tv-b-ghost', className)}>{children}</button>;
+}
+
+export function DangerButton({ children, className, size, ...props }) {
+  return <button {...props} className={cx('tv-b tv-b-danger', size && `tv-b-${size}`, className)}>{children}</button>;
+}
+
+export function Panel({ children, className, ...props }) {
+  return <div {...props} className={cx('tv-panel', className)}>{children}</div>;
+}
+
+export function SectionLabel({ children, style }) {
+  return <div className="tv-section-label" style={style}>{children}</div>;
 }
 
 export function ToggleSwitch({ checked, onChange, ...props }) {

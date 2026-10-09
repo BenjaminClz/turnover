@@ -6,6 +6,7 @@ import { SPORTS, URGENCES, SPECIALITES_SANTE, TYPES_MISSION_BENEVOLE, NIVEAUX_AR
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
+import { SkeletonList } from '@/components/Skeleton';
 
 const ROLE_CONFIG = {
   sante: {
@@ -201,8 +202,8 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
             <div style={{ fontSize: 14, color: 'var(--muted)' }}>{renderCardDetails(myListing)} · {myListing.ville}</div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => setEditing(true)} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '10px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Modifier</button>
-            <button onClick={handleDelete} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '10px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer</button>
+            <button className="tv-b tv-b-primary" onClick={() => setEditing(true)}>Modifier</button>
+            <button className="tv-b tv-b-secondary" onClick={handleDelete}>Supprimer</button>
           </div>
         </div>
       )}
@@ -220,14 +221,14 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
             <Field label="Présentation"><TextArea value={form.bio} onChange={(e) => setForm({ ...form, bio: e.target.value })} /></Field>
             <div style={{ display: 'flex', gap: 12 }}>
               <PrimaryButton type="submit" disabled={geocoding} style={{ width: 'auto', flex: 1 }}>{geocoding ? 'Localisation…' : 'Enregistrer'}</PrimaryButton>
-              <button type="button" onClick={() => { setEditing(false); setForm({ ...emptyForm, ...myListing, distance: String(myListing.distance) }); }} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '15px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>Annuler</button>
+              <button className="tv-b tv-b-secondary" type="button" onClick={() => { setEditing(false); setForm({ ...emptyForm, ...myListing, distance: String(myListing.distance) }); }}>Annuler</button>
             </div>
           </form>
         </div>
       )}
 
       {loading ? (
-        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <SkeletonList count={3} />
       ) : listings.length === 0 ? (
         <EmptyState icon="🧑‍⚕️" title="Aucun profil pour le moment" sub="Les premiers profils apparaîtront ici." />
       ) : (
@@ -246,7 +247,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
                 </div>
               </div>
               {l.owner_id !== user.id && (
-                <button onClick={() => onContact(l.owner_id, l.profiles?.nom, renderCardDetails(l))} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
+                <button className="tv-b tv-b-primary" onClick={() => onContact(l.owner_id, l.profiles?.nom, renderCardDetails(l))}>Contacter</button>
               )}
             </div>
           ))}

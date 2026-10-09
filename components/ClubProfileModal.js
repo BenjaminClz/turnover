@@ -118,9 +118,8 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
 
           {/* Bouton contacter */}
           {ownerId !== currentUserId && (
-            <button
-              onClick={() => onContact(ownerId, nom, needs[0] ? describeNeed(needs[0]) : 'Contact club')}
-              style={{ width: '100%', background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '11px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 16 }}
+            <button className="tv-b tv-b-primary"
+              onClick={() => onContact(ownerId, nom, needs[0] ? describeNeed(needs[0]) : 'Contact club')} style={{ width: '100%', marginTop: 16 }}
             >
               Contacter le club
             </button>

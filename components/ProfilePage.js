@@ -12,6 +12,7 @@ import ProfileMediaGrid from '@/components/ProfileMediaGrid';
 import SearchMap from '@/components/SearchMap';
 import { geocodeAdresse } from '@/lib/geo';
 import { nationalites } from '@/lib/nationalites';
+import { SkeletonProfile } from '@/components/Skeleton';
 
 // Palette partagée avec components/ui.js
 const C = { bg: 'var(--bg)', panel: 'var(--surface)', line: 'var(--line)', soft: 'var(--surface-2)', text: 'var(--text)', muted: 'var(--muted)', sub: 'var(--text-2)', lime: 'var(--lime)', ink: 'var(--on-lime)' };
@@ -235,7 +236,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
     setRecommendations(data || []);
   };
 
-  if (loading) return <div style={{ color: C.muted, textAlign: 'center', padding: 60 }}>Chargement du profil…</div>;
+  if (loading) return <SkeletonProfile />;
   if (!profile) return <div style={{ color: C.muted, textAlign: 'center', padding: 60 }}>Profil introuvable.</div>;
 
   const url = profile.avatar_path ? avatarUrl(supabase, profile.avatar_path) : null;

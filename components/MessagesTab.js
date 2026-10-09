@@ -6,6 +6,7 @@ import { EmptyState, TextInput, PrimaryButton } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import { useSubscription } from '@/lib/use-subscription';
 import ReportButton from '@/components/ReportButton';
+import { SkeletonList } from '@/components/Skeleton';
 
 export default function MessagesTab({ user, profile, setUnreadCount, pendingConvTarget, clearPendingConvTarget, showToast }) {
   const supabase = createClient();
@@ -160,7 +161,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
   const activeConv = conversations.find((c) => c.id === activeConvId);
   const activeLocked = isLockedForMe(activeConv);
 
-  if (loading) return <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>;
+  if (loading) return <SkeletonList count={4} />;
 
   return (
     <div>

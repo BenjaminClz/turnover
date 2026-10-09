@@ -102,7 +102,7 @@ export default function AccountSettingsModal({ open, profile, onClose, showToast
             <PrimaryButton type="submit" disabled={saving} style={{ width: 'auto', flex: 1 }}>
               {saving ? 'Enregistrement…' : 'Enregistrer'}
             </PrimaryButton>
-            <button type="button" onClick={onClose} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '15px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
+            <button className="tv-b tv-b-secondary" type="button" onClick={onClose}>
               Annuler
             </button>
           </div>

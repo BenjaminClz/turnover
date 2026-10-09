@@ -162,10 +162,9 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
           {player.owner_id !== currentUserId && (
             <div>
               <TextArea value={newRecoText} onChange={(e) => setNewRecoText(e.target.value)} placeholder="Laisser une recommandation (ex. entraîneur, coéquipier)…" style={{ minHeight: 70, marginBottom: 8 }} />
-              <button
+              <button className="tv-b tv-b-primary"
                 onClick={submitRecommendation}
-                disabled={submittingReco || !newRecoText.trim()}
-                style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: newRecoText.trim() ? 'pointer' : 'default', opacity: newRecoText.trim() ? 1 : 0.5 }}
+                disabled={submittingReco || !newRecoText.trim()} style={{ opacity: newRecoText.trim() ? 1 : 0.5 }}
               >
                 {submittingReco ? 'Envoi…' : 'Publier la recommandation'}
               </button>
@@ -174,7 +173,7 @@ export default function PlayerProfileModal({ player, supabase, currentUserId, on
 
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginTop: 20 }}>
             {player.owner_id !== currentUserId && (
-              <button onClick={() => onContact(player.owner_id, player.profiles?.nom, `${player.poste} · ${player.ville}`)} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '11px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
+              <button className="tv-b tv-b-primary" onClick={() => onContact(player.owner_id, player.profiles?.nom, `${player.poste} · ${player.ville}`)}>Contacter</button>
             )}
           </div>
         </div>

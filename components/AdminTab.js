@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { PageTitle, PageSubtitle, EmptyState, Badge } from '@/components/ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import { SkeletonList } from '@/components/Skeleton';
 
 const TARGET_LABELS = {
   player_listing: 'Profil joueur', staff_listing: 'Profil staff', club_need: 'Annonce club',
@@ -109,7 +110,7 @@ export default function AdminTab({ showToast }) {
                   <div style={{ fontWeight: 700 }}>{p.nom}</div>
                   <div style={{ fontSize: 13, color: 'var(--muted)' }}>{p.role}</div>
                 </div>
-                <button onClick={() => handleReactivate(p.id)} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Réactiver le compte</button>
+                <button className="tv-b tv-b-primary" onClick={() => handleReactivate(p.id)}>Réactiver le compte</button>
               </div>
             ))}
           </div>
@@ -117,7 +118,7 @@ export default function AdminTab({ showToast }) {
       )}
 
       {loading ? (
-        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <SkeletonList count={4} />
       ) : groupedList.length === 0 ? (
         <EmptyState icon="🛡️" title="Aucun signalement" sub="Tout est calme pour l'instant." />
       ) : (
@@ -142,7 +143,7 @@ export default function AdminTab({ showToast }) {
                         Suspendre ce compte
                       </button>
                     )}
-                    <button onClick={() => handleDismiss(g.reports.map((r) => r.id))} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '8px 14px', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Rejeter ces signalements</button>
+                    <button className="tv-b tv-b-secondary" onClick={() => handleDismiss(g.reports.map((r) => r.id))}>Rejeter ces signalements</button>
                   </div>
                 </div>
                 <div style={{ display: 'grid', gap: 8 }}>

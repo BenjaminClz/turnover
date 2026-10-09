@@ -91,8 +91,8 @@ const css = `
 .pp-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
 .pp-stat { background: transparent; border: none; color: inherit; text-align: left; padding: 12px 16px; }
 .pp-stat:first-child { border-left: none; padding-left: 0; }
-.pp-annonces-row { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 32px; }
-.pp-featured { width: 240px; flex-shrink: 0; }
+.pp-annonces-row { display: flex; gap: 20px; align-items: stretch; margin-bottom: 32px; }
+.pp-featured { width: 200px; flex-shrink: 0; align-self: flex-start; }
 @media (max-width: 760px) { .pp-annonces-row { flex-direction: column; } .pp-featured { width: 100%; } }
 .pp-stat[data-click="1"] { cursor: pointer; }
 .pp-stat[data-click="1"]:hover .pp-stat-v { color: ${C.lime}; }

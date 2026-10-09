@@ -60,17 +60,17 @@ export default function StaffProfileModal({ staff, supabase, currentUserId, onCl
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 20, maxWidth: 520, width: '100%', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}
+        style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, maxWidth: 520, width: '100%', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}
       >
-        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(11,31,26,0.6)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', lineHeight: 1, width: 32, height: 32, borderRadius: '50%', zIndex: 1 }}>✕</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(11,31,26,0.6)', border: 'none', color: 'var(--text)', fontSize: 20, cursor: 'pointer', lineHeight: 1, width: 32, height: 32, borderRadius: '50%', zIndex: 1 }}>✕</button>
 
         {/* En-tête façon Instagram */}
         <div style={{ padding: '32px 28px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 }}>
             {url ? (
-              <img src={url} alt="" style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid #2C4A3D' }} />
+              <img src={url} alt="" style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--line)' }} />
             ) : (
-              <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 26, flexShrink: 0 }}>
+              <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 28, flexShrink: 0 }}>
                 {initials(nom)}
               </div>
             )}
@@ -79,11 +79,11 @@ export default function StaffProfileModal({ staff, supabase, currentUserId, onCl
             </div>
           </div>
 
-          <div style={{ fontSize: 19, fontWeight: 800 }}>{nom}</div>
-          <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 2 }}>{ROLE_LABELS[staff.role]}</div>
-          <div style={{ fontSize: 13.5, color: '#8C9A8E', marginTop: 2 }}>{describeStaff(staff)}</div>
+          <div style={{ fontSize: 20, fontWeight: 800 }}>{nom}</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 2 }}>{ROLE_LABELS[staff.role]}</div>
+          <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 2 }}>{describeStaff(staff)}</div>
           {lastSeenLabel(staff.profiles?.last_seen_at) && (
-            <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(staff.profiles?.last_seen_at)}</div>
+            <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(staff.profiles?.last_seen_at)}</div>
           )}
 
           {/* Infos saisies */}
@@ -94,13 +94,13 @@ export default function StaffProfileModal({ staff, supabase, currentUserId, onCl
             {staff.sport && <Pill>🏅 {staff.sport}</Pill>}
           </div>
 
-          {staff.bio && <div style={{ fontSize: 14, color: '#C7CFC8', marginTop: 16, lineHeight: 1.6 }}>{staff.bio}</div>}
+          {staff.bio && <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 16, lineHeight: 1.6 }}>{staff.bio}</div>}
 
           {/* Bouton contacter */}
           {staff.owner_id !== currentUserId && (
             <button
               onClick={() => onContact(staff.owner_id, nom, describeStaff(staff))}
-              style={{ width: '100%', background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '11px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 16 }}
+              style={{ width: '100%', background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '11px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 16 }}
             >
               Contacter
             </button>
@@ -108,11 +108,11 @@ export default function StaffProfileModal({ staff, supabase, currentUserId, onCl
         </div>
 
         {/* Grille photos/vidéos façon Instagram */}
-        <div style={{ borderTop: '1px solid #2C4A3D' }}>
+        <div style={{ borderTop: '1px solid var(--line)' }}>
           {galleryItems.length > 0 ? (
             <ProfileMediaGrid items={galleryItems} />
           ) : (
-            <div style={{ padding: '24px 28px', textAlign: 'center', color: '#8C9A8E', fontSize: 13.5 }}>Aucune photo publiée pour le moment.</div>
+            <div style={{ padding: '24px 28px', textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>Aucune photo publiée pour le moment.</div>
           )}
         </div>
       </div>
@@ -123,15 +123,15 @@ export default function StaffProfileModal({ staff, supabase, currentUserId, onCl
 function StatBlock({ value, label }) {
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 17, fontWeight: 800 }}>{value}</div>
-      <div style={{ fontSize: 11, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 800 }}>{value}</div>
+      <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
     </div>
   );
 }
 
 function Pill({ children }) {
   return (
-    <span style={{ fontSize: 12.5, color: '#C7CFC8', background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 20, padding: '5px 12px' }}>
+    <span style={{ fontSize: 13, color: 'var(--text-2)', background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 16, padding: '5px 12px' }}>
       {children}
     </span>
   );

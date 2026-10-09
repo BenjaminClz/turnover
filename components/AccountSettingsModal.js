@@ -73,7 +73,7 @@ export default function AccountSettingsModal({ open, profile, onClose, showToast
       onClick={onClose}
       style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}
     >
-      <div onClick={(e) => e.stopPropagation()} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, padding: 28, maxWidth: 420, width: '100%' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, maxWidth: 420, width: '100%' }}>
         <h3 style={{ fontSize: 18, marginBottom: 20 }}>Modifier mes informations</h3>
         <form onSubmit={handleSave}>
           {isClub ? (
@@ -102,7 +102,7 @@ export default function AccountSettingsModal({ open, profile, onClose, showToast
             <PrimaryButton type="submit" disabled={saving} style={{ width: 'auto', flex: 1 }}>
               {saving ? 'Enregistrement…' : 'Enregistrer'}
             </PrimaryButton>
-            <button type="button" onClick={onClose} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '15px 24px', borderRadius: 10, fontWeight: 600, cursor: 'pointer' }}>
+            <button type="button" onClick={onClose} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '15px 24px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>
               Annuler
             </button>
           </div>

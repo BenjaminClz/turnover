@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase-client';
 
 const T = {
-  card: '#16302a',
-  border: '#2C4A3D',
-  text: '#eef3ef',
-  muted: '#A4B0A6',
-  lime: '#D4FF3F',
+  card: 'var(--surface-2)',
+  border: 'var(--line)',
+  text: 'var(--text)',
+  muted: 'var(--muted)',
+  lime: 'var(--lime)',
   rail: 'rgba(255,255,255,0.14)',
 };
 

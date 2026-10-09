@@ -86,17 +86,17 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 20, maxWidth: 520, width: '100%', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}
+        style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, maxWidth: 520, width: '100%', maxHeight: '88vh', overflowY: 'auto', position: 'relative' }}
       >
-        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(11,31,26,0.6)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', lineHeight: 1, width: 32, height: 32, borderRadius: '50%', zIndex: 1 }}>✕</button>
+        <button onClick={onClose} style={{ position: 'absolute', top: 18, right: 18, background: 'rgba(11,31,26,0.6)', border: 'none', color: 'var(--text)', fontSize: 20, cursor: 'pointer', lineHeight: 1, width: 32, height: 32, borderRadius: '50%', zIndex: 1 }}>✕</button>
 
         {/* En-tête façon Instagram */}
         <div style={{ padding: '32px 28px 20px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 20 }}>
             {url ? (
-              <img src={url} alt="" style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid #2C4A3D' }} />
+              <img src={url} alt="" style={{ width: 84, height: 84, borderRadius: '50%', objectFit: 'cover', flexShrink: 0, border: '2px solid var(--line)' }} />
             ) : (
-              <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 26, flexShrink: 0 }}>
+              <div style={{ width: 84, height: 84, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 28, flexShrink: 0 }}>
                 {initials(nom)}
               </div>
             )}
@@ -107,20 +107,20 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
             </div>
           </div>
 
-          <div style={{ fontSize: 19, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ fontSize: 20, fontWeight: 800, display: 'flex', alignItems: 'center', gap: 8 }}>
             {nom}
-            {profileData?.verified && <span style={{ color: '#D4FF3F', fontSize: 16 }}>✓</span>}
+            {profileData?.verified && <span style={{ color: 'var(--lime)', fontSize: 16 }}>✓</span>}
           </div>
-          {profileData?.adresse && <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>📍 {profileData.adresse}</div>}
+          {profileData?.adresse && <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>📍 {profileData.adresse}</div>}
           {lastSeenLabel(profileData?.last_seen_at) && (
-            <div style={{ fontSize: 12.5, color: '#D4FF3F', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(profileData?.last_seen_at)}</div>
+            <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4, fontWeight: 600 }}>{lastSeenLabel(profileData?.last_seen_at)}</div>
           )}
 
           {/* Bouton contacter */}
           {ownerId !== currentUserId && (
             <button
               onClick={() => onContact(ownerId, nom, needs[0] ? describeNeed(needs[0]) : 'Contact club')}
-              style={{ width: '100%', background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '11px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 16 }}
+              style={{ width: '100%', background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '11px 24px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', marginTop: 16 }}
             >
               Contacter le club
             </button>
@@ -137,13 +137,13 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
         {/* Besoins actifs */}
         {needs.length > 0 && (
           <div style={{ padding: '0 28px 20px' }}>
-            <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>Besoins actifs</div>
+            <div style={{ fontSize: 13, color: 'var(--lime)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>Besoins actifs</div>
             <div style={{ display: 'grid', gap: 8 }}>
               {needs.map((n) => (
-                <div key={n.id} style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                <div key={n.id} style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, padding: '12px 14px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 14 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
-                    <div style={{ fontSize: 12.5, color: '#A4B0A6', marginTop: 2 }}>{describeNeed(n)} · {n.ville}</div>
+                    <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{describeNeed(n)} · {n.ville}</div>
                   </div>
                   <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>
                 </div>
@@ -155,12 +155,12 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
         {/* Dernières actualités */}
         {recentPosts.length > 0 && (
           <div style={{ padding: '0 28px 20px' }}>
-            <div style={{ fontSize: 12.5, color: '#D4FF3F', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>Dernières actualités</div>
+            <div style={{ fontSize: 13, color: 'var(--lime)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 10 }}>Dernières actualités</div>
             <div style={{ display: 'grid', gap: 8 }}>
               {recentPosts.map((post) => (
-                <div key={post.id} style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 10, padding: '12px 14px' }}>
-                  {post.content && <div style={{ fontSize: 13.5, color: '#C7CFC8', lineHeight: 1.5 }}>{post.content}</div>}
-                  <div style={{ fontSize: 11.5, color: '#8C9A8E', marginTop: 6 }}>Il y a {postTimeAgo(post.created_at)}</div>
+                <div key={post.id} style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, padding: '12px 14px' }}>
+                  {post.content && <div style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.5 }}>{post.content}</div>}
+                  <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 6 }}>Il y a {postTimeAgo(post.created_at)}</div>
                 </div>
               ))}
             </div>
@@ -168,11 +168,11 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
         )}
 
         {/* Grille photos/vidéos façon Instagram */}
-        <div style={{ borderTop: '1px solid #2C4A3D' }}>
+        <div style={{ borderTop: '1px solid var(--line)' }}>
           {galleryItems.length > 0 ? (
             <ProfileMediaGrid items={galleryItems} />
           ) : (
-            <div style={{ padding: '24px 28px', textAlign: 'center', color: '#8C9A8E', fontSize: 13.5 }}>Aucune photo publiée pour le moment.</div>
+            <div style={{ padding: '24px 28px', textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>Aucune photo publiée pour le moment.</div>
           )}
         </div>
       </div>
@@ -183,8 +183,8 @@ export default function ClubProfileModal({ ownerId, clubName, supabase, currentU
 function StatBlock({ value, label }) {
   return (
     <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 17, fontWeight: 800 }}>{value}</div>
-      <div style={{ fontSize: 11, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
+      <div style={{ fontSize: 18, fontWeight: 800 }}>{value}</div>
+      <div style={{ fontSize: 11, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{label}</div>
     </div>
   );
 }

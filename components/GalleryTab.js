@@ -245,13 +245,13 @@ export default function GalleryTab({
   );
 
   const grid = loading ? (
-    <div style={{ color: '#8C9A8E', textAlign: 'center', padding: 40 }}>Chargement…</div>
+    <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
   ) : items.length === 0 ? (
     <EmptyState icon="🎞️" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
   ) : (
     <div className="tv-masonry">
       {items.map((item, i) => (
-        <button key={item.id} onClick={() => setOpenIndex(i)} style={{ position: 'relative', display: 'block', borderRadius: 8, overflow: 'hidden', border: '1px solid #274238', background: '#0B1F1A', cursor: 'pointer', padding: 0 }}>
+        <button key={item.id} onClick={() => setOpenIndex(i)} style={{ position: 'relative', display: 'block', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--bg)', cursor: 'pointer', padding: 0 }}>
           {item.media_type === 'video' ? (
             <video src={item.url} muted style={{ width: '100%', height: 'auto', display: 'block' }} />
           ) : (
@@ -282,28 +282,28 @@ export default function GalleryTab({
 
   const likersModalEl = likersModal && (
     <div onClick={() => setLikersModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 16, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: '1px solid #2C4A3D' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: '1px solid var(--line)' }}>
           <span style={{ fontWeight: 700, fontSize: 15 }}>J'aime</span>
-          <button onClick={() => setLikersModal(null)} style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer' }}>✕</button>
+          <button onClick={() => setLikersModal(null)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer' }}>✕</button>
         </div>
         <div style={{ overflowY: 'auto' }}>
           {likersModal.loading ? (
-            <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E' }}>Chargement…</div>
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--muted)' }}>Chargement…</div>
           ) : likersModal.users.length === 0 ? (
-            <div style={{ padding: 24, textAlign: 'center', color: '#8C9A8E', fontSize: 14 }}>Personne pour le moment.</div>
+            <div style={{ padding: 24, textAlign: 'center', color: 'var(--muted)', fontSize: 14 }}>Personne pour le moment.</div>
           ) : likersModal.users.map((u) => {
             const av = u.avatar_path ? avatarUrl(supabase, u.avatar_path) : null;
             return (
-              <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', borderBottom: '1px solid #1c332a' }}>
+              <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 18px', borderBottom: '1px solid var(--line-soft)' }}>
                 {av ? (
                   <img src={av} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 13 }}>{initials(u.nom)}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 13 }}>{initials(u.nom)}</div>
                 )}
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: '#F5F0E6' }}>{u.nom}</div>
-                  <div style={{ fontSize: 12, color: '#8C9A8E' }}>{ROLE_LABELS[u.role] || u.role}</div>
+                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{u.nom}</div>
+                  <div style={{ fontSize: 12, color: 'var(--muted)' }}>{ROLE_LABELS[u.role] || u.role}</div>
                 </div>
               </div>
             );
@@ -315,19 +315,19 @@ export default function GalleryTab({
 
   if (embedded) {
     return (
-      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
           <h3 style={{ fontSize: 18 }}>{title}</h3>
           {!readOnly && (
             <>
               {uploadInput}
-              <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: '#D4FF3F', color: '#0B1F1A', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+              <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
                 {uploading ? 'Import en cours…' : '+ Ajouter'}
               </label>
             </>
           )}
         </div>
-        {!readOnly && <p style={{ fontSize: 13, color: '#8C9A8E', marginBottom: 18 }}>{description}</p>}
+        {!readOnly && <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 18 }}>{description}</p>}
         {grid}
         {lightbox}
         {likersModalEl}
@@ -337,21 +337,21 @@ export default function GalleryTab({
 
   return (
     <div>
-      <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(1.5rem, 3.2vw, 1.9rem)', fontWeight: 600, letterSpacing: '-0.015em', color: '#E8EEE9', marginBottom: 10 }}>
+      <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(1.5rem, 3.2vw, 1.9rem)', fontWeight: 600, letterSpacing: '-0.015em', color: 'var(--text)', marginBottom: 10 }}>
         {readOnly ? `Galerie de ${ownerName}` : 'Ma galerie'}
       </h1>
-      <p style={{ color: '#8C9A8E', marginBottom: 24, maxWidth: 520 }}>
+      <p style={{ color: 'var(--muted)', marginBottom: 24, maxWidth: 520 }}>
         {readOnly ? 'Photos et vidéos publiées par ce profil.' : 'Tes photos et vidéos, visibles par les clubs qui consultent ton profil.'}
       </p>
 
       {!readOnly && (
-        <div style={{ background: '#152E26', border: '1px solid #274238', borderRadius: 16, padding: 24, marginBottom: 24 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, marginBottom: 14 }}>Nouvelle publication</h3>
           {uploadInput}
-          <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: '#D4FF3F', color: '#0B1F1A', padding: '12px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+          <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '12px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
             {uploading ? 'Import en cours…' : '+ Ajouter photos / vidéos'}
           </label>
-          <div style={{ fontSize: 12, color: '#8C9A8E', marginTop: 10 }}>Jusqu'à 20 Mo par fichier. Tu pourras ajouter une description ensuite.</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>Jusqu'à 20 Mo par fichier. Tu pourras ajouter une description ensuite.</div>
         </div>
       )}
 
@@ -398,74 +398,74 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
   };
 
   return (
-    <div style={{ background: '#0B1F1A', border: '1px solid #2C4A3D', borderRadius: 14, overflow: 'hidden' }}>
+    <div style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden' }}>
       {/* En-tête */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', position: 'relative' }}>
         {ownerAvatar ? (
           <img src={ownerAvatar} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
         ) : (
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 13 }}>{initials(ownerName)}</div>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 13 }}>{initials(ownerName)}</div>
         )}
         <div style={{ flex: 1 }}>
-          <div style={{ color: '#F5F0E6', fontSize: 13.5, fontWeight: 700 }}>{ownerName}</div>
-          <div style={{ color: '#8C9A8E', fontSize: 11.5 }}>{ROLE_LABELS[ownerRole] || ''}{ownerRole ? ' · ' : ''}il y a {timeAgo(item.created_at)}</div>
+          <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700 }}>{ownerName}</div>
+          <div style={{ color: 'var(--muted)', fontSize: 12 }}>{ROLE_LABELS[ownerRole] || ''}{ownerRole ? ' · ' : ''}il y a {timeAgo(item.created_at)}</div>
         </div>
         {isOwner && (
           <>
-            <button onClick={() => setMenuOpen((v) => !v)} style={{ background: 'transparent', border: 'none', color: '#8C9A8E', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}>⋯</button>
+            <button onClick={() => setMenuOpen((v) => !v)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}>⋯</button>
             {menuOpen && (
-              <div style={{ position: 'absolute', top: 44, right: 12, background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, zIndex: 20, overflow: 'hidden', minWidth: 180 }}>
+              <div style={{ position: 'absolute', top: 44, right: 12, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, zIndex: 20, overflow: 'hidden', minWidth: 180 }}>
                 {onTogglePin && (
-                  <button onClick={() => { setMenuOpen(false); onTogglePin(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer' }}>
+                  <button onClick={() => { setMenuOpen(false); onTogglePin(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 14, padding: '11px 14px', cursor: 'pointer' }}>
                     {item.pinned ? 'Retirer de mon profil' : 'Épingler sur mon profil'}
                   </button>
                 )}
-                <button onClick={() => { setMenuOpen(false); setEditingDesc(true); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer' }}>Modifier la description</button>
-                <button onClick={() => { setMenuOpen(false); onDelete(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#FF5C5C', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid #223a30' }}>Supprimer la publication</button>
+                <button onClick={() => { setMenuOpen(false); setEditingDesc(true); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 14, padding: '11px 14px', cursor: 'pointer' }}>Modifier la description</button>
+                <button onClick={() => { setMenuOpen(false); onDelete(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--danger)', fontSize: 14, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid var(--line-soft)' }}>Supprimer la publication</button>
               </div>
             )}
           </>
         )}
         {modal && onClose && (
-          <button onClick={onClose} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: '#A4B0A6', fontSize: 20, cursor: 'pointer', lineHeight: 1, marginLeft: 4 }}>✕</button>
+          <button onClick={onClose} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', lineHeight: 1, marginLeft: 4 }}>✕</button>
         )}
       </div>
 
       {/* Média */}
-      <div style={{ position: 'relative', width: '100%', background: '#152E26', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 560, overflow: 'hidden' }}>
+      <div style={{ position: 'relative', width: '100%', background: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center', maxHeight: 560, overflow: 'hidden' }}>
         {item.media_type === 'video' ? (
           <video src={item.url} controls style={{ width: '100%', maxHeight: 560, display: 'block' }} />
         ) : (
           <img src={item.url} alt="" style={{ width: '100%', maxHeight: 560, objectFit: 'contain', display: 'block' }} />
         )}
         {modal && position && (
-          <span style={{ position: 'absolute', top: 8, left: 10, background: 'rgba(11,31,26,0.6)', color: '#F5F0E6', fontSize: 12, padding: '2px 9px', borderRadius: 10 }}>{position}</span>
+          <span style={{ position: 'absolute', top: 8, left: 10, background: 'rgba(11,31,26,0.6)', color: 'var(--text)', fontSize: 12, padding: '2px 9px', borderRadius: 8 }}>{position}</span>
         )}
         {modal && onPrev && (
-          <button onClick={onPrev} aria-label="Précédent" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, borderRadius: '50%', background: 'rgba(11,31,26,0.65)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
+          <button onClick={onPrev} aria-label="Précédent" style={{ position: 'absolute', left: 8, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, borderRadius: '50%', background: 'rgba(11,31,26,0.65)', border: 'none', color: 'var(--text)', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>‹</button>
         )}
         {modal && onNext && (
-          <button onClick={onNext} aria-label="Suivant" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, borderRadius: '50%', background: 'rgba(11,31,26,0.65)', border: 'none', color: '#F5F0E6', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
+          <button onClick={onNext} aria-label="Suivant" style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', width: 34, height: 34, borderRadius: '50%', background: 'rgba(11,31,26,0.65)', border: 'none', color: 'var(--text)', fontSize: 20, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>›</button>
         )}
       </div>
 
       {/* Actions */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '12px 14px 4px', position: 'relative' }}>
-        <button onClick={onToggleLike} aria-label="J'aime" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: item.likedByMe ? '#FF5C7A' : '#A4B0A6', padding: 0 }}>
+        <button onClick={onToggleLike} aria-label="J'aime" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: item.likedByMe ? 'var(--danger)' : 'var(--muted)', padding: 0 }}>
           <HeartIcon filled={item.likedByMe} size={22} />
         </button>
-        <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#A4B0A6', fontSize: 14 }}>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--muted)', fontSize: 14 }}>
           <MessageIcon size={21} />{comments.length > 0 ? comments.length : ''}
         </span>
-        <button onClick={() => setShareOpen((v) => !v)} aria-label="Partager" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: '#A4B0A6', padding: 0 }}>
+        <button onClick={() => setShareOpen((v) => !v)} aria-label="Partager" style={{ display: 'flex', alignItems: 'center', background: 'transparent', border: 'none', cursor: 'pointer', color: 'var(--muted)', padding: 0 }}>
           <ShareIcon size={20} />
         </button>
         {shareOpen && (
-          <div style={{ position: 'absolute', top: 40, left: 60, background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, zIndex: 20, overflow: 'hidden', minWidth: 200 }}>
-            <button onClick={doNativeShare} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer' }}>Partager…</button>
-            <button onClick={doCopyLink} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid #223a30' }}>Copier le lien</button>
+          <div style={{ position: 'absolute', top: 40, left: 60, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, zIndex: 20, overflow: 'hidden', minWidth: 200 }}>
+            <button onClick={doNativeShare} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 14, padding: '11px 14px', cursor: 'pointer' }}>Partager…</button>
+            <button onClick={doCopyLink} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 14, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid var(--line-soft)' }}>Copier le lien</button>
             {onShareToMessage && (
-              <button onClick={() => { setShareOpen(false); onShareToMessage(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid #223a30' }}>Envoyer en message</button>
+              <button onClick={() => { setShareOpen(false); onShareToMessage(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 14, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid var(--line-soft)' }}>Envoyer en message</button>
             )}
           </div>
         )}
@@ -474,7 +474,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
       {/* Nombre de likes */}
       {item.likeCount > 0 && (
         <div style={{ padding: '2px 14px 0' }}>
-          <button onClick={onOpenLikers} style={{ background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+          <button onClick={onOpenLikers} style={{ background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
             {item.likeCount} {item.likeCount > 1 ? "j'aime" : "j'aime"}
           </button>
         </div>
@@ -483,35 +483,35 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
       {/* Description */}
       {editingDesc ? (
         <div style={{ padding: '8px 14px' }}>
-          <textarea value={descText} onChange={(e) => setDescText(e.target.value)} placeholder="Écris une description…" style={{ width: '100%', minHeight: 60, background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 8, color: '#F5F0E6', fontSize: 13.5, padding: 10, outline: 'none', boxSizing: 'border-box', resize: 'vertical' }} />
+          <textarea value={descText} onChange={(e) => setDescText(e.target.value)} placeholder="Écris une description…" style={{ width: '100%', minHeight: 60, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, color: 'var(--text)', fontSize: 14, padding: 10, outline: 'none', boxSizing: 'border-box', resize: 'vertical' }} />
           <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-            <button onClick={() => { onUpdateDescription(descText); setEditingDesc(false); }} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '7px 14px', borderRadius: 8, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>Enregistrer</button>
-            <button onClick={() => { setDescText(item.description || ''); setEditingDesc(false); }} style={{ background: 'transparent', color: '#A4B0A6', border: '1px solid #2C4A3D', padding: '7px 14px', borderRadius: 8, fontSize: 12.5, cursor: 'pointer' }}>Annuler</button>
+            <button onClick={() => { onUpdateDescription(descText); setEditingDesc(false); }} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '7px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Enregistrer</button>
+            <button onClick={() => { setDescText(item.description || ''); setEditingDesc(false); }} style={{ background: 'transparent', color: 'var(--muted)', border: '1px solid var(--line)', padding: '7px 14px', borderRadius: 8, fontSize: 13, cursor: 'pointer' }}>Annuler</button>
           </div>
         </div>
       ) : item.description ? (
-        <div style={{ padding: '4px 14px 2px', fontSize: 13.5, color: '#C7CFC8', lineHeight: 1.5 }}>
-          <span style={{ color: '#F5F0E6', fontWeight: 700 }}>{ownerName}</span> {item.description}
+        <div style={{ padding: '4px 14px 2px', fontSize: 14, color: 'var(--text-2)', lineHeight: 1.5 }}>
+          <span style={{ color: 'var(--text)', fontWeight: 700 }}>{ownerName}</span> {item.description}
         </div>
       ) : isOwner ? (
         <div style={{ padding: '4px 14px 2px' }}>
-          <button onClick={() => setEditingDesc(true)} style={{ background: 'transparent', border: 'none', color: '#8C9A8E', fontSize: 13, cursor: 'pointer', padding: 0 }}>+ Ajouter une description</button>
+          <button onClick={() => setEditingDesc(true)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 13, cursor: 'pointer', padding: 0 }}>+ Ajouter une description</button>
         </div>
       ) : null}
 
       {/* Commentaires */}
       {comments.length > 2 && !showAllComments && (
         <div style={{ padding: '4px 14px 0' }}>
-          <button onClick={() => setShowAllComments(true)} style={{ background: 'transparent', border: 'none', color: '#8C9A8E', fontSize: 13, cursor: 'pointer', padding: 0 }}>Voir les {comments.length} commentaires</button>
+          <button onClick={() => setShowAllComments(true)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 13, cursor: 'pointer', padding: 0 }}>Voir les {comments.length} commentaires</button>
         </div>
       )}
       {visibleComments.length > 0 && (
         <div style={{ padding: '4px 14px 8px', display: 'grid', gap: 4 }}>
           {visibleComments.map((c) => (
-            <div key={c.id} style={{ fontSize: 13, color: '#C7CFC8', lineHeight: 1.45, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-              <span><span style={{ color: '#F5F0E6', fontWeight: 700 }}>{c.profiles?.nom || 'Utilisateur'}</span> {c.content}</span>
+            <div key={c.id} style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.45, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+              <span><span style={{ color: 'var(--text)', fontWeight: 700 }}>{c.profiles?.nom || 'Utilisateur'}</span> {c.content}</span>
               {isOwner && (
-                <button onClick={() => onDeleteComment(c.id)} style={{ background: 'transparent', border: 'none', color: '#5C6B5E', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>✕</button>
+                <button onClick={() => onDeleteComment(c.id)} style={{ background: 'transparent', border: 'none', color: 'var(--faint)', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>✕</button>
               )}
             </div>
           ))}
@@ -520,15 +520,15 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
 
       {/* Ajouter un commentaire */}
       {canInteract && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderTop: '1px solid #1c332a', padding: '10px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, borderTop: '1px solid var(--line-soft)', padding: '10px 14px' }}>
           <input
             value={commentText}
             onChange={(e) => setCommentText(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter') submitComment(); }}
             placeholder="Ajouter un commentaire…"
-            style={{ flex: 1, background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13, outline: 'none' }}
+            style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 13, outline: 'none' }}
           />
-          <button onClick={submitComment} disabled={!commentText.trim()} style={{ background: 'transparent', border: 'none', color: commentText.trim() ? '#D4FF3F' : '#5C6B5E', fontSize: 13, fontWeight: 700, cursor: commentText.trim() ? 'pointer' : 'default' }}>Publier</button>
+          <button onClick={submitComment} disabled={!commentText.trim()} style={{ background: 'transparent', border: 'none', color: commentText.trim() ? 'var(--lime)' : 'var(--faint)', fontSize: 13, fontWeight: 700, cursor: commentText.trim() ? 'pointer' : 'default' }}>Publier</button>
         </div>
       )}
     </div>

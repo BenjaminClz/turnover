@@ -42,19 +42,19 @@ export default function AvatarUpload({ userId, currentPath, onUploaded, showToas
     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <div style={{
         width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-        background: url ? 'transparent' : 'linear-gradient(135deg,#D4FF3F,#7fb83a)',
+        background: url ? 'transparent' : 'linear-gradient(135deg,var(--lime),var(--lime-deep))',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        border: '2px solid #2C4A3D',
+        border: '2px solid var(--line)',
       }}>
         {url ? (
           <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <span style={{ fontFamily: 'Anton', color: '#0B1F1A', fontSize: size * 0.4 }}>?</span>
+          <span style={{ fontFamily: 'Anton', color: 'var(--on-lime)', fontSize: size * 0.4 }}>?</span>
         )}
       </div>
       <div>
         <input ref={fileInputRef} type="file" accept="image/*" onChange={(e) => handleFile(e.target.files?.[0])} style={{ display: 'none' }} id={`avatar-upload-${userId}`} />
-        <label htmlFor={`avatar-upload-${userId}`} style={{ display: 'inline-block', background: 'transparent', border: '1.5px solid #2C4A3D', color: '#F5F0E6', padding: '9px 18px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>
+        <label htmlFor={`avatar-upload-${userId}`} style={{ display: 'inline-block', background: 'transparent', border: '1px solid var(--line)', color: 'var(--text)', padding: '9px 18px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
           {uploading ? 'Envoi…' : (url ? 'Changer la photo' : 'Ajouter une photo')}
         </label>
       </div>

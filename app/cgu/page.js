@@ -2,17 +2,17 @@ export const metadata = { title: 'Conditions Générales d\'Utilisation — Turn
 
 const Section = ({ title, children }) => (
   <section style={{ marginBottom: 32 }}>
-    <h2 style={{ fontSize: 18, marginBottom: 10, color: '#D4FF3F' }}>{title}</h2>
-    <div style={{ fontSize: 14.5, color: '#C7CFC8', lineHeight: 1.7 }}>{children}</div>
+    <h2 style={{ fontSize: 18, marginBottom: 10, color: 'var(--lime)' }}>{title}</h2>
+    <div style={{ fontSize: 15, color: 'var(--text-2)', lineHeight: 1.7 }}>{children}</div>
   </section>
 );
 
 export default function CGU() {
   return (
-    <div style={{ minHeight: '100vh', background: '#0B1F1A', color: '#F5F0E6', fontFamily: 'sans-serif', padding: '48px 5vw' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'sans-serif', padding: '48px 5vw' }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <a href="/" style={{ color: '#D4FF3F', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>← Turnover</a>
-        <h1 style={{ fontSize: 30, margin: '24px 0 32px' }}>Conditions Générales d'Utilisation</h1>
+        <a href="/" style={{ color: 'var(--lime)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>← Turnover</a>
+        <h1 style={{ fontSize: 32, margin: '24px 0 32px' }}>Conditions Générales d'Utilisation</h1>
 
         <Section title="1. Objet">
           <p>
@@ -81,7 +81,7 @@ export default function CGU() {
           <p>Les présentes CGU sont soumises au droit français.</p>
         </Section>
 
-        <p style={{ fontSize: 12.5, color: '#5C6B5E', marginTop: 40 }}>Dernière mise à jour : juillet 2026.</p>
+        <p style={{ fontSize: 13, color: 'var(--faint)', marginTop: 40 }}>Dernière mise à jour : juillet 2026.</p>
       </div>
     </div>
   );

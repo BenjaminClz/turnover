@@ -28,19 +28,19 @@ export default function ResetPasswordPage() {
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
       <div style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 32 }}>
-          <div style={{ width: 9, height: 9, background: '#D4FF3F', borderRadius: '50%' }} />
-          <span className="turnover-anton" style={{ fontSize: 22 }}>TURNOVER</span>
+          <div style={{ width: 9, height: 9, background: 'var(--lime)', borderRadius: '50%' }} />
+          <span className="turnover-anton" style={{ fontSize: 24 }}>TURNOVER</span>
         </div>
-        <div style={{ background: '#152E26', border: '1px solid #274238', borderRadius: 16, padding: 28 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
           {done ? (
-            <p style={{ color: '#D4FF3F', fontSize: 14 }}>Mot de passe mis à jour. Redirection…</p>
+            <p style={{ color: 'var(--lime)', fontSize: 14 }}>Mot de passe mis à jour. Redirection…</p>
           ) : (
             <form onSubmit={handleReset}>
               <h2 style={{ fontSize: 20, marginBottom: 18 }}>Nouveau mot de passe</h2>
               <Field label="Choisis un nouveau mot de passe">
                 <TextInput type="password" required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="6 caractères minimum" />
               </Field>
-              {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
+              {error && <div style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 14 }}>{error}</div>}
               <PrimaryButton type="submit" disabled={loading}>{loading ? 'Mise à jour…' : 'Valider'}</PrimaryButton>
             </form>
           )}

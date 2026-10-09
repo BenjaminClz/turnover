@@ -172,12 +172,12 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       <PageTitle>Rechercher</PageTitle>
       <PageSubtitle>{isClub ? 'Trouve les profils les plus proches de toi, partout en France.' : 'Trouve les clubs et profils les plus proches de toi, partout en France.'}</PageSubtitle>
 
-      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 32 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'end', marginBottom: 18 }}>
           <Field label="Chercher autour de">
             <TextInput autoFocus value={villeInput} onChange={(e) => setVilleInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocate(); } }} placeholder="Ta ville (ex. Annemasse, Lyon, Paris…)" />
           </Field>
-          <button onClick={handleLocate} disabled={geocodingOrigin} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '14px 22px', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer', height: 52 }}>
+          <button onClick={handleLocate} disabled={geocodingOrigin} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '14px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', height: 52 }}>
             {geocodingOrigin ? '…' : 'Localiser'}
           </button>
         </div>
@@ -199,17 +199,17 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
         {originCoords && (
           <div>
-            <div style={{ fontSize: 12.5, color: '#A4B0A6', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 600 }}>Rayon de recherche</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 600 }}>Rayon de recherche</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {RAYONS.map((r) => (
-                <button key={r} onClick={() => setRayon(r)} style={{ padding: '7px 16px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (rayon === r ? '#D4FF3F' : '#2C4A3D'), background: rayon === r ? 'rgba(212,255,63,0.12)' : 'transparent', color: rayon === r ? '#D4FF3F' : '#A4B0A6' }}>
+                <button key={r} onClick={() => setRayon(r)} style={{ padding: '7px 16px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (rayon === r ? 'var(--lime)' : 'var(--line)'), background: rayon === r ? 'rgba(212,255,63,0.12)' : 'transparent', color: rayon === r ? 'var(--lime)' : 'var(--muted)' }}>
                   {r === 'Toute la France' ? r : `${r} km`}
                 </button>
               ))}
             </div>
           </div>
         )}
-        {originCoords && <div style={{ fontSize: 13, color: '#A4B0A6', marginTop: 14 }}>📍 Localisé : {originCoords.label}</div>}
+        {originCoords && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 14 }}>📍 Localisé : {originCoords.label}</div>}
       </div>
 
       {loading ? (
@@ -219,24 +219,24 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       ) : (
         <>
           <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-            <button onClick={() => setViewMode('liste')} style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'liste' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'liste' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'liste' ? '#D4FF3F' : '#A4B0A6' }}>📋 Liste</button>
-            <button onClick={() => setViewMode('carte')} style={{ padding: '8px 18px', borderRadius: 20, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'carte' ? '#D4FF3F' : '#2C4A3D'), background: viewMode === 'carte' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'carte' ? '#D4FF3F' : '#A4B0A6' }}>🗺️ Carte</button>
+            <button onClick={() => setViewMode('liste')} style={{ padding: '8px 18px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'liste' ? 'var(--lime)' : 'var(--line)'), background: viewMode === 'liste' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'liste' ? 'var(--lime)' : 'var(--muted)' }}>📋 Liste</button>
+            <button onClick={() => setViewMode('carte')} style={{ padding: '8px 18px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'carte' ? 'var(--lime)' : 'var(--line)'), background: viewMode === 'carte' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'carte' ? 'var(--lime)' : 'var(--muted)' }}>🗺️ Carte</button>
           </div>
 
           {viewMode === 'carte' ? (
             <div>
               <SearchMap markers={mapMarkers} onMarkerClick={handleMarkerClick} />
-              <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginTop: 14, fontSize: 12.5, color: '#A4B0A6' }}>
-                {showNeeds && <span><span style={{ color: '#D4FF3F' }}>●</span> Besoins clubs</span>}
-                {showPlayers && <span><span style={{ color: '#7FD1FF' }}>●</span> Joueurs</span>}
-                {showStaffRoles.length > 0 && <span><span style={{ color: '#FFB86B' }}>●</span> Staff</span>}
+              <div style={{ display: 'flex', gap: 18, flexWrap: 'wrap', marginTop: 14, fontSize: 13, color: 'var(--muted)' }}>
+                {showNeeds && <span><span style={{ color: 'var(--lime)' }}>●</span> Besoins clubs</span>}
+                {showPlayers && <span><span style={{ color: 'var(--info)' }}>●</span> Joueurs</span>}
+                {showStaffRoles.length > 0 && <span><span style={{ color: 'var(--warning)' }}>●</span> Staff</span>}
               </div>
             </div>
           ) : (
             <div style={{ display: 'grid', gap: 32 }}>
               {showNeeds && filteredNeeds.length > 0 && (
                 <div>
-                  <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Besoins clubs ({filteredNeeds.length})</h2>
+                  <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Besoins clubs ({filteredNeeds.length})</h2>
                   <div style={CARD_GRID}>
                     {filteredNeeds.map((n) => (
                       <ResultCard key={n.id} title={n.club} verified={n.profiles?.verified} details={`${needDetails(n)} · ${n.ville}`} distance={n._distance} showContact={n.owner_id !== user.id} onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)} onClickProfile={() => onOpenProfile(n.owner_id)} avatarPath={n.profiles?.avatar_path} supabase={supabase} featured={n._featured} reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }} />
@@ -247,7 +247,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
               {showPlayers && filteredPlayers.length > 0 && (
                 <div>
-                  <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Joueurs ({filteredPlayers.length})</h2>
+                  <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Joueurs ({filteredPlayers.length})</h2>
                   <div style={CARD_GRID}>
                     {filteredPlayers.map((p) => (
                       <ResultCard key={p.id} title={p.profiles?.nom} details={`${p.poste} · ${p.niveau} · ${p.ville}`} distance={p._distance} showContact={p.owner_id !== user.id} onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)} onClickProfile={() => onOpenProfile(p.owner_id)} avatarPath={p.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }} />
@@ -261,7 +261,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                 if (list.length === 0) return null;
                 return (
                   <div key={role}>
-                    <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>{ROLE_LABELS[role]} ({list.length})</h2>
+                    <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>{ROLE_LABELS[role]} ({list.length})</h2>
                     <div style={CARD_GRID}>
                       {list.map((s) => (
                         <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} onClickProfile={() => onOpenProfile(s.owner_id)} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
@@ -287,32 +287,32 @@ const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Bool
 function ResultCard({ title, verified, details, distance, showContact, onContact, onClickProfile, avatarPath, supabase, featured, reportProps, favoriteProps }) {
   const url = avatarPath ? avatarUrl(supabase, avatarPath) : null;
   return (
-    <div className="tv-card" style={{ position: 'relative', background: featured ? 'rgba(212,255,63,0.05)' : '#152E26', border: featured ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D', borderRadius: 14, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
+    <div className="tv-card" style={{ position: 'relative', background: featured ? 'rgba(212,255,63,0.05)' : 'var(--surface)', border: featured ? '1.5px solid var(--lime)' : '1px solid var(--line)', borderRadius: 12, padding: '20px 16px 16px', display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center' }}>
       <div style={{ position: 'absolute', top: 10, right: 10, display: 'flex', gap: 6 }} onClick={(e) => e.stopPropagation()}>
         {favoriteProps && <FavoriteButton {...favoriteProps} />}
         {reportProps && <ReportButton {...reportProps} />}
       </div>
-      {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 9.5, fontWeight: 800, color: '#0B1F1A', background: '#D4FF3F', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
+      {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 11, fontWeight: 800, color: 'var(--on-lime)', background: 'var(--lime)', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
 
       <button onClick={onClickProfile} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
         <div style={{ position: 'relative', marginTop: featured ? 14 : 0, marginBottom: 10 }}>
           {url ? (
             <img src={url} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
           ) : (
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,#D4FF3F,#7fb83a)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: '#0B1F1A', fontSize: 22 }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 24 }}>
               {initials(title)}
             </div>
           )}
           {verified && (
-            <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: '#27500A', color: '#EAF3DE', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, border: '2px solid #152E26' }}>✓</span>
+            <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: '#27500A', color: '#EAF3DE', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, border: '2px solid var(--surface)' }}>✓</span>
           )}
         </div>
-        <div style={{ fontWeight: 700, fontSize: 14.5, marginBottom: 4, color: '#F5F0E6' }}>{title}</div>
+        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4, color: 'var(--text)' }}>{title}</div>
       </button>
-      <div style={{ fontSize: 12.5, color: '#A4B0A6', lineHeight: 1.4, marginBottom: distance != null ? 2 : 14 }}>{details}</div>
-      {distance != null && <div style={{ fontSize: 11.5, color: '#D4FF3F', marginBottom: 14 }}>{distance.toFixed(0)} km</div>}
+      <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.4, marginBottom: distance != null ? 2 : 14 }}>{details}</div>
+      {distance != null && <div style={{ fontSize: 12, color: 'var(--lime)', marginBottom: 14 }}>{distance.toFixed(0)} km</div>}
       {showContact && (
-        <button className="tv-btn" onClick={onContact} style={{ width: '100%', marginTop: 8, background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 0', borderRadius: 7, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+        <button className="tv-btn" onClick={onContact} style={{ width: '100%', marginTop: 8, background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 0', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
           Contacter
         </button>
       )}

@@ -64,7 +64,7 @@ export default function FavoritesTab({ user, onContact, onViewGallery }) {
       <PageSubtitle>Les profils et annonces que tu as mis de côté.</PageSubtitle>
 
       {loading ? (
-        <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
       ) : favorites.length === 0 ? (
         <EmptyState icon="🤍" title="Aucun favori pour le moment" sub="Clique sur le cœur depuis une annonce ou un profil pour le retrouver ici." />
       ) : (
@@ -72,18 +72,18 @@ export default function FavoritesTab({ user, onContact, onViewGallery }) {
           {favorites.map((item) => {
             const url = item.profiles?.avatar_path ? avatarUrl(supabase, item.profiles.avatar_path) : null;
             return (
-              <div key={`${item._favType}:${item.id}`} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+              <div key={`${item._favType}:${item.id}`} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                  {url && <img src={url} alt="" style={{ width: 42, height: 42, borderRadius: 9, objectFit: 'cover' }} />}
+                  {url && <img src={url} alt="" style={{ width: 42, height: 42, borderRadius: 8, objectFit: 'cover' }} />}
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{titleOf(item)}</div>
-                    <div style={{ fontSize: 13.5, color: '#A4B0A6', marginTop: 2 }}>{describe(item)}</div>
+                    <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 2 }}>{describe(item)}</div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                   <FavoriteButton targetType={item._favType} targetId={item.id} ownerId={user.id} />
                   {item.owner_id !== user.id && (
-                    <button onClick={() => onContact(item.owner_id, titleOf(item), describe(item))} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Contacter</button>
+                    <button onClick={() => onContact(item.owner_id, titleOf(item), describe(item))} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
                   )}
                 </div>
               </div>

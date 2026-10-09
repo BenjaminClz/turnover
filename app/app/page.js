@@ -48,7 +48,7 @@ const TAB_ICONS = {
 
 export default function AppPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#0B1F1A' }} />}>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: 'var(--bg)' }} />}>
       <AppPageInner />
     </Suspense>
   );
@@ -200,22 +200,22 @@ function AppPageInner() {
 
   if (suspended) {
     return (
-      <div style={{ minHeight: '100vh', background: '#0B1F1A', color: '#F5F0E6', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
         <div style={{ maxWidth: 420 }}>
           <div style={{ fontSize: 40, marginBottom: 16 }}>🚫</div>
-          <h1 style={{ fontSize: 22, marginBottom: 12 }}>Ton compte a été suspendu</h1>
-          <p style={{ fontSize: 14.5, color: '#A4B0A6', lineHeight: 1.6, marginBottom: 20 }}>
+          <h1 style={{ fontSize: 24, marginBottom: 12 }}>Ton compte a été suspendu</h1>
+          <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 20 }}>
             L'accès à ton compte a été temporairement suspendu suite à un ou plusieurs signalements.
             Si tu penses qu'il s'agit d'une erreur, contacte-nous.
           </p>
-          <a href="mailto:turn-over@outlook.fr" style={{ color: '#D4FF3F', fontWeight: 700, textDecoration: 'underline' }}>turn-over@outlook.fr</a>
+          <a href="mailto:turn-over@outlook.fr" style={{ color: 'var(--lime)', fontWeight: 700, textDecoration: 'underline' }}>turn-over@outlook.fr</a>
         </div>
       </div>
     );
   }
 
   if (loading || !user || !profile || !tab) {
-    return <div style={{ minHeight: '100vh', background: '#0B1F1A' }} />;
+    return <div style={{ minHeight: '100vh', background: 'var(--bg)' }} />;
   }
 
   const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
@@ -243,11 +243,11 @@ function AppPageInner() {
       ];
 
   return (
-    <div style={{ minHeight: '100vh', color: '#F5F0E6' }}>
-      <nav className="tv-navbar" style={{ position: 'sticky', top: 0, zIndex: 50, padding: '10px 5vw', background: 'rgba(11,31,26,0.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid #24423A' }}>
-        <button onClick={() => setTab('actualites')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: '#F5F0E6' }}>
-          <img src="/logo.png" alt="Turnover" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 5 }} />
-          <span className="turnover-anton" style={{ fontSize: 22, color: '#E8EEE9', letterSpacing: '0.02em' }}>TURNOVER</span>
+    <div style={{ minHeight: '100vh', color: 'var(--text)' }}>
+      <nav className="tv-navbar" style={{ position: 'sticky', top: 0, zIndex: 50, padding: '10px 5vw', background: 'rgba(11,31,26,0.92)', backdropFilter: 'blur(10px)', borderBottom: '1px solid var(--line)' }}>
+        <button onClick={() => setTab('actualites')} style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'transparent', border: 'none', cursor: 'pointer', padding: 0, color: 'var(--text)' }}>
+          <img src="/logo.png" alt="Turnover" style={{ width: 26, height: 26, objectFit: 'contain', borderRadius: 6 }} />
+          <span className="turnover-anton" style={{ fontSize: 24, color: 'var(--text)', letterSpacing: '0.02em' }}>TURNOVER</span>
         </button>
         <div className="tv-tabs-scroll" style={{ display: 'flex', gap: 8 }}>
           {tabs.map((t) => {
@@ -268,11 +268,11 @@ function AppPageInner() {
                   if (t.key === 'galerie') setViewingGallery({ userId: user.id, ownerName: profile.nom });
                   setTab(t.key);
                 }}
-                style={{ position: 'relative', padding: '11px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 16, fontWeight: 500, background: tab === t.key ? 'rgba(255,255,255,0.06)' : 'transparent', boxShadow: tab === t.key ? 'inset 0 -2px 0 #D4FF3F' : 'none', color: tab === t.key ? '#E8EEE9' : '#8FA096', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
+                style={{ position: 'relative', padding: '11px 18px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 16, fontWeight: 500, background: tab === t.key ? 'rgba(255,255,255,0.06)' : 'transparent', boxShadow: tab === t.key ? 'inset 0 -2px 0 var(--lime)' : 'none', color: tab === t.key ? 'var(--text)' : 'var(--muted)', whiteSpace: 'nowrap', flexShrink: 0, display: 'flex', alignItems: 'center', gap: 6 }}
               >
                 {t.label}
                 {needsAttention && (
-                  <span style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: '#FF6B6B', border: '1.5px solid #0B1F1A' }} />
+                  <span style={{ position: 'absolute', top: 4, right: 4, width: 8, height: 8, borderRadius: '50%', background: 'var(--danger)', border: '1.5px solid var(--bg)' }} />
                 )}
               </button>
             );
@@ -295,9 +295,9 @@ function AppPageInner() {
 
       <main key={tab} className="tv-fade-in tv-main">
         {profile.role === 'joueur' && myPlayerListing && myPlayerListing.published !== true && tab !== 'joueur' && (
-          <div style={{ background: 'rgba(255,107,107,0.08)', border: '1.5px solid #FF6B6B', borderRadius: 14, padding: '16px 20px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+          <div style={{ background: 'rgba(255,107,107,0.08)', border: '1.5px solid var(--danger)', borderRadius: 12, padding: '16px 20px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <span style={{ fontSize: 14 }}>Ton profil n'est pas encore publié — les clubs ne peuvent pas te trouver pour l'instant.</span>
-            <button onClick={() => setTab('joueur')} style={{ background: '#FF6B6B', color: '#0B1F1A', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', flexShrink: 0 }}>
+            <button onClick={() => setTab('joueur')} style={{ background: 'var(--danger)', color: 'var(--on-lime)', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}>
               Finaliser mon profil
             </button>
           </div>
@@ -335,12 +335,12 @@ function AppPageInner() {
             setTab('messages');
           }}
           aria-label={unreadCount ? `Messages, ${unreadCount} non lus` : 'Messages'}
-          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 60, display: 'flex', alignItems: 'center', gap: 12, background: '#0F241E', color: '#E8EEE9', border: '1px solid #24423A', borderRadius: 999, padding: '13px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: '0 12px 32px rgba(0,0,0,0.45)' }}
+          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 60, display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--line)', borderRadius: 999, padding: '13px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: 'var(--shadow-pop)' }}
         >
           <span style={{ position: 'relative', display: 'inline-flex' }}>
-            {TAB_ICONS.message && TAB_ICONS.message('#E8EEE9')}
+            {TAB_ICONS.message && TAB_ICONS.message('currentColor')}
             {unreadCount > 0 && (
-              <span style={{ position: 'absolute', top: -8, right: -10, minWidth: 18, height: 18, padding: '0 5px', borderRadius: 9, background: '#FF6B6B', color: '#0B1F1A', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0F241E' }}>{unreadCount}</span>
+              <span style={{ position: 'absolute', top: -8, right: -10, minWidth: 18, height: 18, padding: '0 5px', borderRadius: 8, background: 'var(--danger)', color: 'var(--on-lime)', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)' }}>{unreadCount}</span>
             )}
           </span>
           <span className="tv-msg-label">Messages</span>

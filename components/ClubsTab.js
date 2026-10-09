@@ -266,9 +266,9 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
   const othersNeeds = needs.filter((n) => n.owner_id !== user.id);
 
   const InfoRow = ({ label, value }) => value ? (
-    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '10px 0', borderBottom: '1px solid #1c332a' }}>
-      <span style={{ color: '#8C9A8E' }}>{label}</span>
-      <span style={{ color: '#F5F0E6', fontWeight: 600, textAlign: 'right' }}>{value}</span>
+    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, padding: '10px 0', borderBottom: '1px solid var(--line-soft)' }}>
+      <span style={{ color: 'var(--muted)' }}>{label}</span>
+      <span style={{ color: 'var(--text)', fontWeight: 600, textAlign: 'right' }}>{value}</span>
     </div>
   ) : null;
 
@@ -283,16 +283,16 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{myListings.length}</div>
-          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Annonces</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{myListings.length}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Annonces</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{followersCount}</div>
-          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnés</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{followersCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnés</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: '#F5F0E6' }}>{followingCount}</div>
-          <div style={{ fontSize: 11.5, color: '#8C9A8E', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnements</div>
+          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{followingCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnements</div>
         </div>
       </div>
 
@@ -300,15 +300,15 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       <div>
 
       {/* Mes informations club — même principe que la carte du profil joueur */}
-      <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 24, marginBottom: 24 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
           <h3 style={{ fontSize: 18 }}>Mes informations</h3>
           {onEditAccount && <GhostButton onClick={onEditAccount} style={{ fontSize: 13 }}>Modifier</GhostButton>}
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: '#0B1F1A', border: '1px solid #274238', borderRadius: 10, padding: '12px 14px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, padding: '12px 14px', marginBottom: 16 }}>
           <Badge tone={isActive ? 'lime' : 'default'}>{isActive ? 'Pro' : 'Gratuit'}</Badge>
-          <span style={{ fontSize: 12.5, color: '#8C9A8E' }}>
+          <span style={{ fontSize: 13, color: 'var(--muted)' }}>
             {isActive ? 'Abonnement actif — annonces illimitées et mise en avant.' : 'Compte gratuit — 1 annonce active à la fois.'}
           </span>
         </div>
@@ -326,29 +326,29 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       {/* Mes annonces actives, chacune avec son propre Modifier/Supprimer */}
       {myListings.length > 0 && !creatingType && (
         <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Mes annonces ({myListings.length})</h2>
+          <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Mes annonces ({myListings.length})</h2>
           <div style={{ display: 'grid', gap: 12 }}>
             {myListings.map((listing) => (
               deletePendingId === listing.id ? (
-                <div key={listing.id} style={{ background: '#152E26', border: '1.5px solid #D4FF3F', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
-                  <span style={{ fontSize: 14, color: '#A4B0A6' }}>Annonce supprimée.</span>
-                  <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: '#D4FF3F', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
+                <div key={listing.id} style={{ background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+                  <span style={{ fontSize: 14, color: 'var(--muted)' }}>Annonce supprimée.</span>
+                  <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: 'var(--lime)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
                 </div>
               ) : editingId === listing.id ? (
-                <div key={listing.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28 }}>
+                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
                   <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier — {ROLE_LABELS[listing.besoin_type] || 'Joueur'}</h3>
                   {renderForm(listing.besoin_type)}
                 </div>
               ) : (
-                <div key={listing.id} style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid #D4FF3F', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+                <div key={listing.id} style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
-                    <div style={{ fontSize: 14, color: '#A4B0A6' }}>{describeNeed(listing)} · {listing.ville}</div>
-                    {listing.remuneration && <div style={{ fontSize: 13, color: '#D4FF3F', marginTop: 4 }}>💰 {listing.remuneration}</div>}
+                    <div style={{ fontSize: 14, color: 'var(--muted)' }}>{describeNeed(listing)} · {listing.ville}</div>
+                    {listing.remuneration && <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4 }}>💰 {listing.remuneration}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => startEditing(listing)} style={{ background: 'transparent', border: '1.5px solid #D4FF3F', color: '#D4FF3F', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Modifier</button>
-                    <button onClick={() => requestDelete(listing.id)} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13.5, cursor: 'pointer' }}>Supprimer</button>
+                    <button onClick={() => startEditing(listing)} style={{ background: 'transparent', border: '1.5px solid var(--lime)', color: 'var(--lime)', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Modifier</button>
+                    <button onClick={() => requestDelete(listing.id)} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Supprimer</button>
                   </div>
                 </div>
               )
@@ -359,15 +359,15 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       {/* Bouton pour ajouter une nouvelle annonce, ou sélecteur de type si pas encore d'annonce */}
       {!creatingType && !editingId && !(myListings.length >= 1 && !isActive && !subLoading) && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 18 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
             {BESOIN_TYPES.map((t) => (
-              <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: '#0B1F1A', border: '1.5px solid #2C4A3D', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: '#F5F0E6', transition: 'border-color .15s ease' }}
-                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#D4FF3F'}
-                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#2C4A3D'}
+              <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: 'var(--text)', transition: 'border-color .15s ease' }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--lime)'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--line)'}
               >
-                <div style={{ fontSize: 26, marginBottom: 8 }}>{t.icon}</div>
+                <div style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</div>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
               </button>
             ))}
@@ -377,7 +377,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       {/* Formulaire de création d'une nouvelle annonce */}
       {creatingType && (
-        <div style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 18, padding: 28, marginBottom: 36 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 18 }}>Tu cherches {BESOIN_TYPES.find((t) => t.value === creatingType)?.label.toLowerCase()}</h3>
           {renderForm(creatingType)}
         </div>
@@ -403,22 +403,22 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       </div>
 
       {loading ? (
-        <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
       ) : othersNeeds.length === 0 ? (
         <EmptyState icon="📋" title="Aucune autre annonce pour le moment" sub="Les annonces des autres clubs apparaîtront ici." />
       ) : (
         <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
-          <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Annonces des autres clubs</h2>
+          <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Annonces des autres clubs</h2>
           {othersNeeds.map((n) => (
-            <div key={n.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
+            <div key={n.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>{n.club} <span style={{ color: '#A4B0A6', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
-                <div style={{ fontSize: 14, color: '#A4B0A6', marginTop: 4 }}>{describeNeed(n)} · {n.ville}</div>
-                {n.remuneration && <div style={{ fontSize: 13.5, color: '#D4FF3F', marginTop: 6 }}>💰 {n.remuneration}</div>}
-                {n.details && <div style={{ fontSize: 14, color: '#C7CFC8', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}
+                <div style={{ fontWeight: 700, fontSize: 16 }}>{n.club} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
+                <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{describeNeed(n)} · {n.ville}</div>
+                {n.remuneration && <div style={{ fontSize: 14, color: 'var(--lime)', marginTop: 6 }}>💰 {n.remuneration}</div>}
+                {n.details && <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}
                 <div style={{ marginTop: 12 }}><Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge></div>
               </div>
-              <button onClick={() => onContact(n.owner_id, n.club, describeNeed(n))} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
+              <button onClick={() => onContact(n.owner_id, n.club, describeNeed(n))} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Contacter</button>
             </div>
           ))}
         </div>

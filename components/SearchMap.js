@@ -4,11 +4,11 @@ import { useEffect, useRef } from 'react';
 
 // Style sombre pour rester cohérent avec le reste du site.
 const DARK_MAP_STYLE = [
-  { elementType: 'geometry', stylers: [{ color: '#152E26' }] },
+  { elementType: 'geometry', stylers: [{ color: '#0F241E' }] },
   { elementType: 'labels.text.stroke', stylers: [{ color: '#0B1F1A' }] },
-  { elementType: 'labels.text.fill', stylers: [{ color: '#A4B0A6' }] },
-  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: '#2C4A3D' }] },
-  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#233B31' }] },
+  { elementType: 'labels.text.fill', stylers: [{ color: '#94A399' }] },
+  { featureType: 'administrative', elementType: 'geometry', stylers: [{ color: '#24423A' }] },
+  { featureType: 'road', elementType: 'geometry', stylers: [{ color: '#1C332A' }] },
   { featureType: 'water', elementType: 'geometry', stylers: [{ color: '#0B1F1A' }] },
   { featureType: 'poi', stylers: [{ visibility: 'off' }] },
   { featureType: 'transit', stylers: [{ visibility: 'off' }] },
@@ -81,5 +81,5 @@ export default function SearchMap({ markers, onMarkerClick }) {
     return () => { cancelled = true; if (pollId) clearInterval(pollId); };
   }, [markers, onMarkerClick]);
 
-  return <div ref={mapRef} style={{ width: '100%', height: 440, borderRadius: 14, border: '1.5px solid #2C4A3D' }} />;
+  return <div ref={mapRef} style={{ width: '100%', height: 440, borderRadius: 12, border: '1px solid var(--line)' }} />;
 }

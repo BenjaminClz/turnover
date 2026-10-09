@@ -28,10 +28,10 @@ export default function RootLayout({ children }) {
       </head>
       <body>
         {children}
-        <footer style={{ textAlign: 'center', padding: '24px 5vw', fontSize: 12.5, color: '#5C6B5E' }}>
-          <a href="/mentions-legales" style={{ color: '#5C6B5E', marginRight: 16 }}>Mentions légales</a>
-          <a href="/cgu" style={{ color: '#5C6B5E', marginRight: 16 }}>CGU</a>
-          <a href="/confidentialite" style={{ color: '#5C6B5E' }}>Confidentialité</a>
+        <footer style={{ textAlign: 'center', padding: '24px 5vw', fontSize: 13, color: 'var(--faint)' }}>
+          <a href="/mentions-legales" style={{ color: 'var(--faint)', marginRight: 16 }}>Mentions légales</a>
+          <a href="/cgu" style={{ color: 'var(--faint)', marginRight: 16 }}>CGU</a>
+          <a href="/confidentialite" style={{ color: 'var(--faint)' }}>Confidentialité</a>
         </footer>
         <CookieBanner />
         <Analytics />

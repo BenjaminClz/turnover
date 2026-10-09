@@ -15,9 +15,9 @@ export function StatsSlider({ stats, onChange }) {
     <div style={{ display: 'grid', gap: 16 }}>
       {STATS.map(({ key, label }) => (
         <div key={key}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13.5, marginBottom: 6 }}>
-            <span style={{ color: '#A4B0A6', fontWeight: 600 }}>{label}</span>
-            <span style={{ color: '#D4FF3F', fontWeight: 700 }}>{stats[key] ?? 50}</span>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 6 }}>
+            <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{label}</span>
+            <span style={{ color: 'var(--lime)', fontWeight: 700 }}>{stats[key] ?? 50}</span>
           </div>
           <input
             type="range"
@@ -25,7 +25,7 @@ export function StatsSlider({ stats, onChange }) {
             max={100}
             value={stats[key] ?? 50}
             onChange={(e) => onChange(key, Number(e.target.value))}
-            style={{ width: '100%', accentColor: '#D4FF3F' }}
+            style={{ width: '100%', accentColor: 'var(--lime)' }}
           />
         </div>
       ))}

@@ -76,19 +76,19 @@ export default function AdminTab({ showToast }) {
       <PageSubtitle>Signalements reçus et comptes suspendus.</PageSubtitle>
 
       <div style={{ marginBottom: 36 }}>
-        <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+        <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
           Clubs — vérification ({clubs.length})
         </h2>
         <div style={{ display: 'grid', gap: 8 }}>
           {clubs.map((c) => (
-            <div key={c.id} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 10, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={c.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                 {c.nom}
-                {c.verified && <span title="Vérifié" style={{ color: '#D4FF3F' }}>✓</span>}
+                {c.verified && <span title="Vérifié" style={{ color: 'var(--lime)' }}>✓</span>}
               </span>
               <button
                 onClick={() => toggleVerified(c.id, c.verified)}
-                style={{ background: c.verified ? 'transparent' : '#D4FF3F', border: c.verified ? '1.5px solid #2C4A3D' : 'none', color: c.verified ? '#A4B0A6' : '#0B1F1A', padding: '7px 14px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}
+                style={{ background: c.verified ? 'transparent' : 'var(--lime)', border: c.verified ? '1px solid var(--line)' : 'none', color: c.verified ? 'var(--muted)' : 'var(--bg)', padding: '7px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
               >
                 {c.verified ? 'Retirer la vérification' : 'Vérifier ce club'}
               </button>
@@ -99,17 +99,17 @@ export default function AdminTab({ showToast }) {
 
       {suspendedProfiles.length > 0 && (
         <div style={{ marginBottom: 36 }}>
-          <h2 style={{ fontSize: 15, color: '#FF6B6B', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+          <h2 style={{ fontSize: 15, color: 'var(--danger)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
             Comptes suspendus ({suspendedProfiles.length})
           </h2>
           <div style={{ display: 'grid', gap: 10 }}>
             {suspendedProfiles.map((p) => (
-              <div key={p.id} style={{ background: 'rgba(255,107,107,0.06)', border: '1.5px solid #FF6B6B', borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
+              <div key={p.id} style={{ background: 'rgba(255,107,107,0.06)', border: '1.5px solid var(--danger)', borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div>
                   <div style={{ fontWeight: 700 }}>{p.nom}</div>
-                  <div style={{ fontSize: 13, color: '#A4B0A6' }}>{p.role}</div>
+                  <div style={{ fontSize: 13, color: 'var(--muted)' }}>{p.role}</div>
                 </div>
-                <button onClick={() => handleReactivate(p.id)} style={{ background: '#D4FF3F', color: '#0B1F1A', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 13.5, cursor: 'pointer' }}>Réactiver le compte</button>
+                <button onClick={() => handleReactivate(p.id)} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 18px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Réactiver le compte</button>
               </div>
             ))}
           </div>
@@ -117,38 +117,38 @@ export default function AdminTab({ showToast }) {
       )}
 
       {loading ? (
-        <div style={{ color: '#A4B0A6', textAlign: 'center', padding: 40 }}>Chargement…</div>
+        <div style={{ color: 'var(--muted)', textAlign: 'center', padding: 40 }}>Chargement…</div>
       ) : groupedList.length === 0 ? (
         <EmptyState icon="🛡️" title="Aucun signalement" sub="Tout est calme pour l'instant." />
       ) : (
         <div>
-          <h2 style={{ fontSize: 15, color: '#D4FF3F', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+          <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
             Signalements groupés par cible ({groupedList.length})
           </h2>
           <div style={{ display: 'grid', gap: 12 }}>
             {groupedList.map((g) => (
-              <div key={`${g.target_type}:${g.target_id}`} style={{ background: '#152E26', border: '1.5px solid #2C4A3D', borderRadius: 14, padding: 18 }}>
+              <div key={`${g.target_type}:${g.target_id}`} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 18 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
                   <div>
                     <div style={{ fontWeight: 700, fontSize: 15 }}>{TARGET_LABELS[g.target_type]} — {g.target_owner?.nom}</div>
-                    <div style={{ fontSize: 13, color: '#A4B0A6', marginTop: 2 }}>
+                    <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
                       {g.reports.length} signalement{g.reports.length > 1 ? 's' : ''}
                       {g.target_owner?.suspended && <span style={{ marginLeft: 8 }}><Badge tone="urgent">Compte suspendu</Badge></span>}
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {!g.target_owner?.suspended && (
-                      <button onClick={() => setConfirmSuspendId(g.target_owner_id)} style={{ background: '#FF6B6B', color: '#0B1F1A', border: 'none', padding: '8px 14px', borderRadius: 7, fontWeight: 700, fontSize: 12.5, cursor: 'pointer' }}>
+                      <button onClick={() => setConfirmSuspendId(g.target_owner_id)} style={{ background: 'var(--danger)', color: 'var(--on-lime)', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
                         Suspendre ce compte
                       </button>
                     )}
-                    <button onClick={() => handleDismiss(g.reports.map((r) => r.id))} style={{ background: 'transparent', border: '1.5px solid #2C4A3D', color: '#A4B0A6', padding: '8px 14px', borderRadius: 7, fontWeight: 600, fontSize: 12.5, cursor: 'pointer' }}>Rejeter ces signalements</button>
+                    <button onClick={() => handleDismiss(g.reports.map((r) => r.id))} style={{ background: 'transparent', border: '1px solid var(--line)', color: 'var(--muted)', padding: '8px 14px', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Rejeter ces signalements</button>
                   </div>
                 </div>
                 <div style={{ display: 'grid', gap: 8 }}>
                   {g.reports.map((r) => (
-                    <div key={r.id} style={{ fontSize: 13, color: '#C7CFC8', background: '#0B1F1A', borderRadius: 8, padding: '8px 12px' }}>
-                      <span style={{ color: '#8C9A8E' }}>Signalé par {r.reporter?.nom} :</span> {r.reason || <em>aucune raison donnée</em>}
+                    <div key={r.id} style={{ fontSize: 13, color: 'var(--text-2)', background: 'var(--bg)', borderRadius: 8, padding: '8px 12px' }}>
+                      <span style={{ color: 'var(--muted)' }}>Signalé par {r.reporter?.nom} :</span> {r.reason || <em>aucune raison donnée</em>}
                     </div>
                   ))}
                 </div>

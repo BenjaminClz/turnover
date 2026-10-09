@@ -6,7 +6,7 @@ export function PiedFortSelect({ sport, poste, value, onChange }) {
 
   return (
     <div>
-      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: '#A4B0A6' }}>
+      <label style={{ display: 'block', fontSize: 13, fontWeight: 600, marginBottom: 8, color: 'var(--muted)' }}>
         Pied fort
       </label>
       <div style={{ display: 'flex', gap: 10 }}>
@@ -18,9 +18,9 @@ export function PiedFortSelect({ sport, poste, value, onChange }) {
             style={{
               padding: '10px 18px',
               borderRadius: 8,
-              border: value === option ? '1.5px solid #D4FF3F' : '1.5px solid #2C4A3D',
-              background: value === option ? '#D4FF3F' : 'transparent',
-              color: value === option ? '#0B1F1A' : '#A4B0A6',
+              border: value === option ? '1.5px solid var(--lime)' : '1px solid var(--line)',
+              background: value === option ? 'var(--lime)' : 'transparent',
+              color: value === option ? 'var(--bg)' : 'var(--muted)',
               fontWeight: 700,
               fontSize: 14,
               cursor: 'pointer',

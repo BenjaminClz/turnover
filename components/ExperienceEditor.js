@@ -5,13 +5,13 @@ import { createClient } from '@/lib/supabase-client';
 import { sortExperiences, formatPeriode } from './ExperienceTimeline';
 
 const T = {
-  card: '#16302a',
-  input: '#0c1f1a',
-  border: '#2C4A3D',
-  text: '#eef3ef',
-  muted: '#A4B0A6',
-  lime: '#D4FF3F',
-  danger: '#ff6b6b',
+  card: 'var(--surface-2)',
+  input: 'var(--bg)',
+  border: 'var(--line)',
+  text: 'var(--text)',
+  muted: 'var(--muted)',
+  lime: 'var(--lime)',
+  danger: 'var(--danger)',
 };
 
 const NIVEAUX = [
@@ -42,7 +42,7 @@ const inputStyle = {
   boxSizing: 'border-box',
   background: T.input,
   border: `1px solid ${T.border}`,
-  borderRadius: 10,
+  borderRadius: 8,
   padding: '10px 12px',
   color: T.text,
   fontSize: 15,
@@ -53,9 +53,9 @@ const labelStyle = { display: 'block', fontSize: 13, color: T.muted, marginBotto
 
 const btnPrimary = {
   background: T.lime,
-  color: '#0c1f1a',
+  color: 'var(--bg)',
   border: 'none',
-  borderRadius: 10,
+  borderRadius: 8,
   padding: '10px 16px',
   fontWeight: 700,
   fontSize: 14,
@@ -66,7 +66,7 @@ const btnSecondary = {
   background: 'transparent',
   color: T.text,
   border: `1px solid ${T.border}`,
-  borderRadius: 10,
+  borderRadius: 8,
   padding: '8px 14px',
   fontWeight: 600,
   fontSize: 13,
@@ -381,7 +381,7 @@ export default function ExperienceEditor({ userId }) {
             justifyContent: 'space-between',
             gap: 12,
             background: 'rgba(255,255,255,0.06)',
-            borderRadius: 10,
+            borderRadius: 8,
             padding: '10px 14px',
             marginBottom: 12,
             fontSize: 14,

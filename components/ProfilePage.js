@@ -14,7 +14,7 @@ import { geocodeAdresse } from '@/lib/geo';
 import { nationalites } from '@/lib/nationalites';
 
 // Palette partagée avec components/ui.js
-const C = { bg: '#0B1F1A', panel: '#0F241E', line: '#24423A', soft: '#1A332B', text: '#E8EEE9', muted: '#8FA096', sub: '#C7CFC8', lime: '#D4FF3F', ink: '#0B1F1A' };
+const C = { bg: 'var(--bg)', panel: 'var(--surface)', line: 'var(--line)', soft: 'var(--surface-2)', text: 'var(--text)', muted: 'var(--muted)', sub: 'var(--text-2)', lime: 'var(--lime)', ink: 'var(--on-lime)' };
 
 const initials = (name) => (name || '?').split(' ').map((w) => w[0]).filter(Boolean).slice(0, 2).join('').toUpperCase();
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
@@ -291,7 +291,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
     <div style={{ maxWidth: 880, margin: '0 auto', color: C.text }}>
       <style>{css}</style>
 
-      <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 13.5, fontWeight: 500, marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0 }}>
+      <button onClick={onBack} style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', fontSize: 14, fontWeight: 500, marginBottom: 16, display: 'inline-flex', alignItems: 'center', gap: 4, padding: 0 }}>
         <Icon d={BACK} size={16} /> Retour
       </button>
 
@@ -307,11 +307,11 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
 
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <h1 style={{ fontSize: 22, fontWeight: 600, letterSpacing: '-0.01em', margin: 0 }}>{profile.nom}</h1>
+            <h1 style={{ fontSize: 24, fontWeight: 600, letterSpacing: '-0.01em', margin: 0 }}>{profile.nom}</h1>
             {profile.verified && <span title="Profil vérifié" style={{ color: C.lime, display: 'inline-flex' }}><Icon d={CHECK} size={16} /></span>}
             <Badge>{ROLE_LABELS[profile.role] || profile.role}</Badge>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px 12px', marginTop: 4, fontSize: 13.5, color: C.muted }}>
+          <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px 12px', marginTop: 4, fontSize: 14, color: C.muted }}>
             {subtitle && <span>{subtitle}</span>}
             {ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={13} />{ville}</span>}
             {seen && (
@@ -349,8 +349,8 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         {isClub && <Stat label="Annonces" value={needs.length} />}
         {listing?.dispo && (
           <div className="pp-stat">
-            <div style={{ fontSize: 11.5, color: C.muted }}>Disponibilité</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: 14.5, fontWeight: 500, color: C.lime }}>
+            <div style={{ fontSize: 12, color: C.muted }}>Disponibilité</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: 15, fontWeight: 500, color: C.lime }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.lime }} />{listing.dispo}
             </div>
           </div>
@@ -367,7 +367,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       <div style={{ paddingTop: 20, paddingBottom: 32 }}>
         {tab === 'apercu' && (
           <>
-            {bio && <p style={{ fontSize: 14.5, color: C.sub, lineHeight: 1.65, margin: '0 0 20px', maxWidth: 680 }}>{bio}</p>}
+            {bio && <p style={{ fontSize: 15, color: C.sub, lineHeight: 1.65, margin: '0 0 20px', maxWidth: 680 }}>{bio}</p>}
 
             {(isPlayer || isStaff) && (facts.length > 0 || (isPlayer && playerListing)) && (
               <div className="pp-cols" style={{ display: 'grid', gridTemplateColumns: isPlayer && playerListing ? 'minmax(0,1fr) auto' : '1fr', gap: 28, alignItems: 'start', marginBottom: 28 }}>
@@ -394,11 +394,11 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
 
             {isClub && (
               <div className="pp-annonces-row">
-              <div style={{ flex: 1, minWidth: 0, background: 'rgba(212,255,63,0.05)', borderLeft: `3px solid ${C.lime}`, borderRadius: 10, padding: '18px 22px' }}>
+              <div style={{ flex: 1, minWidth: 0, background: 'rgba(212,255,63,0.05)', borderLeft: `3px solid ${C.lime}`, borderRadius: 8, padding: '18px 22px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 14, borderBottom: `1px solid ${C.line}` }}>
                   <span style={{ fontSize: 18, fontWeight: 700, color: C.text }}>Annonces du club</span>
                   {needs.length > 0 && (
-                    <span style={{ background: C.lime, color: '#0B1F1A', fontSize: 12, fontWeight: 700, borderRadius: 999, padding: '2px 9px' }}>{needs.length}</span>
+                    <span style={{ background: C.lime, color: 'var(--on-lime)', fontSize: 12, fontWeight: 700, borderRadius: 999, padding: '2px 9px' }}>{needs.length}</span>
                   )}
                 </div>
                 {needs.length === 0 ? (
@@ -409,7 +409,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                       <div key={n.id}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: 17, color: C.text }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
+                            <div style={{ fontWeight: 700, fontSize: 18, color: C.text }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 14px', fontSize: 14, color: C.muted, marginTop: 5 }}>
                               {describeNeed(n) && <span>{describeNeed(n)}</span>}
                               {n.ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={13} />{n.ville}</span>}
@@ -450,7 +450,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
               <div>
                 <SectionTitle>Localisation</SectionTitle>
                 {profile.adresse && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 13.5, color: C.muted, marginBottom: 10 }}><Icon d={PIN} size={13} />{profile.adresse}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 14, color: C.muted, marginBottom: 10 }}><Icon d={PIN} size={13} />{profile.adresse}</div>
                 )}
                 <div style={{ borderRadius: 8, overflow: 'hidden', border: `1px solid ${C.line}` }}>
                   <SearchMap markers={[{ lat: clubLat, lng: clubLng, title: profile.nom, color: C.lime }]} />
@@ -486,7 +486,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                 {recommendations.map((r) => (
                   <div key={r.id} style={{ padding: '4px 8px' }}>
                     <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.55 }}>{r.content}</div>
-                    <div style={{ fontSize: 12.5, color: C.muted, marginTop: 6 }}>{r.profiles?.nom || 'Utilisateur'}</div>
+                    <div style={{ fontSize: 13, color: C.muted, marginTop: 6 }}>{r.profiles?.nom || 'Utilisateur'}</div>
                   </div>
                 ))}
               </div>
@@ -513,7 +513,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
           onClick={() => setFollowList(null)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(5,15,12,0.7)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 20 }}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, maxWidth: 400, width: '100%', maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 40px rgba(0,0,0,0.4)' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, maxWidth: 400, width: '100%', maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-pop)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${C.line}` }}>
               <div style={{ fontWeight: 600, fontSize: 15 }}>{followList.type === 'followers' ? 'Abonnés' : 'Abonnements'}</div>
               <button onClick={() => setFollowList(null)} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', display: 'inline-flex', padding: 4 }}><Icon d={CLOSE} size={18} /></button>
@@ -544,7 +544,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                       )}
                       <div>
                         <div style={{ fontWeight: 500, fontSize: 14 }}>{u.nom}</div>
-                        <div style={{ fontSize: 12.5, color: C.muted }}>{ROLE_LABELS[u.role] || u.role}</div>
+                        <div style={{ fontSize: 13, color: C.muted }}>{ROLE_LABELS[u.role] || u.role}</div>
                       </div>
                     </button>
                   );
@@ -561,7 +561,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
 function Stat({ label, value, onClick }) {
   return (
     <button className="pp-stat" data-click={onClick ? '1' : '0'} onClick={onClick} disabled={!onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
-      <div style={{ fontSize: 11.5, color: C.muted }}>{label}</div>
+      <div style={{ fontSize: 12, color: C.muted }}>{label}</div>
       <div className="pp-stat-v" style={{ fontSize: 18, fontWeight: 600, marginTop: 2, fontVariantNumeric: 'tabular-nums', color: C.text, transition: 'color .12s ease' }}>{value}</div>
     </button>
   );

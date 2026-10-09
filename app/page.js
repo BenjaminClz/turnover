@@ -99,9 +99,9 @@ export default function AuthPage() {
       <div style={{ width: '100%', maxWidth: 400 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', marginBottom: 32 }}>
           <img src="/logo.png" alt="Turnover" style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: 6 }} />
-          <span className="turnover-anton" style={{ fontSize: 22 }}>TURNOVER</span>
+          <span className="turnover-anton" style={{ fontSize: 24 }}>TURNOVER</span>
         </div>
-        <div style={{ background: '#152E26', border: '1px solid #274238', borderRadius: 16, padding: 28 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
           {content}
         </div>
       </div>
@@ -112,8 +112,8 @@ export default function AuthPage() {
     return wrap(
       <div>
         <h2 style={{ fontSize: 20, marginBottom: 10 }}>Vérifie ta boîte mail</h2>
-        <p style={{ color: '#8C9A8E', fontSize: 14, lineHeight: 1.6 }}>
-          Un email de confirmation a été envoyé à <strong style={{ color: '#F5F0E6' }}>{form.email}</strong>.
+        <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6 }}>
+          Un email de confirmation a été envoyé à <strong style={{ color: 'var(--text)' }}>{form.email}</strong>.
           Clique sur le lien qu'il contient pour activer ton compte, puis reviens te connecter ici.
         </p>
         <div style={{ marginTop: 20 }}>
@@ -127,8 +127,8 @@ export default function AuthPage() {
     return wrap(
       <div>
         <h2 style={{ fontSize: 20, marginBottom: 10 }}>Email envoyé</h2>
-        <p style={{ color: '#8C9A8E', fontSize: 14, lineHeight: 1.6 }}>
-          Si un compte existe avec <strong style={{ color: '#F5F0E6' }}>{form.email}</strong>, un lien de réinitialisation vient d'être envoyé. Clique sur ce lien pour choisir un nouveau mot de passe.
+        <p style={{ color: 'var(--muted)', fontSize: 14, lineHeight: 1.6 }}>
+          Si un compte existe avec <strong style={{ color: 'var(--text)' }}>{form.email}</strong>, un lien de réinitialisation vient d'être envoyé. Clique sur ce lien pour choisir un nouveau mot de passe.
         </p>
         <div style={{ marginTop: 20 }}>
           <GhostButton onClick={() => setMode('login')}>Retour à la connexion</GhostButton>
@@ -141,11 +141,11 @@ export default function AuthPage() {
     return wrap(
       <form onSubmit={handleForgot}>
         <h2 style={{ fontSize: 20, marginBottom: 6 }}>Mot de passe oublié</h2>
-        <p style={{ color: '#8C9A8E', fontSize: 13, marginBottom: 18 }}>Entre ton email, tu recevras un vrai lien de réinitialisation.</p>
+        <p style={{ color: 'var(--muted)', fontSize: 13, marginBottom: 18 }}>Entre ton email, tu recevras un vrai lien de réinitialisation.</p>
         <Field label="Email">
           <TextInput type="email" required value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} placeholder="toi@exemple.com" />
         </Field>
-        {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
+        {error && <div style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 14 }}>{error}</div>}
         <PrimaryButton type="submit" disabled={loading}>{loading ? 'Envoi…' : 'Envoyer le lien'}</PrimaryButton>
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <GhostButton type="button" onClick={() => { setMode('login'); setError(''); }}>Retour à la connexion</GhostButton>
@@ -189,7 +189,7 @@ export default function AuthPage() {
         <Field label="Mot de passe">
           <TextInput type="password" required minLength={6} value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="6 caractères minimum" />
         </Field>
-        {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
+        {error && <div style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 14 }}>{error}</div>}
         <PrimaryButton type="submit" disabled={loading}>{loading ? 'Création du compte…' : 'Créer mon compte'}</PrimaryButton>
         <div style={{ textAlign: 'center', marginTop: 16 }}>
           <GhostButton type="button" onClick={() => { setMode('login'); setError(''); }}>J'ai déjà un compte</GhostButton>
@@ -207,7 +207,7 @@ export default function AuthPage() {
       <Field label="Mot de passe">
         <TextInput type="password" required value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} placeholder="••••••••" />
       </Field>
-      {error && <div style={{ color: '#FF5C5C', fontSize: 13, marginBottom: 14 }}>{error}</div>}
+      {error && <div style={{ color: 'var(--danger)', fontSize: 13, marginBottom: 14 }}>{error}</div>}
       <PrimaryButton type="submit" disabled={loading}>{loading ? 'Connexion…' : 'Se connecter'}</PrimaryButton>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 16 }}>
         <GhostButton type="button" onClick={() => { setMode('signup'); setError(''); }}>Créer un compte</GhostButton>

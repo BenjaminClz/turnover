@@ -1,7 +1,7 @@
 'use client';
 
 // Style épuré inspiré de TradingView : traits fins, lime réservé à l'action principale
-const C = { bg: '#0F241E', line: '#24423A', lineHover: '#3A5A4F', text: '#E8EEE9', muted: '#8FA096', lime: '#D4FF3F', ink: '#0B1F1A', red: '#FF6B6B' };
+const C = { bg: 'var(--surface)', line: 'var(--line)', lineHover: 'var(--line-strong)', text: 'var(--text)', muted: 'var(--muted)', lime: 'var(--lime)', ink: 'var(--on-lime)', red: 'var(--danger)' };
 
 const inputStyle = {
   width: '100%', background: C.bg, border: `1px solid ${C.line}`, borderRadius: 8,
@@ -16,7 +16,7 @@ export function Field({ label, hint, children }) {
     <label style={{ display: 'block', marginBottom: 16 }}>
       <span style={{ display: 'block', fontSize: 13, fontWeight: 500, color: C.muted, marginBottom: 6 }}>{label}</span>
       {children}
-      {hint && <span style={{ display: 'block', fontSize: 12.5, color: C.muted, marginTop: 6 }}>{hint}</span>}
+      {hint && <span style={{ display: 'block', fontSize: 13, color: C.muted, marginTop: 6 }}>{hint}</span>}
     </label>
   );
 }
@@ -40,12 +40,12 @@ export function Select({ value, onChange, options, ...props }) {
 
 export function Badge({ children, tone = 'default' }) {
   const tones = {
-    default: { bg: 'transparent', color: '#C9D3CC', border: `1px solid ${C.line}` },
+    default: { bg: 'transparent', color: 'var(--text-2)', border: `1px solid ${C.line}` },
     lime: { bg: 'rgba(212,255,63,0.12)', color: C.lime, border: '1px solid transparent' },
     urgent: { bg: 'rgba(255,107,107,0.12)', color: C.red, border: '1px solid transparent' },
   };
   const t = tones[tone] || tones.default;
-  return <span style={{ fontSize: 12, fontWeight: 500, padding: '2px 8px', borderRadius: 4, background: t.bg, color: t.color, border: t.border, whiteSpace: 'nowrap' }}>{children}</span>;
+  return <span style={{ fontSize: 12, fontWeight: 500, padding: '2px 8px', borderRadius: 6, background: t.bg, color: t.color, border: t.border, whiteSpace: 'nowrap' }}>{children}</span>;
 }
 
 export function EmptyState({ icon, title, sub }) {
@@ -65,8 +65,8 @@ export function PrimaryButton({ children, ...props }) {
   return (
     <button
       {...props}
-      style={{ background: C.lime, color: C.ink, border: 'none', padding: '11px 20px', borderRadius: 8, fontWeight: 600, fontSize: 14.5, cursor: 'pointer', width: '100%', transition: 'transform .1s ease, background .12s ease', ...props.style }}
-      onMouseEnter={(e) => { e.currentTarget.style.background = '#DEFF66'; }}
+      style={{ background: C.lime, color: C.ink, border: 'none', padding: '11px 20px', borderRadius: 8, fontWeight: 600, fontSize: 15, cursor: 'pointer', width: '100%', transition: 'transform .1s ease, background .12s ease', ...props.style }}
+      onMouseEnter={(e) => { e.currentTarget.style.background = 'var(--lime-hover)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.background = C.lime; release(e); }}
       onMouseDown={press}
       onMouseUp={release}
@@ -80,7 +80,7 @@ export function SecondaryButton({ children, ...props }) {
   return (
     <button
       {...props}
-      style={{ background: 'transparent', color: C.text, border: `1px solid ${C.line}`, padding: '10px 18px', borderRadius: 8, fontWeight: 500, fontSize: 14.5, cursor: 'pointer', transition: 'border-color .12s ease, background .12s ease, transform .1s ease', ...props.style }}
+      style={{ background: 'transparent', color: C.text, border: `1px solid ${C.line}`, padding: '10px 18px', borderRadius: 8, fontWeight: 500, fontSize: 15, cursor: 'pointer', transition: 'border-color .12s ease, background .12s ease, transform .1s ease', ...props.style }}
       onMouseEnter={(e) => { e.currentTarget.style.borderColor = C.lineHover; e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; }}
       onMouseLeave={(e) => { e.currentTarget.style.borderColor = C.line; e.currentTarget.style.background = 'transparent'; release(e); }}
       onMouseDown={press}
@@ -121,7 +121,7 @@ export function ToggleSwitch({ checked, onChange, ...props }) {
 export function Toast({ message }) {
   if (!message) return null;
   return (
-    <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 10, background: '#132A23', color: C.text, border: `1px solid ${C.line}`, padding: '11px 16px', borderRadius: 8, fontWeight: 500, fontSize: 14, boxShadow: '0 8px 24px rgba(0,0,0,0.35)', zIndex: 100, maxWidth: '90vw', animation: 'tv-toast-in .2s ease' }}>
+    <div role="status" style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', display: 'flex', alignItems: 'center', gap: 10, background: 'var(--surface-2)', color: C.text, border: `1px solid ${C.line}`, padding: '11px 16px', borderRadius: 8, fontWeight: 500, fontSize: 14, boxShadow: 'var(--shadow-pop)', zIndex: 100, maxWidth: '90vw', animation: 'tv-toast-in .2s ease' }}>
       <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.lime, flexShrink: 0 }} />
       {message}
     </div>

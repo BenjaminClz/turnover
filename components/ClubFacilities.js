@@ -10,7 +10,7 @@ export const INFRASTRUCTURES = [
   'Parking', 'Accès en transports en commun',
 ];
 
-const T = { card: '#16302a', border: '#2C4A3D', text: '#eef3ef', muted: '#A4B0A6', lime: '#D4FF3F', dark: '#0c1f1a', danger: '#ff6b6b' };
+const T = { card: 'var(--surface-2)', border: 'var(--line)', text: 'var(--text)', muted: 'var(--muted)', lime: 'var(--lime)', dark: 'var(--bg)', danger: 'var(--danger)' };
 
 const chip = (on) => ({
   display: 'inline-flex', alignItems: 'center', gap: 6,

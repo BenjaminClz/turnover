@@ -7,7 +7,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { ROLE_LABELS } from '@/lib/constants';
 
-const C = { bg: '#0B1F1A', panel: '#0F241E', line: '#24423A', soft: '#1A332B', text: '#E8EEE9', muted: '#8FA096', sub: '#C7CFC8', lime: '#D4FF3F', ink: '#0B1F1A' };
+const C = { bg: 'var(--bg)', panel: 'var(--surface)', line: 'var(--line)', soft: 'var(--surface-2)', text: 'var(--text)', muted: 'var(--muted)', sub: 'var(--text-2)', lime: 'var(--lime)', ink: 'var(--on-lime)' };
 const MAX_FILES = 10;
 const LONG_TEXT = 180;
 
@@ -74,7 +74,7 @@ function MediaCarousel({ media, onDoubleTap, pop }) {
 
   return (
     <div style={{ marginTop: 10 }}>
-      <div onDoubleClick={onDoubleTap} style={{ position: 'relative', borderRadius: 4, overflow: 'hidden', background: '#000', border: `1px solid ${C.line}`, userSelect: 'none' }}>
+      <div onDoubleClick={onDoubleTap} style={{ position: 'relative', borderRadius: 6, overflow: 'hidden', background: '#000', border: `1px solid ${C.line}`, userSelect: 'none' }}>
         {current.type === 'video' ? (
           <video src={current.url} controls style={{ width: '100%', maxHeight: 600, objectFit: 'contain', display: 'block' }} />
         ) : (
@@ -89,7 +89,7 @@ function MediaCarousel({ media, onDoubleTap, pop }) {
           <>
             {idx > 0 && <button className="fd-arrow" style={{ left: 10 }} onClick={() => setIdx(idx - 1)} aria-label="Précédent"><Icon d={CHEV_L} size={16} width={2.4} /></button>}
             {idx < media.length - 1 && <button className="fd-arrow" style={{ right: 10 }} onClick={() => setIdx(idx + 1)} aria-label="Suivant"><Icon d={CHEV_R} size={16} width={2.4} /></button>}
-            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 12, fontWeight: 500, padding: '2px 8px', borderRadius: 10 }}>
+            <div style={{ position: 'absolute', top: 10, right: 10, background: 'rgba(0,0,0,0.6)', color: '#fff', fontSize: 12, fontWeight: 500, padding: '2px 8px', borderRadius: 8 }}>
               {idx + 1}/{media.length}
             </div>
           </>
@@ -305,7 +305,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
               <Avatar supabase={supabase} path={profile?.avatar_path} name={profile?.nom} size={36} />
               <button
                 onClick={() => setComposerOpen(true)}
-                style={{ flex: 1, textAlign: 'left', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 999, padding: '9px 16px', color: C.muted, fontSize: 14.5, cursor: 'text' }}
+                style={{ flex: 1, textAlign: 'left', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 999, padding: '9px 16px', color: C.muted, fontSize: 15, cursor: 'text' }}
               >
                 Quoi de neuf{firstName(profile?.nom) ? `, ${firstName(profile?.nom)}` : ''} ?
               </button>
@@ -330,9 +330,9 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                     {mediaFiles.map((m, i) => (
                       <div key={i} style={{ position: 'relative' }}>
                         {m.type === 'video' ? (
-                          <video src={m.url} style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 4, display: 'block' }} />
+                          <video src={m.url} style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 6, display: 'block' }} />
                         ) : (
-                          <img src={m.url} alt="" style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 4, display: 'block' }} />
+                          <img src={m.url} alt="" style={{ width: 72, height: 72, objectFit: 'cover', borderRadius: 6, display: 'block' }} />
                         )}
                         <button
                           onClick={() => removeMediaAt(i)}
@@ -346,7 +346,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                   </div>
                 )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 10 }}>
-                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 13.5, color: C.muted, cursor: 'pointer' }}>
+                  <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 14, color: C.muted, cursor: 'pointer' }}>
                     <Icon d={IMAGE} size={18} />
                     Photos / vidéos
                     <input type="file" accept="image/*,video/*" multiple onChange={onSelectMedia} style={{ display: 'none' }} />
@@ -409,10 +409,10 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                         <Icon d={MORE} size={22} width={2.6} />
                       </button>
                       {menuPostId === post.id && (
-                        <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', right: 0, top: '100%', zIndex: 20, minWidth: 180, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, boxShadow: '0 12px 32px rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+                        <div onClick={(e) => e.stopPropagation()} style={{ position: 'absolute', right: 0, top: '100%', zIndex: 20, minWidth: 180, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, boxShadow: 'var(--shadow-pop)', overflow: 'hidden' }}>
                           <button
                             onClick={() => { setMenuPostId(null); setConfirmDeleteId(post.id); }}
-                            style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', padding: '11px 14px', color: '#FF6B6B', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
+                            style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', padding: '11px 14px', color: 'var(--danger)', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
                           >
                             Supprimer la publication
                           </button>
@@ -427,7 +427,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
 
                 {/* Texte seul : affiché en grand, avant les actions */}
                 {mediaList.length === 0 && text && (
-                  <div style={{ fontSize: 15.5, color: C.text, lineHeight: 1.6, whiteSpace: 'pre-wrap', marginTop: 10 }}>
+                  <div style={{ fontSize: 16, color: C.text, lineHeight: 1.6, whiteSpace: 'pre-wrap', marginTop: 10 }}>
                     {shownText}
                     {isLong && !expanded[post.id] && (
                       <button className="fd-link" onClick={() => setExpanded((e) => ({ ...e, [post.id]: true }))} style={{ color: C.muted, marginLeft: 4 }}>plus</button>
@@ -506,7 +506,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                   </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <button className="fd-link" onClick={() => onOpenProfile(p.id)} style={{ fontWeight: 600, fontSize: 14, color: C.text, display: 'block', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.nom}</button>
-                    <div style={{ fontSize: 12.5, color: C.muted }}>{ROLE_LABELS[p.role] || p.role}</div>
+                    <div style={{ fontSize: 13, color: C.muted }}>{ROLE_LABELS[p.role] || p.role}</div>
                   </div>
                   <button
                     onClick={() => !followed && follow(p)}
@@ -531,7 +531,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
       />
       {likersModal && (
         <div onClick={() => setLikersModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(5,15,12,0.7)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 10, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: '0 16px 40px rgba(0,0,0,0.4)' }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-pop)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${C.line}` }}>
               <span style={{ fontWeight: 600, fontSize: 15 }}>J'aime</span>
               <button onClick={() => setLikersModal(null)} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', display: 'inline-flex', padding: 4 }}><Icon d={CLOSE} size={18} /></button>
@@ -546,7 +546,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                   <Avatar supabase={supabase} path={u.avatar_path} name={u.nom} size={36} />
                   <div>
                     <div style={{ fontWeight: 500, fontSize: 14 }}>{u.nom}</div>
-                    <div style={{ fontSize: 12.5, color: C.muted }}>{ROLE_LABELS[u.role] || u.role}</div>
+                    <div style={{ fontSize: 13, color: C.muted }}>{ROLE_LABELS[u.role] || u.role}</div>
                   </div>
                 </button>
               ))}

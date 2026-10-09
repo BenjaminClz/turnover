@@ -89,7 +89,7 @@ const css = `
 .pp-tab { background: transparent; border: none; border-bottom: 2px solid transparent; color: ${C.muted}; padding: 12px 0; margin-right: 24px; font-size: 14px; font-weight: 500; cursor: pointer; }
 .pp-tab:hover { color: ${C.text}; }
 .pp-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
-.pp-stat { background: transparent; border: none; color: inherit; text-align: left; padding: 12px 16px; border-left: 1px solid ${C.line}; }
+.pp-stat { background: transparent; border: none; color: inherit; text-align: left; padding: 12px 16px; }
 .pp-stat:first-child { border-left: none; padding-left: 0; }
 .pp-stat[data-click="1"] { cursor: pointer; }
 .pp-stat[data-click="1"]:hover .pp-stat-v { color: ${C.lime}; }
@@ -337,7 +337,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       </div>
 
       {/* Bandeau de chiffres clés */}
-      <div className="pp-stats" style={{ marginTop: 20, borderTop: `1px solid ${C.line}`, borderBottom: `1px solid ${C.line}` }}>
+      <div className="pp-stats" style={{ marginTop: 20 }}>
         <Stat label="Abonnés" value={followersCount} onClick={() => openFollowList('followers')} />
         <Stat label="Abonnements" value={followingCount} onClick={() => openFollowList('following')} />
         <Stat label="Photos" value={galleryItems.length} onClick={() => setTab('photos')} />
@@ -354,7 +354,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       </div>
 
       {/* Onglets */}
-      <div role="tablist" style={{ display: 'flex', borderBottom: `1px solid ${C.line}`, overflowX: 'auto' }}>
+      <div role="tablist" style={{ display: 'flex', overflowX: 'auto', marginBottom: 8 }}>
         {tabs.map(([id, label]) => (
           <button key={id} role="tab" aria-selected={tab === id} className="pp-tab" onClick={() => setTab(id)}>{label}</button>
         ))}
@@ -371,7 +371,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                   <div>
                     <SectionTitle>Profil</SectionTitle>
                     {facts.map(([k, v], i) => (
-                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, padding: '9px 0', borderBottom: i < facts.length - 1 ? `1px solid ${C.line}` : 'none', fontSize: 14 }}>
+                      <div key={k} style={{ display: 'flex', justifyContent: 'space-between', gap: 16, padding: '9px 0', fontSize: 14 }}>
                         <span style={{ color: C.muted }}>{k}</span>
                         <span style={{ textAlign: 'right', fontVariantNumeric: 'tabular-nums' }}>{v}</span>
                       </div>
@@ -459,7 +459,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
             {recommendations.length === 0 ? (
               <Empty>Aucune recommandation pour le moment.</Empty>
             ) : (
-              <div style={{ borderTop: `1px solid ${C.line}`, marginBottom: 20 }}>
+              <div style={{ marginBottom: 20 }}>
                 {recommendations.map((r) => (
                   <div key={r.id} style={{ padding: '4px 8px' }}>
                     <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.55 }}>{r.content}</div>

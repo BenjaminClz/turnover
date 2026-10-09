@@ -389,26 +389,31 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
             {isPlayer && <div style={{ marginBottom: 28 }}><ExperienceTimeline userId={targetUserId} /></div>}
 
             {isClub && (
-              <div style={{ marginBottom: 28 }}>
-                <SectionTitle>Annonces du club</SectionTitle>
+              <div style={{ marginBottom: 32, background: 'rgba(212,255,63,0.05)', borderLeft: `3px solid ${C.lime}`, borderRadius: 10, padding: '18px 22px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 14, borderBottom: `1px solid ${C.line}` }}>
+                  <span style={{ fontSize: 18, fontWeight: 700, color: C.text }}>Annonces du club</span>
+                  {needs.length > 0 && (
+                    <span style={{ background: C.lime, color: '#0B1F1A', fontSize: 12, fontWeight: 700, borderRadius: 999, padding: '2px 9px' }}>{needs.length}</span>
+                  )}
+                </div>
                 {needs.length === 0 ? (
                   <Empty>Ce club n'a pas d'annonce en ligne pour le moment.</Empty>
                 ) : (
-                  <div style={{ borderTop: `1px solid ${C.line}` }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
                     {needs.map((n) => (
-                      <div key={n.id} className="pp-row" style={{ padding: '14px 8px', borderBottom: `1px solid ${C.line}` }}>
+                      <div key={n.id}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 600, fontSize: 15 }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
-                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px 12px', fontSize: 13.5, color: C.muted, marginTop: 3 }}>
+                            <div style={{ fontWeight: 700, fontSize: 17, color: C.text }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
+                            <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 14px', fontSize: 14, color: C.muted, marginTop: 5 }}>
                               {describeNeed(n) && <span>{describeNeed(n)}</span>}
-                              {n.ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={12} />{n.ville}</span>}
-                              {n.remuneration && <span style={{ color: C.text }}>{n.remuneration}</span>}
+                              {n.ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={13} />{n.ville}</span>}
+                              {n.remuneration && <span style={{ color: C.lime, fontWeight: 600 }}>{n.remuneration}</span>}
                             </div>
                           </div>
                           {n.urgence && <Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge>}
                         </div>
-                        {n.details && <div style={{ fontSize: 13.5, color: C.sub, lineHeight: 1.55, marginTop: 8 }}>{n.details}</div>}
+                        {n.details && <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.6, marginTop: 10 }}>{n.details}</div>}
                       </div>
                     ))}
                   </div>
@@ -438,9 +443,9 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
 
         {tab === 'actus' && (
           recentPosts.length === 0 ? <Empty>Aucune publication pour le moment.</Empty> : (
-            <div style={{ borderTop: `1px solid ${C.line}` }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
               {recentPosts.map((post) => (
-                <div key={post.id} className="pp-row" style={{ padding: '14px 8px', borderBottom: `1px solid ${C.line}` }}>
+                <div key={post.id} className="pp-row" style={{ padding: '4px 8px' }}>
                   {post.content && <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.55 }}>{post.content}</div>}
                   <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Il y a {postTimeAgo(post.created_at)}</div>
                 </div>
@@ -456,7 +461,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
             ) : (
               <div style={{ borderTop: `1px solid ${C.line}`, marginBottom: 20 }}>
                 {recommendations.map((r) => (
-                  <div key={r.id} style={{ padding: '14px 8px', borderBottom: `1px solid ${C.line}` }}>
+                  <div key={r.id} style={{ padding: '4px 8px' }}>
                     <div style={{ fontSize: 14, color: C.sub, lineHeight: 1.55 }}>{r.content}</div>
                     <div style={{ fontSize: 12.5, color: C.muted, marginTop: 6 }}>{r.profiles?.nom || 'Utilisateur'}</div>
                   </div>

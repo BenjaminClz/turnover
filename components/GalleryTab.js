@@ -139,6 +139,21 @@ export default function GalleryTab({
     load();
   };
 
+  const togglePin = async (item) => {
+    const next = !item.pinned;
+    if (next && items.filter((it) => it.pinned).length >= 4) {
+      const msg = 'Tu peux épingler 4 photos maximum. Retire une épingle pour en ajouter une.';
+      if (typeof showToast === 'function') showToast(msg); else alert(msg);
+      return;
+    }
+    setItems((prev) => prev.map((it) => it.id === item.id ? { ...it, pinned: next } : it));
+    const { error } = await supabase.from('gallery_items').update({ pinned: next }).eq('id', item.id);
+    if (error) {
+      console.error('Supabase:', error);
+      setItems((prev) => prev.map((it) => it.id === item.id ? { ...it, pinned: !next } : it));
+    }
+  };
+
   const deleteItem = async (item) => {
     await supabase.storage.from(BUCKET).remove([item.file_path]);
     await supabase.from('gallery_items').delete().eq('id', item.id);
@@ -217,7 +232,7 @@ export default function GalleryTab({
       onAddComment={(text) => addComment(item, text)}
       onDeleteComment={(cid) => deleteComment(item, cid)}
       onUpdateDescription={(text) => updateDescription(item, text)}
-      onDelete={() => { deleteItem(item); setOpenIndex(null); }}
+      onDelete={() => { deleteItem(item); setOpenIndex(null); }} onTogglePin={() => togglePin(item)}
       getShareLink={() => shareItem(item)}
       onShareToMessage={onShareToMessage ? () => onShareToMessage(userId, ownerName) : null}
       showToast={showToast}
@@ -347,7 +362,7 @@ export default function GalleryTab({
   );
 }
 
-function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRole, onToggleLike, onOpenLikers, onAddComment, onDeleteComment, onUpdateDescription, onDelete, getShareLink, onShareToMessage, showToast, modal = false, onClose, onPrev, onNext, position }) {
+function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRole, onToggleLike, onOpenLikers, onAddComment, onDeleteComment, onUpdateDescription, onDelete, onTogglePin, getShareLink, onShareToMessage, showToast, modal = false, onClose, onPrev, onNext, position }) {
   const [commentText, setCommentText] = useState('');
   const [showAllComments, setShowAllComments] = useState(false);
   const [editingDesc, setEditingDesc] = useState(false);
@@ -400,6 +415,11 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
             <button onClick={() => setMenuOpen((v) => !v)} style={{ background: 'transparent', border: 'none', color: '#8C9A8E', fontSize: 20, cursor: 'pointer', lineHeight: 1 }}>⋯</button>
             {menuOpen && (
               <div style={{ position: 'absolute', top: 44, right: 12, background: '#152E26', border: '1px solid #2C4A3D', borderRadius: 10, zIndex: 20, overflow: 'hidden', minWidth: 180 }}>
+                {onTogglePin && (
+                  <button onClick={() => { setMenuOpen(false); onTogglePin(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer' }}>
+                    {item.pinned ? 'Retirer de mon profil' : 'Épingler sur mon profil'}
+                  </button>
+                )}
                 <button onClick={() => { setMenuOpen(false); setEditingDesc(true); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#F5F0E6', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer' }}>Modifier la description</button>
                 <button onClick={() => { setMenuOpen(false); onDelete(); }} style={{ display: 'block', width: '100%', textAlign: 'left', background: 'transparent', border: 'none', color: '#FF5C5C', fontSize: 13.5, padding: '11px 14px', cursor: 'pointer', borderTop: '1px solid #223a30' }}>Supprimer la publication</button>
               </div>

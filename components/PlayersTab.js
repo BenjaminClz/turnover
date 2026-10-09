@@ -489,9 +489,29 @@ export default function PlayersTab({ user, profile, showToast }) {
                   Compléter mon profil ({completion}%)
                 </PrimaryButton>
               )}
-              <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--lime)', textDecoration: 'underline', fontSize: 13, textAlign: 'center' }}>
-                Voir / partager mon profil public ↗
-              </a>
+              <div style={{ display: 'flex', gap: 8, justifyContent: 'center', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  className="tv-b tv-b-secondary tv-b-sm"
+                  onClick={async () => {
+                    const url = `${window.location.origin}/j/${myListing.id}`;
+                    const title = `${profile?.nom || 'Mon profil'} sur Turnover`;
+                    try {
+                      if (navigator.share) { await navigator.share({ title, url }); return; }
+                      await navigator.clipboard.writeText(url);
+                      showToast('Lien copié : colle-le dans WhatsApp, Instagram ou un mail.');
+                    } catch (e) {
+                      if (e?.name !== 'AbortError') showToast('Impossible de partager le lien.');
+                    }
+                  }}
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="M16 6l-4-4-4 4" /><path d="M12 2v13" /></svg>
+                  Partager mon profil
+                </button>
+                <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost" style={{ fontSize: 13 }}>
+                  Voir la page publique ↗
+                </a>
+              </div>
             </div>
           </div>
         </div>

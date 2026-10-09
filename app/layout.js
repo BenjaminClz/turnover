@@ -3,8 +3,17 @@ import CookieBanner from '@/components/CookieBanner';
 import { Analytics } from '@vercel/analytics/react';
 
 export const metadata = {
+  metadataBase: new URL('https://turnover-sport.fr'),
   title: 'Turnover — Le marché des transferts amateurs',
-  description: 'Connecte clubs et joueurs amateurs.',
+  description: 'Joueurs, clubs et staff du sport amateur se trouvent, se suivent et se contactent.',
+  openGraph: {
+    type: 'website',
+    siteName: 'Turnover',
+    locale: 'fr_FR',
+    title: 'Turnover — Le marché des transferts amateurs',
+    description: 'Joueurs, clubs et staff du sport amateur se trouvent, se suivent et se contactent.',
+  },
+  twitter: { card: 'summary_large_image' },
   manifest: '/manifest.json',
   appleWebApp: { capable: true, statusBarStyle: 'black-translucent', title: 'Turnover' },
 };

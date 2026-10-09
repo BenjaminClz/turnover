@@ -22,7 +22,9 @@ export async function generateMetadata({ params }) {
   return {
     title,
     description,
-    openGraph: { title, description },
+    openGraph: { title, description, type: 'profile', url: `/j/${params.id}` },
+    twitter: { card: 'summary_large_image', title, description },
+    alternates: { canonical: `/j/${params.id}` },
   };
 }
 

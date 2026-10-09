@@ -205,3 +205,7 @@ h1, h2, h3 { line-height: 1.15; }
 
 .tv-sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 .tv-tab-btn { padding: 8px 14px !important; }
+
+/* Onglets : pas de contour bleu au clic, contour lime au clavier */
+.tv-tab-btn:focus { outline: none; }
+.tv-tab-btn:focus-visible { outline: 2px solid #D4FF3F; outline-offset: 2px; }

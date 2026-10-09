@@ -91,6 +91,9 @@ const css = `
 .pp-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
 .pp-stat { background: transparent; border: none; color: inherit; text-align: left; padding: 12px 16px; }
 .pp-stat:first-child { border-left: none; padding-left: 0; }
+.pp-annonces-row { display: flex; gap: 20px; align-items: flex-start; margin-bottom: 32px; }
+.pp-featured { width: 240px; flex-shrink: 0; }
+@media (max-width: 760px) { .pp-annonces-row { flex-direction: column; } .pp-featured { width: 100%; } }
 .pp-stat[data-click="1"] { cursor: pointer; }
 .pp-stat[data-click="1"]:hover .pp-stat-v { color: ${C.lime}; }
 .pp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
@@ -122,6 +125,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   const [loadingFollowList, setLoadingFollowList] = useState(false);
   const [mapCoords, setMapCoords] = useState(null); // coordonnées géocodées depuis l'adresse du club
   const [tab, setTab] = useState('apercu');
+  const featuredPhotos = [...galleryItems].sort((a, b) => (b.pinned === true) - (a.pinned === true)).slice(0, 4);
 
   const openFollowList = async (type) => {
     setLoadingFollowList(true);
@@ -389,7 +393,8 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
             {isPlayer && <div style={{ marginBottom: 28 }}><ExperienceTimeline userId={targetUserId} /></div>}
 
             {isClub && (
-              <div style={{ marginBottom: 32, background: 'rgba(212,255,63,0.05)', borderLeft: `3px solid ${C.lime}`, borderRadius: 10, padding: '18px 22px' }}>
+              <div className="pp-annonces-row">
+              <div style={{ flex: 1, minWidth: 0, background: 'rgba(212,255,63,0.05)', borderLeft: `3px solid ${C.lime}`, borderRadius: 10, padding: '18px 22px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 14, borderBottom: `1px solid ${C.line}` }}>
                   <span style={{ fontSize: 18, fontWeight: 700, color: C.text }}>Annonces du club</span>
                   {needs.length > 0 && (
@@ -418,6 +423,24 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                     ))}
                   </div>
                 )}
+              </div>
+              {featuredPhotos.length > 0 && (
+                <aside className="pp-featured">
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
+                    <span style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Photos</span>
+                    <button onClick={() => setTab('photos')} style={{ background: 'transparent', border: 'none', color: C.lime, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>Voir tout ({galleryItems.length})</button>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+                    {featuredPhotos.map((it) => (
+                      <button key={it.id} onClick={() => setTab('photos')} aria-label="Voir la photo" style={{ padding: 0, border: 'none', background: C.soft, borderRadius: 6, overflow: 'hidden', aspectRatio: '1 / 1', cursor: 'pointer', display: 'block' }}>
+                        {it.media_type === 'video'
+                          ? <video src={it.url} muted playsInline style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />
+                          : <img src={it.url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }} />}
+                      </button>
+                    ))}
+                  </div>
+                </aside>
+              )}
               </div>
             )}
 

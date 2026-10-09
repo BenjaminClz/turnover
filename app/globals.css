@@ -209,3 +209,7 @@ h1, h2, h3 { line-height: 1.15; }
 /* Onglets : pas de contour bleu au clic, contour lime au clavier */
 .tv-tab-btn:focus { outline: none; }
 .tv-tab-btn:focus-visible { outline: 2px solid #D4FF3F; outline-offset: 2px; }
+
+/* Focus global : pas de contour bleu au clic, contour lime au clavier */
+button:focus:not(:focus-visible), a:focus:not(:focus-visible), [role="tab"]:focus:not(:focus-visible) { outline: none; }
+:focus-visible { outline: 2px solid #D4FF3F; outline-offset: 2px; }

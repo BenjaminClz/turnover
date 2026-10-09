@@ -1,5 +1,5 @@
 import { ImageResponse } from 'next/og';
-import { OG_SIZE, PlayerOgCard, SiteOgCard, loadOgFonts } from '@/lib/og';
+import { OG_SIZE, PlayerOgCard, SiteOgCard, loadOgFonts, fetchImageDataUrl } from '@/lib/og';
 
 export const runtime = 'edge';
 export const alt = 'Profil joueur sur Turnover';
@@ -24,9 +24,11 @@ async function fetchPlayer(id) {
 export default async function Image({ params }) {
   const player = await fetchPlayer(params.id);
   const text = player ? Object.values(player).filter((v) => typeof v === 'string').join(' ') : '';
+  const avatarSrc = player?.avatar_path ? `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/avatars/${player.avatar_path}` : null;
+  const avatar = await fetchImageDataUrl(avatarSrc);
   const { fonts, hasDisplay } = await loadOgFonts(text + ' Le marché des transferts du sport amateur. Joueurs, clubs et staff se trouvent, se suivent et se contactent. Rejoindre Turnover PROFIL JOUEUR NOTE GLOBALE Voir le profil Vitesse Attaque Défense Technique Vision Combat Physique turnover-sport.fr');
   return new ImageResponse(
-    player ? <PlayerOgCard player={player} hasDisplay={hasDisplay} /> : <SiteOgCard hasDisplay={hasDisplay} />,
+    player ? <PlayerOgCard player={player} hasDisplay={hasDisplay} avatar={avatar} /> : <SiteOgCard hasDisplay={hasDisplay} />,
     { ...OG_SIZE, fonts: fonts.length ? fonts : undefined }
   );
 }

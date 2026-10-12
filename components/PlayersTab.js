@@ -7,6 +7,7 @@ import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
 import { Field, TextInput, TextArea, Select, Badge, PrimaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
+import { sharePublicLink, ShareIcon } from '@/lib/share';
 import { profileCompletion, COMPLETION_THRESHOLD } from '@/lib/profile-completion';
 import NationaliteSelect from '@/components/NationaliteSelect';
 import StatsSlider from '@/components/StatsSlider';
@@ -270,8 +271,16 @@ export default function PlayersTab({ user, profile, showToast }) {
       <PageTitle>Mon profil</PageTitle>
       <PageSubtitle>Ton profil joueur, visible des clubs uniquement une fois publié.</PageSubtitle>
 
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <AvatarUpload userId={user.id} currentPath={profile.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} />
+        {isPublished && (
+          <>
+            <button type="button" className="tv-b tv-b-secondary" onClick={() => sharePublicLink(`/j/${myListing.id}`, `${profile?.nom || 'Mon profil'} sur Turnover`, showToast)}>
+              <ShareIcon />Partager mon profil
+            </button>
+            <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost">Voir ma page publique ↗</a>
+          </>
+        )}
       </div>
 
       <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
@@ -493,20 +502,9 @@ export default function PlayersTab({ user, profile, showToast }) {
                 <button
                   type="button"
                   className="tv-b tv-b-secondary tv-b-sm"
-                  onClick={async () => {
-                    const url = `${window.location.origin}/j/${myListing.id}`;
-                    const title = `${profile?.nom || 'Mon profil'} sur Turnover`;
-                    try {
-                      if (navigator.share) { await navigator.share({ title, url }); return; }
-                      await navigator.clipboard.writeText(url);
-                      showToast('Lien copié : colle-le dans WhatsApp, Instagram ou un mail.');
-                    } catch (e) {
-                      if (e?.name !== 'AbortError') showToast('Impossible de partager le lien.');
-                    }
-                  }}
+                  onClick={() => sharePublicLink(`/j/${myListing.id}`, `${profile?.nom || 'Mon profil'} sur Turnover`, showToast)}
                 >
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8" /><path d="M16 6l-4-4-4 4" /><path d="M12 2v13" /></svg>
-                  Partager mon profil
+                  <ShareIcon />Partager mon profil
                 </button>
                 <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost" style={{ fontSize: 13 }}>
                   Voir la page publique ↗

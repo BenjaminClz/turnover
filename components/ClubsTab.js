@@ -7,6 +7,7 @@ import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPE
 import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
+import { sharePublicLink, ShareIcon } from '@/lib/share';
 import GalleryTab from '@/components/GalleryTab';
 import { useSubscription } from '@/lib/use-subscription';
 import { SkeletonList } from '@/components/Skeleton';
@@ -278,8 +279,12 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       <PageTitle>Mon espace</PageTitle>
       <PageSubtitle>Ton club, tes annonces et tes photos, visibles par les joueurs.</PageSubtitle>
 
-      <div style={{ marginBottom: 20 }}>
+      <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
         <AvatarUpload userId={user.id} currentPath={profile?.avatar_path} showToast={showToast} onUploaded={() => window.location.reload()} size={84} />
+        <button type="button" className="tv-b tv-b-secondary" onClick={() => sharePublicLink(`/c/${user.id}`, `${profile?.nom || 'Notre club'} sur Turnover`, showToast)}>
+          <ShareIcon />Partager la page du club
+        </button>
+        <a href={`/c/${user.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost">Voir la page publique ↗</a>
       </div>
 
       <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
@@ -348,7 +353,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                     {listing.remuneration && <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4 }}>💰 {listing.remuneration}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
-                    <button onClick={() => startEditing(listing)} style={{ background: 'transparent', border: '1.5px solid var(--lime)', color: 'var(--lime)', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Modifier</button>
+                    <button className="tv-b tv-b-secondary" onClick={() => startEditing(listing)}>Modifier</button>
                     <button className="tv-b tv-b-secondary" onClick={() => requestDelete(listing.id)}>Supprimer</button>
                   </div>
                 </div>

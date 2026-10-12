@@ -202,7 +202,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
             <div style={{ fontSize: 14, color: 'var(--muted)' }}>{renderCardDetails(myListing)} · {myListing.ville}</div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
-            <button className="tv-b tv-b-primary" onClick={() => setEditing(true)}>Modifier</button>
+            <button className="tv-b tv-b-secondary" onClick={() => setEditing(true)}>Modifier</button>
             <button className="tv-b tv-b-secondary" onClick={handleDelete}>Supprimer</button>
           </div>
         </div>

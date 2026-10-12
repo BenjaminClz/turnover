@@ -1,37 +1,11 @@
 import { nationalites } from '@/lib/nationalites';
+import { PUBLIC_CSS, Icon, Section, PublicHeader, PhotoGrid, CtaBar, publicUrl, initials, supaGet, fetchGallery } from '@/lib/publicPage';
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SUPABASE_ANON_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-const HEADERS = { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${SUPABASE_ANON_KEY}` };
-
-const publicUrl = (bucket, path) => (path ? `${SUPABASE_URL}/storage/v1/object/public/${bucket}/${path}` : null);
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
-const initials = (nom) => (nom || '?').split(' ').filter(Boolean).map((w) => w[0]).slice(0, 2).join('').toUpperCase();
 
 async function fetchPlayer(id) {
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/public_player_profiles?id=eq.${encodeURIComponent(id)}&select=*`, {
-      headers: HEADERS, next: { revalidate: 600 },
-    });
-    if (!res.ok) return null;
-    const rows = await res.json();
-    return rows?.[0] || null;
-  } catch {
-    return null;
-  }
-}
-
-async function fetchGallery(ownerId) {
-  try {
-    const res = await fetch(
-      `${SUPABASE_URL}/rest/v1/gallery_items?owner_id=eq.${ownerId}&select=id,file_path,media_type&order=pinned.desc.nullslast,created_at.desc&limit=12`,
-      { headers: HEADERS, next: { revalidate: 600 } }
-    );
-    if (!res.ok) return [];
-    return (await res.json()).map((it) => ({ ...it, url: publicUrl('gallery', it.file_path) }));
-  } catch {
-    return [];
-  }
+  const rows = await supaGet(`public_player_profiles?id=eq.${encodeURIComponent(id)}&select=*`);
+  return rows?.[0] || null;
 }
 
 export async function generateMetadata({ params }) {
@@ -52,48 +26,6 @@ const STATS = [
   ['stat_vitesse', 'Vitesse'], ['stat_attaque', 'Attaque'], ['stat_defense', 'Défense'], ['stat_technique', 'Technique'],
   ['stat_vision', 'Vision de jeu'], ['stat_combat', 'Combat'], ['stat_physique', 'Physique'],
 ];
-
-const PIN = 'M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21zM12 12a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z';
-const Icon = ({ d, size = 14 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={d} /></svg>
-);
-
-const css = `
-.pj-wrap { max-width: 820px; margin: 0 auto; padding: 0 5vw 40px; }
-body { padding-bottom: 92px; }
-.pj-top { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; padding: 12px 5vw; background: rgba(11,31,26,0.9); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
-.pj-head { display: flex; gap: 28px; align-items: center; padding: 40px 0 28px; }
-.pj-avatar { width: 128px; height: 128px; border-radius: 999px; flex-shrink: 0; object-fit: cover; padding: 3px; background: linear-gradient(135deg, var(--lime), var(--lime-deep)); }
-.pj-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-.pj-pill { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 5px 11px; border-radius: 999px; border: 1px solid var(--line); color: var(--text-2); white-space: nowrap; }
-.pj-pill-lime { border-color: transparent; background: var(--lime-soft); color: var(--lime); font-weight: 600; }
-.pj-grid-stats { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: center; }
-.pj-bars { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 28px; }
-.pj-photos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; border-radius: 12px; overflow: hidden; }
-.pj-photo { position: relative; aspect-ratio: 1; background: var(--surface); overflow: hidden; display: block; }
-.pj-photo img, .pj-photo video { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .3s var(--ease); }
-.pj-photo:hover img { transform: scale(1.04); }
-.pj-cta-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; padding: 12px 5vw calc(12px + env(safe-area-inset-bottom)); background: rgba(11,31,26,0.94); backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
-.pj-cta-inner { max-width: 820px; margin: 0 auto; display: flex; gap: 16px; align-items: center; justify-content: space-between; }
-@media (max-width: 640px) {
-  .pj-head { flex-direction: column; text-align: center; gap: 18px; padding-top: 28px; }
-  .pj-pills-head { justify-content: center; }
-  .pj-avatar { width: 112px; height: 112px; }
-  .pj-grid-stats { grid-template-columns: 1fr; gap: 20px; }
-  .pj-bars { grid-template-columns: 1fr; }
-  .pj-cta-text { display: none; }
-  .pj-cta-inner .tv-b { width: 100%; }
-}
-`;
-
-function Section({ title, children }) {
-  return (
-    <section style={{ padding: '28px 0', borderTop: '1px solid var(--line-soft)' }}>
-      <div className="tv-section-label">{title}</div>
-      {children}
-    </section>
-  );
-}
 
 export default async function PublicPlayerPage({ params }) {
   const player = await fetchPlayer(params.id);
@@ -123,15 +55,9 @@ export default async function PublicPlayerPage({ params }) {
 
   return (
     <>
-      <style dangerouslySetInnerHTML={{ __html: css }} />
+      <style dangerouslySetInnerHTML={{ __html: PUBLIC_CSS }} />
 
-      <header className="pj-top">
-        <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <img src="/logo.png" alt="" style={{ width: 24, height: 24, borderRadius: 6 }} />
-          <span className="turnover-anton" style={{ fontSize: 22, letterSpacing: '0.02em' }}>TURNOVER</span>
-        </a>
-        <a href="/" className="tv-b tv-b-secondary tv-b-sm">Se connecter</a>
-      </header>
+      <PublicHeader />
 
       <main className="pj-wrap">
         {/* En-tête */}
@@ -151,7 +77,7 @@ export default async function PublicPlayerPage({ params }) {
             </p>
             <div className="pj-pills pj-pills-head">
               {player.dispo && <span className="pj-pill pj-pill-lime"><span style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lime)' }} />{player.dispo}</span>}
-              {player.ville && <span className="pj-pill"><Icon d={PIN} size={13} />{player.ville}</span>}
+              {player.ville && <span className="pj-pill"><Icon size={13} />{player.ville}</span>}
             </div>
           </div>
         </div>
@@ -200,29 +126,12 @@ export default async function PublicPlayerPage({ params }) {
 
         {gallery.length > 0 && (
           <Section title={`Photos & vidéos · ${gallery.length}`}>
-            <div className="pj-photos">
-              {gallery.map((it) => (
-                <a key={it.id} className="pj-photo" href={it.url} target="_blank" rel="noopener noreferrer">
-                  {it.media_type === 'video'
-                    ? <video src={`${it.url}#t=0.1`} muted playsInline preload="metadata" />
-                    : <img src={it.url} alt="" loading="lazy" />}
-                </a>
-              ))}
-            </div>
+            <PhotoGrid items={gallery} />
           </Section>
         )}
       </main>
 
-      {/* Barre d'action toujours visible */}
-      <div className="pj-cta-bar">
-        <div className="pj-cta-inner">
-          <div className="pj-cta-text" style={{ minWidth: 0 }}>
-            <div style={{ fontWeight: 600 }}>Intéressé par {prenom} ?</div>
-            <div style={{ fontSize: 13, color: 'var(--muted)' }}>Crée ton compte club en 2 minutes pour le contacter.</div>
-          </div>
-          <a href="/" className="tv-b tv-b-primary tv-b-lg">Contacter {prenom}</a>
-        </div>
-      </div>
+      <CtaBar title={`Intéressé par ${prenom} ?`} subtitle="Crée ton compte club en 2 minutes pour le contacter." label={`Contacter ${prenom}`} />
     </>
   );
 }

@@ -45,7 +45,7 @@ const inputStyle = {
   borderRadius: 8,
   padding: '10px 12px',
   color: T.text,
-  fontSize: 15,
+  fontSize: 14,
   fontFamily: 'inherit',
 };
 
@@ -57,7 +57,7 @@ const btnPrimary = {
   border: 'none',
   borderRadius: 8,
   padding: '10px 16px',
-  fontWeight: 700,
+  fontWeight: 600,
   fontSize: 14,
   cursor: 'pointer',
 };
@@ -351,7 +351,7 @@ export default function ExperienceEditor({ userId }) {
       style={{
         background: T.card,
         border: `1px solid ${T.border}`,
-        borderRadius: 16,
+        borderRadius: 12,
         padding: 20,
         color: T.text,
       }}
@@ -360,7 +360,7 @@ export default function ExperienceEditor({ userId }) {
 
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, marginBottom: 16 }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Parcours</h3>
+          <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Parcours</h3>
           <p style={{ margin: '4px 0 0', fontSize: 14, color: T.muted }}>
             Les clubs où tu as joué, visibles sur ton profil.
           </p>
@@ -416,7 +416,7 @@ export default function ExperienceEditor({ userId }) {
                 }}
               >
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 700 }}>{item.club_name}</div>
+                  <div style={{ fontWeight: 600 }}>{item.club_name}</div>
                   <div style={{ color: T.muted, fontSize: 13, marginTop: 2 }}>
                     {[formatPeriode(item), item.level, item.position].filter(Boolean).join(', ')}
                   </div>

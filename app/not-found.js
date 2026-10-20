@@ -6,12 +6,12 @@ export default function NotFound() {
           <img src="/logo.png" alt="Turnover" style={{ width: 34, height: 34, objectFit: 'contain', borderRadius: 6 }} />
           <span style={{ fontFamily: 'Anton, sans-serif', fontSize: 24, textTransform: 'uppercase' }}>TURNOVER</span>
         </div>
-        <div style={{ fontSize: 56, fontWeight: 800, color: 'var(--lime)', marginBottom: 8 }}>404</div>
+        <div style={{ fontSize: 56, fontWeight: 600, color: 'var(--lime)', marginBottom: 8 }}>404</div>
         <h1 style={{ fontSize: 20, marginBottom: 12 }}>Cette page n'existe pas</h1>
-        <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
+        <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 24 }}>
           Le lien est peut-être expiré, ou l'adresse a été mal saisie.
         </p>
-        <a href="/app" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '13px 26px', borderRadius: 8, fontWeight: 700, textDecoration: 'none' }}>
+        <a href="/app" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '13px 26px', borderRadius: 8, fontWeight: 600, textDecoration: 'none' }}>
           Retour à l'accueil
         </a>
       </div>

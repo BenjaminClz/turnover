@@ -23,7 +23,7 @@ export default function ProfileMediaGrid({ items }) {
               <img src={it.url} alt="" style={{ width: '100%', height: 'auto', display: 'block' }} />
             )}
             {it.media_type === 'video' && (
-              <span style={{ position: 'absolute', top: 6, right: 6, fontSize: 15, filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.6))' }}>▶️</span>
+              <span style={{ position: 'absolute', top: 6, right: 6, fontSize: 14, filter: 'drop-shadow(0 0 3px rgba(0,0,0,0.6))' }}>▶️</span>
             )}
           </button>
         ))}

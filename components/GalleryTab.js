@@ -263,7 +263,7 @@ export default function GalleryTab({
             <span style={{ position: 'absolute', top: 6, right: 8, color: '#fff', display: 'flex', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))' }}><PlayIcon size={15} /></span>
           )}
           {item.likeCount > 0 && (
-            <span style={{ position: 'absolute', bottom: 6, left: 8, color: '#fff', fontSize: 12, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))' }}><HeartIcon filled size={13} /> {item.likeCount}</span>
+            <span style={{ position: 'absolute', bottom: 6, left: 8, color: '#fff', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4, filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.7))' }}><HeartIcon filled size={13} /> {item.likeCount}</span>
           )}
         </button>
       ))}
@@ -284,9 +284,9 @@ export default function GalleryTab({
 
   const likersModalEl = likersModal && (
     <div onClick={() => setLikersModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}>
-      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
+      <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: '1px solid var(--line)' }}>
-          <span style={{ fontWeight: 700, fontSize: 15 }}>J'aime</span>
+          <span style={{ fontWeight: 600, fontSize: 14 }}>J'aime</span>
           <button onClick={() => setLikersModal(null)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', display: 'flex' }} aria-label="Fermer"><Icon name="close" size={20} /></button>
         </div>
         <div style={{ overflowY: 'auto' }}>
@@ -304,7 +304,7 @@ export default function GalleryTab({
                   <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 13 }}>{initials(u.nom)}</div>
                 )}
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{u.nom}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14, color: 'var(--text)' }}>{u.nom}</div>
                   <div style={{ fontSize: 12, color: 'var(--muted)' }}>{ROLE_LABELS[u.role] || u.role}</div>
                 </div>
               </div>
@@ -317,13 +317,13 @@ export default function GalleryTab({
 
   if (embedded) {
     return (
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
-          <h3 style={{ fontSize: 18 }}>{title}</h3>
+          <h3 style={{ fontSize: 16 }}>{title}</h3>
           {!readOnly && (
             <>
               {uploadInput}
-              <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '9px 16px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+              <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '9px 16px', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
                 {uploading ? 'Import en cours…' : '+ Ajouter'}
               </label>
             </>
@@ -347,10 +347,10 @@ export default function GalleryTab({
       </p>
 
       {!readOnly && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 24 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, marginBottom: 14 }}>Nouvelle publication</h3>
           {uploadInput}
-          <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '12px 22px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
+          <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '12px 22px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>
             {uploading ? 'Import en cours…' : '+ Ajouter photos / vidéos'}
           </label>
           <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 10 }}>Jusqu'à 20 Mo par fichier. Tu pourras ajouter une description ensuite.</div>
@@ -409,7 +409,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
           <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 13 }}>{initials(ownerName)}</div>
         )}
         <div style={{ flex: 1 }}>
-          <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700 }}>{ownerName}</div>
+          <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 600 }}>{ownerName}</div>
           <div style={{ color: 'var(--muted)', fontSize: 12 }}>{ROLE_LABELS[ownerRole] || ''}{ownerRole ? ' · ' : ''}il y a {timeAgo(item.created_at)}</div>
         </div>
         {isOwner && (
@@ -476,7 +476,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
       {/* Nombre de likes */}
       {item.likeCount > 0 && (
         <div style={{ padding: '2px 14px 0' }}>
-          <button onClick={onOpenLikers} style={{ background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: 0 }}>
+          <button onClick={onOpenLikers} style={{ background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>
             {item.likeCount} {item.likeCount > 1 ? "j'aime" : "j'aime"}
           </button>
         </div>
@@ -493,7 +493,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
         </div>
       ) : item.description ? (
         <div style={{ padding: '4px 14px 2px', fontSize: 14, color: 'var(--text-2)', lineHeight: 1.5 }}>
-          <span style={{ color: 'var(--text)', fontWeight: 700 }}>{ownerName}</span> {item.description}
+          <span style={{ color: 'var(--text)', fontWeight: 600 }}>{ownerName}</span> {item.description}
         </div>
       ) : isOwner ? (
         <div style={{ padding: '4px 14px 2px' }}>
@@ -511,7 +511,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
         <div style={{ padding: '4px 14px 8px', display: 'grid', gap: 4 }}>
           {visibleComments.map((c) => (
             <div key={c.id} style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.45, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
-              <span><span style={{ color: 'var(--text)', fontWeight: 700 }}>{c.profiles?.nom || 'Utilisateur'}</span> {c.content}</span>
+              <span><span style={{ color: 'var(--text)', fontWeight: 600 }}>{c.profiles?.nom || 'Utilisateur'}</span> {c.content}</span>
               {isOwner && (
                 <button onClick={() => onDeleteComment(c.id)} style={{ background: 'transparent', border: 'none', color: 'var(--faint)', fontSize: 12, cursor: 'pointer', flexShrink: 0, display: 'flex' }} aria-label="Supprimer le commentaire"><Icon name="close" size={14} /></button>
               )}
@@ -530,7 +530,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
             placeholder="Ajouter un commentaire…"
             style={{ flex: 1, background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 13, outline: 'none' }}
           />
-          <button onClick={submitComment} disabled={!commentText.trim()} style={{ background: 'transparent', border: 'none', color: commentText.trim() ? 'var(--lime)' : 'var(--faint)', fontSize: 13, fontWeight: 700, cursor: commentText.trim() ? 'pointer' : 'default' }}>Publier</button>
+          <button onClick={submitComment} disabled={!commentText.trim()} style={{ background: 'transparent', border: 'none', color: commentText.trim() ? 'var(--lime)' : 'var(--faint)', fontSize: 13, fontWeight: 600, cursor: commentText.trim() ? 'pointer' : 'default' }}>Publier</button>
         </div>
       )}
     </div>

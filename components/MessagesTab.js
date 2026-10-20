@@ -170,7 +170,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
       {conversations.length === 0 ? (
         <EmptyState icon="message" title="Aucune conversation" sub="Clique sur « Contacter » depuis un profil ou un besoin pour démarrer une discussion." />
       ) : (
-        <div className="tv-messages-grid" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minHeight: 480 }}>
+        <div className="tv-messages-grid" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, overflow: 'hidden', minHeight: 480 }}>
           <div className={activeConvId ? 'tv-messages-list-mobile-hidden' : ''} style={{ borderRight: '1px solid var(--line)', overflowY: 'auto' }}>
             {conversations.map((c) => {
               const other = otherOf(c);
@@ -180,11 +180,11 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                 <div key={c.id} className="tv-card" onClick={() => setActiveConvId(c.id)} style={{ padding: 16, borderBottom: '1px solid var(--line)', cursor: 'pointer', background: activeConvId === c.id ? 'rgba(212,255,63,0.08)' : 'transparent', display: 'flex', alignItems: 'center', gap: 12 }}>
                   {url && <img src={url} alt="" style={{ width: 36, height: 36, borderRadius: 8, objectFit: 'cover', flexShrink: 0, opacity: locked ? 0.5 : 1 }} />}
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <div style={{ fontWeight: 600, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {other?.nom}
                       {locked && <Icon name="lock" size={12} style={{ color: 'var(--muted)' }} />}
                     </div>
-                    <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{c.context}</div>
+                    <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 2 }}>{c.context}</div>
                   </div>
                 </div>
               );
@@ -195,7 +195,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
               <button
                 className="tv-messages-back"
                 onClick={() => setActiveConvId(null)}
-                style={{ display: 'none', background: 'transparent', border: 'none', color: 'var(--lime)', fontSize: 13, fontWeight: 700, cursor: 'pointer', padding: '12px 16px', textAlign: 'left' }}
+                style={{ display: 'none', background: 'transparent', border: 'none', color: 'var(--lime)', fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: '12px 16px', textAlign: 'left' }}
               >
                 ← Retour aux conversations
               </button>
@@ -205,7 +205,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
             ) : activeLocked ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
                 <div style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', marginBottom: 16 }}><Icon name="lock" size={22} /></div>
-                <h3 style={{ fontSize: 18, marginBottom: 8 }}>Candidature de {otherOf(activeConv)?.nom}</h3>
+                <h3 style={{ fontSize: 16, marginBottom: 8 }}>Candidature de {otherOf(activeConv)?.nom}</h3>
                 <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 24, maxWidth: 340 }}>
                   {alreadyUnlockedForScope(activeConv.id, activeConv.club_need_id)
                     ? (activeConv.club_need_id
@@ -228,7 +228,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                     <img src={avatarUrl(supabase, otherOf(activeConv)?.avatar_path)} alt="" style={{ width: 40, height: 40, borderRadius: 8, objectFit: 'cover' }} />
                   )}
                   <div>
-                    <div style={{ fontWeight: 700 }}>{otherOf(activeConv)?.nom}</div>
+                    <div style={{ fontWeight: 600 }}>{otherOf(activeConv)?.nom}</div>
                     <div style={{ fontSize: 12, color: 'var(--muted)' }}>{activeConv.context}</div>
                   </div>
                 </div>
@@ -244,7 +244,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                         border: m.sender_id === user.id ? 'none' : '1px solid var(--line)',
                       }}>{m.content}</div>
                       {m.sender_id === user.id ? (
-                        <span style={{ fontSize: 11, color: m.read_at ? 'var(--lime)' : 'var(--muted)', marginTop: 3, marginRight: 2 }}>
+                        <span style={{ fontSize: 12, color: m.read_at ? 'var(--lime)' : 'var(--muted)', marginTop: 3, marginRight: 2 }}>
                           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name={m.read_at ? 'checks' : 'check'} size={13} />{m.read_at ? 'Lu' : 'Envoyé'}</span>
                         </span>
                       ) : (
@@ -273,7 +273,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); sendMessage(); } }}
                     placeholder="Écris un message…"
                   />
-                  <button className="tv-btn" onClick={sendMessage} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '0 20px', borderRadius: 8, fontWeight: 700, cursor: 'pointer' }}>Envoyer</button>
+                  <button className="tv-btn" onClick={sendMessage} style={{ background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '0 20px', borderRadius: 8, fontWeight: 600, cursor: 'pointer' }}>Envoyer</button>
                 </div>
               </>
             )}

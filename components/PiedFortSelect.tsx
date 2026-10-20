@@ -21,7 +21,7 @@ export function PiedFortSelect({ sport, poste, value, onChange }) {
               border: value === option ? '1.5px solid var(--lime)' : '1px solid var(--line)',
               background: value === option ? 'var(--lime)' : 'transparent',
               color: value === option ? 'var(--bg)' : 'var(--muted)',
-              fontWeight: 700,
+              fontWeight: 600,
               fontSize: 14,
               cursor: 'pointer',
               textTransform: 'capitalize',

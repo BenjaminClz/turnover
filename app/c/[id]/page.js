@@ -48,7 +48,7 @@ export default async function PublicClubPage({ params }) {
   if (!club) {
     return (
       <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24, textAlign: 'center' }}>
-        <p style={{ fontSize: 18, fontWeight: 600 }}>Ce club n'est plus disponible.</p>
+        <p style={{ fontSize: 16, fontWeight: 600 }}>Ce club n'est plus disponible.</p>
         <a href="/" className="tv-b tv-b-primary">Découvrir Turnover</a>
       </div>
     );
@@ -84,18 +84,18 @@ export default async function PublicClubPage({ params }) {
           {avatar ? (
             <img className="pj-avatar" src={avatar} alt={club.nom} style={{ background: 'var(--surface)', objectFit: 'contain' }} />
           ) : (
-            <div className="pj-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-lime)', fontSize: 40, fontWeight: 800 }}>
+            <div className="pj-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', fontSize: 40, fontWeight: 600 }}>
               {initials(club.nom)}
             </div>
           )}
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 6 }}>Club</div>
-            <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', fontWeight: 700 }}>{club.nom}</h1>
-            {sports.length > 0 && <p style={{ fontSize: 17, color: 'var(--text-2)', marginTop: 6 }}>{sports.join(' · ')}</p>}
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', marginBottom: 6 }}>Club</div>
+            <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', fontWeight: 600 }}>{club.nom}</h1>
+            {sports.length > 0 && <p style={{ fontSize: 16, color: 'var(--text-2)', marginTop: 6 }}>{sports.join(' · ')}</p>}
             <div className="pj-pills pj-pills-head">
               {needs.length > 0 && (
                 <span className="pj-pill pj-pill-lime">
-                  <span style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lime)' }} />
+                  <span style={{ width: 7, height: 7, borderRadius: 8, background: 'var(--lime)' }} />
                   Recrute · {needs.length} annonce{needs.length > 1 ? 's' : ''}
                 </span>
               )}
@@ -108,14 +108,14 @@ export default async function PublicClubPage({ params }) {
 
         <Section title={needs.length ? `Annonces en cours · ${needs.length}` : 'Annonces'}>
           {needs.length === 0 ? (
-            <p style={{ color: 'var(--muted)', fontSize: 15 }}>Ce club n'a pas d'annonce en ligne pour le moment. Suis-le sur Turnover pour être prévenu de ses prochains recrutements.</p>
+            <p style={{ color: 'var(--muted)', fontSize: 14 }}>Ce club n'a pas d'annonce en ligne pour le moment. Suis-le sur Turnover pour être prévenu de ses prochains recrutements.</p>
           ) : (
             <div style={{ display: 'grid', gap: 10 }}>
               {needs.map((n) => (
                 <article key={n.id} className="tv-panel" style={{ padding: '18px 20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <h2 style={{ fontSize: 18, fontWeight: 700 }}>{needTitle(n)}</h2>
+                      <h2 style={{ fontSize: 16, fontWeight: 600 }}>{needTitle(n)}</h2>
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px 14px', fontSize: 14, color: 'var(--muted)', marginTop: 6 }}>
                         {needSub(n) && <span>{needSub(n)}</span>}
                         {n.ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon size={13} />{n.ville}</span>}
@@ -126,7 +126,7 @@ export default async function PublicClubPage({ params }) {
                       <span className={`pj-pill${n.urgence === URGENT ? ' pj-pill-lime' : ''}`}>{n.urgence}</span>
                     )}
                   </div>
-                  {n.details && <p style={{ fontSize: 15, lineHeight: 1.6, color: 'var(--text-2)', marginTop: 12, whiteSpace: 'pre-line' }}>{n.details}</p>}
+                  {n.details && <p style={{ fontSize: 14, lineHeight: 1.6, color: 'var(--text-2)', marginTop: 12, whiteSpace: 'pre-line' }}>{n.details}</p>}
                 </article>
               ))}
             </div>

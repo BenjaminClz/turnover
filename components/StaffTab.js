@@ -180,8 +180,8 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       </div>
 
       {!myListing && !editing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>{config.formTitle}</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+          <h3 style={{ marginBottom: 20, fontSize: 16 }}>{config.formTitle}</h3>
           <form onSubmit={handleSubmit}>
             {renderSpecificFields()}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
@@ -196,9 +196,9 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       )}
 
       {myListing && !editing && (
-        <div style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 24, marginBottom: 36, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+        <div style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid var(--lime)', borderRadius: 12, padding: 24, marginBottom: 36, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
           <div>
-            <div style={{ fontWeight: 700, marginBottom: 4 }}>Ton profil est publié</div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>Ton profil est publié</div>
             <div style={{ fontSize: 14, color: 'var(--muted)' }}>{renderCardDetails(myListing)} · {myListing.ville}</div>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
@@ -209,8 +209,8 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       )}
 
       {myListing && editing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier mon profil</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+          <h3 style={{ marginBottom: 20, fontSize: 16 }}>Modifier mon profil</h3>
           <form onSubmit={handleSubmit}>
             {renderSpecificFields()}
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
@@ -240,7 +240,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
                   <img src={avatarUrl(supabase, l.profiles.avatar_path)} alt="" style={{ width: 48, height: 48, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />
                 )}
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 16 }}>{l.profiles?.nom}</div>
+                  <div style={{ fontWeight: 600, fontSize: 16 }}>{l.profiles?.nom}</div>
                   <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{renderCardDetails(l)} · {l.ville} ({l.distance} km)</div>
                   {l.bio && <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 10, maxWidth: 480 }}>{l.bio}</div>}
                   <div style={{ marginTop: 12 }}><Badge tone="lime">{l.dispo}</Badge></div>

@@ -17,7 +17,7 @@ export function StatsSlider({ stats, onChange }) {
         <div key={key}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 14, marginBottom: 6 }}>
             <span style={{ color: 'var(--muted)', fontWeight: 600 }}>{label}</span>
-            <span style={{ color: 'var(--lime)', fontWeight: 700 }}>{stats[key] ?? 50}</span>
+            <span style={{ color: 'var(--lime)', fontWeight: 600 }}>{stats[key] ?? 50}</span>
           </div>
           <input
             type="range"

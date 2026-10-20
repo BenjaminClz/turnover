@@ -36,7 +36,7 @@ export default function FavoriteButton({ targetType, targetId, ownerId, style })
   };
 
   return (
-    <button onClick={toggle} title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'} aria-pressed={isFavorite} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'inline-flex', fontSize: 18, padding: 4, lineHeight: 1, opacity: loading ? 0.4 : 1, transition: 'transform .12s ease', ...style }}>
+    <button onClick={toggle} title={isFavorite ? 'Retirer des favoris' : 'Ajouter aux favoris'} aria-pressed={isFavorite} style={{ background: 'transparent', border: 'none', cursor: 'pointer', display: 'inline-flex', fontSize: 16, padding: 4, lineHeight: 1, opacity: loading ? 0.4 : 1, transition: 'transform .12s ease', ...style }}>
       <Icon name="heart" size={18} filled={isFavorite} style={{ color: isFavorite ? 'var(--lime)' : 'var(--muted)', display: 'block' }} />
     </button>
   );

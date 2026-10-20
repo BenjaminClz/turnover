@@ -16,7 +16,7 @@ export function StatsRadar({ stats }) {
       <RadarChart data={data}>
         <PolarGrid stroke="#24423A" />
         <PolarAngleAxis dataKey="stat" tick={{ fill: '#94A399', fontSize: 12 }} />
-        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#5C6B5E', fontSize: 10 }} />
+        <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fill: '#5C6B5E', fontSize: 12 }} />
         <Radar dataKey="valeur" stroke="#D4FF3F" fill="#D4FF3F" fillOpacity={0.35} />
       </RadarChart>
     </ResponsiveContainer>

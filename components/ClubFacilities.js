@@ -55,8 +55,8 @@ export default function ClubFacilitiesEditor({ userId }) {
   };
 
   return (
-    <section style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: 20, color: T.text }}>
-      <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700 }}>Infrastructures</h3>
+    <section style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 20, color: T.text }}>
+      <h3 style={{ margin: 0, fontSize: 16, fontWeight: 600 }}>Infrastructures</h3>
       <p style={{ margin: '4px 0 16px', fontSize: 14, color: T.muted }}>
         Sélectionne ce dont dispose ton club. Les joueurs le verront sur ta fiche.
       </p>
@@ -84,8 +84,8 @@ export default function ClubFacilitiesEditor({ userId }) {
 export function ClubFacilitiesList({ items }) {
   if (!items || items.length === 0) return null;
   return (
-    <section style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: 20, color: T.text }}>
-      <h3 style={{ margin: '0 0 12px', fontSize: 18, fontWeight: 700 }}>Infrastructures</h3>
+    <section style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 12, padding: 20, color: T.text }}>
+      <h3 style={{ margin: '0 0 12px', fontSize: 16, fontWeight: 600 }}>Infrastructures</h3>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
         {items.map((item) => (
           <span key={item} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 12px', borderRadius: 999, fontSize: 13, border: `1px solid ${T.border}`, color: T.text }}>

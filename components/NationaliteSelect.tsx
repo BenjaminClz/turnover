@@ -23,7 +23,7 @@ const darkStyles = {
     cursor: 'pointer',
   }),
   multiValue: (base) => ({ ...base, background: 'var(--lime)', borderRadius: 6 }),
-  multiValueLabel: (base) => ({ ...base, color: 'var(--on-lime)', fontWeight: 700 }),
+  multiValueLabel: (base) => ({ ...base, color: 'var(--on-lime)', fontWeight: 600 }),
   multiValueRemove: (base) => ({ ...base, color: 'var(--on-lime)', ':hover': { background: 'var(--lime-hover)', color: 'var(--on-lime)' } }),
   input: (base) => ({ ...base, color: 'var(--text)' }),
   placeholder: (base) => ({ ...base, color: 'var(--faint)' }),

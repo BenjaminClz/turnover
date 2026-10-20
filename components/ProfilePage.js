@@ -351,7 +351,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         {listing?.dispo && (
           <div className="pp-stat">
             <div style={{ fontSize: 12, color: C.muted }}>Disponibilité</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: 15, fontWeight: 500, color: C.lime }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: 14, fontWeight: 500, color: C.lime }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.lime }} />{listing.dispo}
             </div>
           </div>
@@ -368,7 +368,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       <div style={{ paddingTop: 20, paddingBottom: 32 }}>
         {tab === 'apercu' && (
           <>
-            {bio && <p style={{ fontSize: 15, color: C.sub, lineHeight: 1.65, margin: '0 0 20px', maxWidth: 680 }}>{bio}</p>}
+            {bio && <p style={{ fontSize: 14, color: C.sub, lineHeight: 1.65, margin: '0 0 20px', maxWidth: 680 }}>{bio}</p>}
 
             {(isPlayer || isStaff) && (facts.length > 0 || (isPlayer && playerListing)) && (
               <div className="pp-cols" style={{ display: 'grid', gridTemplateColumns: isPlayer && playerListing ? 'minmax(0,1fr) auto' : '1fr', gap: 28, alignItems: 'start', marginBottom: 28 }}>
@@ -397,9 +397,9 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
               <div className="pp-annonces-row">
               <div style={{ flex: 1, minWidth: 0, background: 'rgba(212,255,63,0.05)', borderLeft: `3px solid ${C.lime}`, borderRadius: 8, padding: '18px 22px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, paddingBottom: 12, marginBottom: 14, borderBottom: `1px solid ${C.line}` }}>
-                  <span style={{ fontSize: 18, fontWeight: 700, color: C.text }}>Annonces du club</span>
+                  <span style={{ fontSize: 16, fontWeight: 600, color: C.text }}>Annonces du club</span>
                   {needs.length > 0 && (
-                    <span style={{ background: C.lime, color: 'var(--on-lime)', fontSize: 12, fontWeight: 700, borderRadius: 999, padding: '2px 9px' }}>{needs.length}</span>
+                    <span style={{ background: C.lime, color: 'var(--on-lime)', fontSize: 12, fontWeight: 600, borderRadius: 999, padding: '2px 9px' }}>{needs.length}</span>
                   )}
                 </div>
                 {needs.length === 0 ? (
@@ -410,7 +410,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
                       <div key={n.id}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12, flexWrap: 'wrap' }}>
                           <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontWeight: 700, fontSize: 18, color: C.text }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
+                            <div style={{ fontWeight: 600, fontSize: 16, color: C.text }}>{ROLE_LABELS[n.besoin_type] || 'Joueur'}</div>
                             <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '4px 14px', fontSize: 14, color: C.muted, marginTop: 5 }}>
                               {describeNeed(n) && <span>{describeNeed(n)}</span>}
                               {n.ville && <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon d={PIN} size={13} />{n.ville}</span>}
@@ -428,7 +428,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
               {featuredPhotos.length > 0 && (
                 <aside className="pp-featured">
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10 }}>
-                    <span style={{ fontSize: 15, fontWeight: 700, color: C.text }}>Photos</span>
+                    <span style={{ fontSize: 14, fontWeight: 600, color: C.text }}>Photos</span>
                     <button onClick={() => setTab('photos')} style={{ background: 'transparent', border: 'none', color: C.lime, fontSize: 13, fontWeight: 600, cursor: 'pointer', padding: 0 }}>Voir tout ({galleryItems.length})</button>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -516,7 +516,7 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
         >
           <div onClick={(e) => e.stopPropagation()} style={{ background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, maxWidth: 400, width: '100%', maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-pop)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${C.line}` }}>
-              <div style={{ fontWeight: 600, fontSize: 15 }}>{followList.type === 'followers' ? 'Abonnés' : 'Abonnements'}</div>
+              <div style={{ fontWeight: 600, fontSize: 14 }}>{followList.type === 'followers' ? 'Abonnés' : 'Abonnements'}</div>
               <button onClick={() => setFollowList(null)} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', display: 'inline-flex', padding: 4 }}><Icon d={CLOSE} size={18} /></button>
             </div>
             <div style={{ overflowY: 'auto', flex: 1 }}>
@@ -563,13 +563,13 @@ function Stat({ label, value, onClick }) {
   return (
     <button className="pp-stat" data-click={onClick ? '1' : '0'} onClick={onClick} disabled={!onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
       <div style={{ fontSize: 12, color: C.muted }}>{label}</div>
-      <div className="pp-stat-v" style={{ fontSize: 18, fontWeight: 600, marginTop: 2, fontVariantNumeric: 'tabular-nums', color: C.text, transition: 'color .12s ease' }}>{value}</div>
+      <div className="pp-stat-v" style={{ fontSize: 16, fontWeight: 600, marginTop: 2, fontVariantNumeric: 'tabular-nums', color: C.text, transition: 'color .12s ease' }}>{value}</div>
     </button>
   );
 }
 
 function SectionTitle({ children }) {
-  return <h2 style={{ fontSize: 15, fontWeight: 600, color: C.text, margin: '0 0 10px' }}>{children}</h2>;
+  return <h2 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: '0 0 10px' }}>{children}</h2>;
 }
 
 function Empty({ children }) {

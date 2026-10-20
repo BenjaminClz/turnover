@@ -306,7 +306,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
               <Avatar supabase={supabase} path={profile?.avatar_path} name={profile?.nom} size={36} />
               <button
                 onClick={() => setComposerOpen(true)}
-                style={{ flex: 1, textAlign: 'left', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 999, padding: '9px 16px', color: C.muted, fontSize: 15, cursor: 'text' }}
+                style={{ flex: 1, textAlign: 'left', background: C.panel, border: `1px solid ${C.line}`, borderRadius: 999, padding: '9px 16px', color: C.muted, fontSize: 14, cursor: 'text' }}
               >
                 Quoi de neuf{firstName(profile?.nom) ? `, ${firstName(profile?.nom)}` : ''} ?
               </button>
@@ -534,7 +534,7 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
         <div onClick={() => setLikersModal(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(5,15,12,0.7)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}>
           <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: C.panel, border: `1px solid ${C.line}`, borderRadius: 8, maxHeight: '70vh', display: 'flex', flexDirection: 'column', boxShadow: 'var(--shadow-pop)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '14px 16px', borderBottom: `1px solid ${C.line}` }}>
-              <span style={{ fontWeight: 600, fontSize: 15 }}>J'aime</span>
+              <span style={{ fontWeight: 600, fontSize: 14 }}>J'aime</span>
               <button onClick={() => setLikersModal(null)} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: C.muted, cursor: 'pointer', display: 'inline-flex', padding: 4 }}><Icon d={CLOSE} size={18} /></button>
             </div>
             <div style={{ overflowY: 'auto' }}>

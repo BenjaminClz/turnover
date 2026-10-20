@@ -73,8 +73,8 @@ export default function AccountSettingsModal({ open, profile, onClose, showToast
       onClick={onClose}
       style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}
     >
-      <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, maxWidth: 420, width: '100%' }}>
-        <h3 style={{ fontSize: 18, marginBottom: 20 }}>Modifier mes informations</h3>
+      <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, maxWidth: 420, width: '100%' }}>
+        <h3 style={{ fontSize: 16, marginBottom: 20 }}>Modifier mes informations</h3>
         <form onSubmit={handleSave}>
           {isClub ? (
             <Field label="Nom du club">

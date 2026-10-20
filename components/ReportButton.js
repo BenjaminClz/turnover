@@ -41,8 +41,8 @@ export default function ReportButton({ targetType, targetId, targetOwnerId, repo
 
       {open && (
         <div onClick={(e) => { e.stopPropagation(); setOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.8)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: 20 }}>
-          <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 26, maxWidth: 420, width: '100%' }}>
-            <h3 style={{ fontSize: 18, marginBottom: 8 }}>Signaler ce contenu</h3>
+          <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 26, maxWidth: 420, width: '100%' }}>
+            <h3 style={{ fontSize: 16, marginBottom: 8 }}>Signaler ce contenu</h3>
             <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 16 }}>Explique brièvement le problème (optionnel). Les signalements répétés peuvent entraîner la suspension du compte concerné.</p>
             <TextArea value={reason} onChange={(e) => setReason(e.target.value)} placeholder="Ex. propos inappropriés, fausse annonce…" style={{ minHeight: 80, marginBottom: 16 }} />
             <div style={{ display: 'flex', gap: 10 }}>

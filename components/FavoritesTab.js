@@ -77,7 +77,7 @@ export default function FavoritesTab({ user, onContact, onViewGallery }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
                   {url && <img src={url} alt="" style={{ width: 42, height: 42, borderRadius: 8, objectFit: 'cover' }} />}
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>{titleOf(item)}</div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{titleOf(item)}</div>
                     <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 2 }}>{describe(item)}</div>
                   </div>
                 </div>

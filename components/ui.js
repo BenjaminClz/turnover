@@ -113,5 +113,5 @@ export function PageTitle({ children }) {
 }
 
 export function PageSubtitle({ children }) {
-  return <p style={{ color: C.muted, marginBottom: 24, maxWidth: 560, fontSize: 15, lineHeight: 1.6 }}>{children}</p>;
+  return <p style={{ color: C.muted, marginBottom: 24, maxWidth: 560, fontSize: 14, lineHeight: 1.6 }}>{children}</p>;
 }

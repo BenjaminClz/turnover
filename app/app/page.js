@@ -205,11 +205,11 @@ function AppPageInner() {
         <div style={{ maxWidth: 420 }}>
           <div style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', margin: '0 auto 20px' }}><Icon name="ban" size={22} /></div>
           <h1 style={{ fontSize: 24, marginBottom: 12 }}>Ton compte a été suspendu</h1>
-          <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 20 }}>
+          <p style={{ fontSize: 14, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 20 }}>
             L'accès à ton compte a été temporairement suspendu suite à un ou plusieurs signalements.
             Si tu penses qu'il s'agit d'une erreur, contacte-nous.
           </p>
-          <a href="mailto:turn-over@outlook.fr" style={{ color: 'var(--lime)', fontWeight: 700, textDecoration: 'underline' }}>turn-over@outlook.fr</a>
+          <a href="mailto:turn-over@outlook.fr" style={{ color: 'var(--lime)', fontWeight: 600, textDecoration: 'underline' }}>turn-over@outlook.fr</a>
         </div>
       </div>
     );
@@ -298,7 +298,7 @@ function AppPageInner() {
         {profile.role === 'joueur' && myPlayerListing && myPlayerListing.published !== true && tab !== 'joueur' && (
           <div style={{ background: 'rgba(255,107,107,0.08)', border: '1.5px solid var(--danger)', borderRadius: 12, padding: '16px 20px', marginBottom: 28, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
             <span style={{ fontSize: 14 }}>Ton profil n'est pas encore publié — les clubs ne peuvent pas te trouver pour l'instant.</span>
-            <button onClick={() => setTab('joueur')} style={{ background: 'var(--danger)', color: 'var(--on-lime)', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 700, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}>
+            <button onClick={() => setTab('joueur')} style={{ background: 'var(--danger)', color: 'var(--on-lime)', border: 'none', padding: '10px 20px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer', flexShrink: 0 }}>
               Finaliser mon profil
             </button>
           </div>
@@ -336,12 +336,12 @@ function AppPageInner() {
             setTab('messages');
           }}
           aria-label={unreadCount ? `Messages, ${unreadCount} non lus` : 'Messages'}
-          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 60, display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--line)', borderRadius: 999, padding: '13px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer', boxShadow: 'var(--shadow-pop)' }}
+          style={{ position: 'fixed', bottom: 24, right: 24, zIndex: 60, display: 'flex', alignItems: 'center', gap: 12, background: 'var(--surface)', color: 'var(--text)', border: '1px solid var(--line)', borderRadius: 999, padding: '13px 22px', fontSize: 14, fontWeight: 600, cursor: 'pointer', boxShadow: 'var(--shadow-pop)' }}
         >
           <span style={{ position: 'relative', display: 'inline-flex' }}>
             {TAB_ICONS.message && TAB_ICONS.message('currentColor')}
             {unreadCount > 0 && (
-              <span style={{ position: 'absolute', top: -8, right: -10, minWidth: 18, height: 18, padding: '0 5px', borderRadius: 8, background: 'var(--danger)', color: 'var(--on-lime)', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)' }}>{unreadCount}</span>
+              <span style={{ position: 'absolute', top: -8, right: -10, minWidth: 18, height: 18, padding: '0 5px', borderRadius: 8, background: 'var(--danger)', color: 'var(--on-lime)', fontSize: 12, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)' }}>{unreadCount}</span>
             )}
           </span>
           <span className="tv-msg-label">Messages</span>

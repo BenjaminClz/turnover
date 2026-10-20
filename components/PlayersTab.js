@@ -286,18 +286,18 @@ export default function PlayersTab({ user, profile, showToast }) {
 
       <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{followersCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnés</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followersCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnés</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{followingCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnements</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followingCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnements</div>
         </div>
       </div>
 
       {!myListing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>Créer mon profil</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+          <h3 style={{ marginBottom: 20, fontSize: 16 }}>Créer mon profil</h3>
           <form onSubmit={handleCreateBasic}>
             {renderBasicFields()}
             <PrimaryButton type="submit" disabled={geocoding}>{geocoding ? 'Localisation de la ville…' : 'Créer mon profil'}</PrimaryButton>
@@ -310,8 +310,8 @@ export default function PlayersTab({ user, profile, showToast }) {
       ) : myListing && (
         <>
           {editing ? (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 24 }}>
-              <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier mes informations de base</h3>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 20, fontSize: 16 }}>Modifier mes informations de base</h3>
               <form onSubmit={handleUpdateBasic}>
                 {renderBasicFields()}
                 <div style={{ display: 'flex', gap: 12 }}>
@@ -321,8 +321,8 @@ export default function PlayersTab({ user, profile, showToast }) {
               </form>
             </div>
           ) : editingDetails ? (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 24 }}>
-              <h3 style={{ marginBottom: 6, fontSize: 18 }}>Informations personnelles</h3>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 24 }}>
+              <h3 style={{ marginBottom: 6, fontSize: 16 }}>Informations personnelles</h3>
               <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>Date de naissance, taille et poids comptent pour ta progression vers les 80%. Le reste est facultatif.</p>
               <form onSubmit={handleSaveDetails}>
                 <div className="tv-grid-2" style={{ gap: 18 }}>
@@ -350,7 +350,7 @@ export default function PlayersTab({ user, profile, showToast }) {
                 <Field label="Présentation (facultatif)"><TextArea value={detailsForm.bio} onChange={(e) => setDetailsForm({ ...detailsForm, bio: e.target.value })} placeholder="Ton parcours, ce que tu recherches…" /></Field>
 
                 <div style={{ marginTop: 8, marginBottom: 24 }}>
-                  <h4 style={{ fontSize: 15, marginBottom: 4 }}>Points forts</h4>
+                  <h4 style={{ fontSize: 14, marginBottom: 4 }}>Points forts</h4>
                   <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 16 }}>Positionne les curseurs pour donner une idée de ton profil de jeu.</p>
                   <div className="tv-grid-2 tv-stats-grid" style={{ gap: 32 }}>
                     <StatsSlider
@@ -382,9 +382,9 @@ export default function PlayersTab({ user, profile, showToast }) {
             <>
             <div className="tv-two-col">
             <div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
+            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
-                <h3 style={{ fontSize: 18 }}>Mes informations</h3>
+                <h3 style={{ fontSize: 16 }}>Mes informations</h3>
                 <div style={{ display: 'flex', gap: 10 }}>
                   <GhostButton onClick={() => setEditing(true)} style={{ fontSize: 13 }}>Modifier l'essentiel</GhostButton>
                   <GhostButton onClick={() => setEditingDetails(true)} style={{ fontSize: 13 }}>Modifier les détails</GhostButton>
@@ -396,7 +396,7 @@ export default function PlayersTab({ user, profile, showToast }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ width: 9, height: 9, borderRadius: '50%', background: (isPublished || isComplete) ? 'var(--lime)' : 'var(--danger)', flexShrink: 0 }} />
                   <div>
-                    <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700 }}>
+                    <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 600 }}>
                       {isPublished ? 'Annonce publiée' : isComplete ? 'Prête à être publiée' : 'Annonce non publiée'}
                     </div>
                     <div style={{ color: 'var(--muted)', fontSize: 12 }}>
@@ -424,8 +424,8 @@ export default function PlayersTab({ user, profile, showToast }) {
 
               {myListing.bio && (
                 <div style={{ marginTop: 20, marginBottom: 8 }}>
-                  <div style={{ fontSize: 13, color: 'var(--lime)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.03em', marginBottom: 8 }}>Présentation</div>
-                  <div style={{ fontSize: 15, color: 'var(--text-2)', lineHeight: 1.6 }}>{myListing.bio}</div>
+                  <div style={{ fontSize: 13, color: 'var(--lime)', fontWeight: 600, marginBottom: 8 }}>Présentation</div>
+                  <div style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.6 }}>{myListing.bio}</div>
                 </div>
               )}
 
@@ -456,7 +456,7 @@ export default function PlayersTab({ user, profile, showToast }) {
       {deletePending && (
         <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 12, padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 16, zIndex: 500, boxShadow: 'var(--shadow-pop)' }}>
           <span style={{ fontSize: 14 }}>Profil supprimé.</span>
-          <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: 'var(--lime)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
+          <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: 'var(--lime)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
         </div>
       )}
 
@@ -466,17 +466,17 @@ export default function PlayersTab({ user, profile, showToast }) {
           onClick={() => setAnnonceOpen(false)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}
         >
-          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 24 }}>
+          <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 12, padding: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-              <h3 style={{ fontSize: 18 }}>Mon annonce</h3>
+              <h3 style={{ fontSize: 16 }}>Mon annonce</h3>
               <button onClick={() => setAnnonceOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', display: 'flex' }} aria-label="Fermer"><Icon name="close" size={20} /></button>
             </div>
             {isPublished ? (
-              <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontWeight: 600, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <Badge tone="lime">Publié</Badge> Visible par tous les clubs
               </div>
             ) : (
-              <div style={{ fontWeight: 700, marginBottom: 4 }}>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>
                 {isComplete ? 'Profil prêt à être publié' : 'Complète ton profil pour le publier'}
               </div>
             )}

@@ -74,12 +74,12 @@ export default function ExperienceTimeline({ userId }) {
       style={{
         background: T.card,
         border: `1px solid ${T.border}`,
-        borderRadius: 16,
+        borderRadius: 12,
         padding: 20,
         color: T.text,
       }}
     >
-      <h3 style={{ margin: '0 0 16px', fontSize: 18, fontWeight: 700 }}>Parcours</h3>
+      <h3 style={{ margin: '0 0 16px', fontSize: 16, fontWeight: 600 }}>Parcours</h3>
 
       <ol style={{ listStyle: 'none', margin: 0, padding: 0 }}>
         {items.map((e, i) => {
@@ -103,7 +103,7 @@ export default function ExperienceTimeline({ userId }) {
               </div>
 
               <div style={{ paddingBottom: isLast ? 0 : 20, minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>{e.club_name}</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{e.club_name}</div>
                 <div style={{ color: T.muted, fontSize: 13, marginTop: 2 }}>{formatPeriode(e)}</div>
                 {(e.level || e.position) && (
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 8 }}>

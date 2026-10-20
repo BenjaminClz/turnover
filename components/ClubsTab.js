@@ -290,16 +290,16 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{myListings.length}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Annonces</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{myListings.length}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Annonces</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{followersCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnés</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followersCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnés</div>
         </div>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{followingCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)', textTransform: 'uppercase', letterSpacing: '0.02em' }}>Abonnements</div>
+          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followingCount}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnements</div>
         </div>
       </div>
 
@@ -307,9 +307,9 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       <div>
 
       {/* Mes informations club — même principe que la carte du profil joueur */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 24 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
-          <h3 style={{ fontSize: 18 }}>Mes informations</h3>
+          <h3 style={{ fontSize: 16 }}>Mes informations</h3>
           {onEditAccount && <GhostButton onClick={onEditAccount} style={{ fontSize: 13 }}>Modifier</GhostButton>}
         </div>
 
@@ -333,23 +333,23 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       {/* Mes annonces actives, chacune avec son propre Modifier/Supprimer */}
       {myListings.length > 0 && !creatingType && (
         <div style={{ marginBottom: 32 }}>
-          <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Mes annonces ({myListings.length})</h2>
+          <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 14, fontWeight: 600 }}>Mes annonces ({myListings.length})</h2>
           <div style={{ display: 'grid', gap: 12 }}>
             {myListings.map((listing) => (
               deletePendingId === listing.id ? (
-                <div key={listing.id} style={{ background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
+                <div key={listing.id} style={{ background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 12, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 14 }}>
                   <span style={{ fontSize: 14, color: 'var(--muted)' }}>Annonce supprimée.</span>
-                  <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: 'var(--lime)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
+                  <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: 'var(--lime)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
                 </div>
               ) : editingId === listing.id ? (
-                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
-                  <h3 style={{ marginBottom: 20, fontSize: 18 }}>Modifier — {ROLE_LABELS[listing.besoin_type] || 'Joueur'}</h3>
+                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28 }}>
+                  <h3 style={{ marginBottom: 20, fontSize: 16 }}>Modifier — {ROLE_LABELS[listing.besoin_type] || 'Joueur'}</h3>
                   {renderForm(listing.besoin_type)}
                 </div>
               ) : (
-                <div key={listing.id} style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
+                <div key={listing.id} style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid var(--lime)', borderRadius: 12, padding: 22, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 14 }}>
                   <div>
-                    <div style={{ fontWeight: 700, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
                     <div style={{ fontSize: 14, color: 'var(--muted)' }}>{describeNeed(listing)} · {listing.ville}</div>
                     {listing.remuneration && <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="banknote" size={14} />{listing.remuneration}</div>}
                   </div>
@@ -366,8 +366,8 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       {/* Bouton pour ajouter une nouvelle annonce, ou sélecteur de type si pas encore d'annonce */}
       {!creatingType && !editingId && !(myListings.length >= 1 && !isActive && !subLoading) && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+          <h3 style={{ marginBottom: 20, fontSize: 16 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
             {BESOIN_TYPES.map((t) => (
               <button key={t.value} onClick={() => startCreating(t.value)} style={{ background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 12, padding: '20px 16px', cursor: 'pointer', textAlign: 'left', color: 'var(--text)', transition: 'border-color .15s ease' }}
@@ -375,7 +375,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--line)'}
               >
                 <div style={{ color: 'var(--muted)', marginBottom: 12 }}><Icon name={t.icon} size={24} /></div>
-                <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
+                <div style={{ fontWeight: 600, fontSize: 14 }}>{t.label}</div>
               </button>
             ))}
           </div>
@@ -384,8 +384,8 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       {/* Formulaire de création d'une nouvelle annonce */}
       {creatingType && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28, marginBottom: 36 }}>
-          <h3 style={{ marginBottom: 20, fontSize: 18 }}>Tu cherches {BESOIN_TYPES.find((t) => t.value === creatingType)?.label.toLowerCase()}</h3>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+          <h3 style={{ marginBottom: 20, fontSize: 16 }}>Tu cherches {BESOIN_TYPES.find((t) => t.value === creatingType)?.label.toLowerCase()}</h3>
           {renderForm(creatingType)}
         </div>
       )}
@@ -415,11 +415,11 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
         <EmptyState icon="clipboard" title="Aucune autre annonce pour le moment" sub="Les annonces des autres clubs apparaîtront ici." />
       ) : (
         <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
-          <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Annonces des autres clubs</h2>
+          <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 6, fontWeight: 600 }}>Annonces des autres clubs</h2>
           {othersNeeds.map((n) => (
             <div key={n.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap' }}>
               <div>
-                <div style={{ fontWeight: 700, fontSize: 16 }}>{n.club} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
+                <div style={{ fontWeight: 600, fontSize: 16 }}>{n.club} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
                 <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{describeNeed(n)} · {n.ville}</div>
                 {n.remuneration && <div style={{ fontSize: 14, color: 'var(--lime)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="banknote" size={14} />{n.remuneration}</div>}
                 {n.details && <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}

@@ -33,7 +33,7 @@ export default async function PublicPlayerPage({ params }) {
   if (!player) {
     return (
       <div style={{ minHeight: '80vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 16, padding: 24, textAlign: 'center' }}>
-        <p style={{ fontSize: 18, fontWeight: 600 }}>Ce profil n'est plus disponible.</p>
+        <p style={{ fontSize: 16, fontWeight: 600 }}>Ce profil n'est plus disponible.</p>
         <a href="/" className="tv-b tv-b-primary">Découvrir Turnover</a>
       </div>
     );
@@ -65,18 +65,18 @@ export default async function PublicPlayerPage({ params }) {
           {avatar ? (
             <img className="pj-avatar" src={avatar} alt={player.nom} />
           ) : (
-            <div className="pj-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--on-lime)', fontSize: 40, fontWeight: 800 }}>
+            <div className="pj-avatar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-2)', fontSize: 40, fontWeight: 600 }}>
               {initials(player.nom)}
             </div>
           )}
           <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', marginBottom: 6 }}>Profil joueur</div>
-            <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', fontWeight: 700 }}>{player.nom}</h1>
-            <p style={{ fontSize: 17, color: 'var(--text-2)', marginTop: 6 }}>
+            <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', marginBottom: 6 }}>Profil joueur</div>
+            <h1 style={{ fontSize: 'clamp(1.8rem, 5vw, 2.4rem)', fontWeight: 600 }}>{player.nom}</h1>
+            <p style={{ fontSize: 16, color: 'var(--text-2)', marginTop: 6 }}>
               {[player.poste, player.sport, player.niveau].filter(Boolean).join(' · ')}
             </p>
             <div className="pj-pills pj-pills-head">
-              {player.dispo && <span className="pj-pill pj-pill-lime"><span style={{ width: 7, height: 7, borderRadius: 9, background: 'var(--lime)' }} />{player.dispo}</span>}
+              {player.dispo && <span className="pj-pill pj-pill-lime"><span style={{ width: 7, height: 7, borderRadius: 8, background: 'var(--lime)' }} />{player.dispo}</span>}
               {player.ville && <span className="pj-pill"><Icon size={13} />{player.ville}</span>}
             </div>
           </div>
@@ -102,8 +102,8 @@ export default async function PublicPlayerPage({ params }) {
             <div className="tv-panel pj-grid-stats">
               {overall != null && (
                 <div style={{ textAlign: 'center', paddingRight: 8 }}>
-                  <div style={{ fontSize: 64, fontWeight: 800, color: 'var(--lime)', lineHeight: 1, letterSpacing: '-0.03em' }}>{overall}</div>
-                  <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.08em', textTransform: 'uppercase', color: 'var(--muted)', marginTop: 8 }}>Note globale</div>
+                  <div style={{ fontSize: 64, fontWeight: 600, color: 'var(--lime)', lineHeight: 1, letterSpacing: '-0.03em' }}>{overall}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--muted)', marginTop: 8 }}>Note globale</div>
                 </div>
               )}
               <div className="pj-bars">
@@ -111,10 +111,10 @@ export default async function PublicPlayerPage({ params }) {
                   <div key={label}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
                       <span style={{ color: 'var(--muted)' }}>{label}</span>
-                      <span style={{ fontWeight: 700 }}>{v}</span>
+                      <span style={{ fontWeight: 600 }}>{v}</span>
                     </div>
-                    <div style={{ height: 5, borderRadius: 9, background: 'var(--line-soft)' }}>
-                      <div style={{ width: `${v}%`, height: 5, borderRadius: 9, background: 'var(--lime)' }} />
+                    <div style={{ height: 5, borderRadius: 8, background: 'var(--line-soft)' }}>
+                      <div style={{ width: `${v}%`, height: 5, borderRadius: 8, background: 'var(--lime)' }} />
                     </div>
                   </div>
                 ))}

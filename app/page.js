@@ -101,7 +101,7 @@ export default function AuthPage() {
           <img src="/logo.png" alt="Turnover" style={{ width: 30, height: 30, objectFit: 'contain', borderRadius: 6 }} />
           <span className="turnover-anton" style={{ fontSize: 24 }}>TURNOVER</span>
         </div>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28 }}>
           {content}
         </div>
       </div>

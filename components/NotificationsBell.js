@@ -78,14 +78,14 @@ export default function NotificationsBell({ user, onNavigate }) {
         onClick={() => setOpen((v) => !v)}
         aria-label="Notifications"
         className="tv-btn"
-        style={{ position: 'relative', background: 'transparent', border: '1px solid var(--line)', color: 'var(--text)', width: 40, height: 40, borderRadius: 8, cursor: 'pointer', fontSize: 18, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+        style={{ position: 'relative', background: 'transparent', border: '1px solid var(--line)', color: 'var(--text)', width: 40, height: 40, borderRadius: 8, cursor: 'pointer', fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9" />
           <path d="M13.73 21a2 2 0 0 1-3.46 0" />
         </svg>
         {unreadCount > 0 && (
-          <span style={{ position: 'absolute', top: -4, right: -4, background: 'var(--lime)', color: 'var(--on-lime)', fontSize: 11, fontWeight: 800, minWidth: 17, height: 17, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
+          <span style={{ position: 'absolute', top: -4, right: -4, background: 'var(--lime)', color: 'var(--on-lime)', fontSize: 12, fontWeight: 600, minWidth: 17, height: 17, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '0 4px' }}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -94,7 +94,7 @@ export default function NotificationsBell({ user, onNavigate }) {
       {open && (
         <div style={{ position: 'absolute', top: 48, left: 0, width: 'min(320px, calc(100vw - 32px))', maxHeight: 420, overflowY: 'auto', background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, boxShadow: 'var(--shadow-pop)', zIndex: 300 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '12px 16px', borderBottom: '1px solid var(--line)' }}>
-            <span style={{ fontWeight: 700, fontSize: 14 }}>Notifications</span>
+            <span style={{ fontWeight: 600, fontSize: 14 }}>Notifications</span>
             {unreadCount > 0 && (
               <button onClick={markAllRead} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 12, cursor: 'pointer', textDecoration: 'underline' }}>
                 Tout marquer lu
@@ -115,7 +115,7 @@ export default function NotificationsBell({ user, onNavigate }) {
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 14, fontWeight: 600, color: 'var(--text)' }}>{n.title}</div>
                     {n.body && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{n.body}</div>}
-                    <div style={{ fontSize: 11, color: 'var(--faint)', marginTop: 4 }}>{timeAgo(n.created_at)}</div>
+                    <div style={{ fontSize: 12, color: 'var(--faint)', marginTop: 4 }}>{timeAgo(n.created_at)}</div>
                   </div>
                 </div>
               </div>

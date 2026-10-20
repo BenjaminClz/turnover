@@ -85,7 +85,13 @@ input, select, textarea, button {
   color: inherit;
 }
 
-h1, h2, h3 { line-height: 1.15; letter-spacing: -0.015em; }
+h1, h2, h3 { line-height: 1.2; letter-spacing: -0.015em; font-weight: 600; }
+
+/* ÉCHELLE TYPOGRAPHIQUE — 7 tailles, pas une de plus
+   12 métadonnées · 13 libellés · 14 corps · 16 titres de section
+   20 titres de bloc · 24 nom de profil · 28 titres de page
+   (40+ réservé aux grands chiffres : note globale, 404)
+   GRAISSES — 400 texte · 500 libellés, boutons secondaires · 600 titres, valeurs */
 
 ::selection { background: var(--lime); color: var(--on-lime); }
 
@@ -95,7 +101,7 @@ input::placeholder, textarea::placeholder { color: var(--faint); }
 * { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 ::-webkit-scrollbar { width: 10px; height: 10px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--line); border-radius: 10px; border: 3px solid var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; border: 3px solid var(--bg); }
 ::-webkit-scrollbar-thumb:hover { background: var(--line-strong); }
 
 /* Respect des préférences d'accessibilité */
@@ -320,8 +326,7 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible), [role="tab"]:focu
   border-radius: var(--radius-lg); padding: 20px;
 }
 
-/* En-tête de section : petit titre en capitales, façon terminal */
+/* En-tête de section : casse normale, hiérarchie par la taille et la graisse */
 .tv-section-label {
-  font-size: 12px; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
-  color: var(--muted); margin-bottom: 12px;
+  font-size: 13px; font-weight: 600; color: var(--text-2); margin-bottom: 12px;
 }

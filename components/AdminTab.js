@@ -78,7 +78,7 @@ export default function AdminTab({ showToast }) {
       <PageSubtitle>Signalements reçus et comptes suspendus.</PageSubtitle>
 
       <div style={{ marginBottom: 36 }}>
-        <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+        <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 14, fontWeight: 600 }}>
           Clubs — vérification ({clubs.length})
         </h2>
         <div style={{ display: 'grid', gap: 8 }}>
@@ -90,7 +90,7 @@ export default function AdminTab({ showToast }) {
               </span>
               <button
                 onClick={() => toggleVerified(c.id, c.verified)}
-                style={{ background: c.verified ? 'transparent' : 'var(--lime)', border: c.verified ? '1px solid var(--line)' : 'none', color: c.verified ? 'var(--muted)' : 'var(--bg)', padding: '7px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                style={{ background: c.verified ? 'transparent' : 'var(--lime)', border: c.verified ? '1px solid var(--line)' : 'none', color: c.verified ? 'var(--muted)' : 'var(--bg)', padding: '7px 14px', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
               >
                 {c.verified ? 'Retirer la vérification' : 'Vérifier ce club'}
               </button>
@@ -101,14 +101,14 @@ export default function AdminTab({ showToast }) {
 
       {suspendedProfiles.length > 0 && (
         <div style={{ marginBottom: 36 }}>
-          <h2 style={{ fontSize: 15, color: 'var(--danger)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+          <h2 style={{ fontSize: 14, color: 'var(--danger)', marginBottom: 14, fontWeight: 600 }}>
             Comptes suspendus ({suspendedProfiles.length})
           </h2>
           <div style={{ display: 'grid', gap: 10 }}>
             {suspendedProfiles.map((p) => (
               <div key={p.id} style={{ background: 'rgba(255,107,107,0.06)', border: '1.5px solid var(--danger)', borderRadius: 12, padding: 16, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                  <div style={{ fontWeight: 700 }}>{p.nom}</div>
+                  <div style={{ fontWeight: 600 }}>{p.nom}</div>
                   <div style={{ fontSize: 13, color: 'var(--muted)' }}>{p.role}</div>
                 </div>
                 <button className="tv-b tv-b-primary" onClick={() => handleReactivate(p.id)}>Réactiver le compte</button>
@@ -124,7 +124,7 @@ export default function AdminTab({ showToast }) {
         <EmptyState icon="shield" title="Aucun signalement" sub="Tout est calme pour l'instant." />
       ) : (
         <div>
-          <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>
+          <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 14, fontWeight: 600 }}>
             Signalements groupés par cible ({groupedList.length})
           </h2>
           <div style={{ display: 'grid', gap: 12 }}>
@@ -132,7 +132,7 @@ export default function AdminTab({ showToast }) {
               <div key={`${g.target_type}:${g.target_id}`} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 18 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>{TARGET_LABELS[g.target_type]} — {g.target_owner?.nom}</div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{TARGET_LABELS[g.target_type]} — {g.target_owner?.nom}</div>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>
                       {g.reports.length} signalement{g.reports.length > 1 ? 's' : ''}
                       {g.target_owner?.suspended && <span style={{ marginLeft: 8 }}><Badge tone="urgent">Compte suspendu</Badge></span>}
@@ -140,7 +140,7 @@ export default function AdminTab({ showToast }) {
                   </div>
                   <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                     {!g.target_owner?.suspended && (
-                      <button onClick={() => setConfirmSuspendId(g.target_owner_id)} style={{ background: 'var(--danger)', color: 'var(--on-lime)', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+                      <button onClick={() => setConfirmSuspendId(g.target_owner_id)} style={{ background: 'var(--danger)', color: 'var(--on-lime)', border: 'none', padding: '8px 14px', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
                         Suspendre ce compte
                       </button>
                     )}

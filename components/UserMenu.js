@@ -33,7 +33,7 @@ export default function UserMenu({ nom, roleLabel, showSubscription, onSubscript
         <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 12, flexShrink: 0 }}>
           {initials(nom)}
         </div>
-        <span style={{ fontSize: 15, color: 'var(--text)', fontWeight: 700 }}>{nom}</span>
+        <span style={{ fontSize: 14, color: 'var(--text)', fontWeight: 600 }}>{nom}</span>
         <Badge tone="lime">{roleLabel}</Badge>
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#A4B0A6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform .15s ease' }}>
           <polyline points="6 9 12 15 18 9" />

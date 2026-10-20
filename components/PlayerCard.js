@@ -31,10 +31,10 @@ export default function PlayerCard({ player, nom, avatarSrc }) {
   return (
     <div style={{
       width: 260, background: 'linear-gradient(160deg,var(--surface),var(--bg))', border: '1px solid var(--line)',
-      borderRadius: 16, padding: 20, position: 'relative', boxShadow: 'var(--shadow-pop)',
+      borderRadius: 12, padding: 20, position: 'relative', boxShadow: 'var(--shadow-pop)',
     }}>
       <div style={{ position: 'absolute', top: 20, left: 20, textAlign: 'center' }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--lime)', letterSpacing: '0.05em' }}>{POSTE_ABBR(player?.poste)}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--lime)', letterSpacing: '0.05em' }}>{POSTE_ABBR(player?.poste)}</div>
         {flag && <div style={{ fontSize: 20, marginTop: 6 }}>{flag}</div>}
       </div>
 
@@ -62,7 +62,7 @@ export default function PlayerCard({ player, nom, avatarSrc }) {
             {STAT_LABELS.map(({ key, label }) => player?.[key] != null && (
               <div key={key} style={{ display: 'flex', justifyContent: 'space-between' }}>
                 <span style={{ color: 'var(--muted)' }}>{label}</span>
-                <span style={{ color: 'var(--lime)', fontWeight: 700 }}>{player[key]}</span>
+                <span style={{ color: 'var(--lime)', fontWeight: 600 }}>{player[key]}</span>
               </div>
             ))}
           </div>
@@ -70,7 +70,7 @@ export default function PlayerCard({ player, nom, avatarSrc }) {
       )}
 
       {player?.pied_fort && (
-        <div style={{ marginTop: 14, textAlign: 'center', fontSize: 11, color: 'var(--faint)', textTransform: 'capitalize' }}>
+        <div style={{ marginTop: 14, textAlign: 'center', fontSize: 12, color: 'var(--faint)', textTransform: 'capitalize' }}>
           Pied fort : {player.pied_fort}
         </div>
       )}

@@ -99,18 +99,18 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
 
       {myListings.length > 0 && !creating && (
         <div style={{ marginBottom: 28 }}>
-          <h3 style={{ fontSize: 14, color: 'var(--lime)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 700 }}>Mes recherches ({myListings.length})</h3>
+          <h3 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 12, fontWeight: 600 }}>Mes recherches ({myListings.length})</h3>
           <div style={{ display: 'grid', gap: 10 }}>
             {myListings.map((listing) => (
               editingId === listing.id ? (
-                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24 }}>
+                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24 }}>
                   <h3 style={{ marginBottom: 18, fontSize: 16 }}>Modifier ma recherche</h3>
                   {renderForm()}
                 </div>
               ) : (
                 <div key={listing.id} style={{ background: 'rgba(212,255,63,0.06)', border: '1.5px solid var(--lime)', borderRadius: 12, padding: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                   <div>
-                    <div style={{ fontWeight: 700, fontSize: 15 }}>{listing.poste} · {listing.niveau}</div>
+                    <div style={{ fontWeight: 600, fontSize: 14 }}>{listing.poste} · {listing.niveau}</div>
                     <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{listing.ville}</div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
@@ -133,7 +133,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
       )}
 
       {creating && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 28 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 28 }}>
           <h3 style={{ marginBottom: 18, fontSize: 16 }}>Nouvelle recherche de club</h3>
           {renderForm()}
         </div>
@@ -145,12 +145,12 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
         <EmptyState icon="search" title="Aucune autre recherche pour le moment" sub="Les recherches publiées par d'autres joueurs apparaîtront ici." />
       ) : (
         <div>
-          <h3 style={{ fontSize: 14, color: 'var(--lime)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 700 }}>Autres joueurs en recherche</h3>
+          <h3 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 12, fontWeight: 600 }}>Autres joueurs en recherche</h3>
           <div style={{ display: 'grid', gap: 10 }}>
             {othersSearches.map((s) => (
               <div key={s.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 18, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 12 }}>
                 <div>
-                  <div style={{ fontWeight: 700, fontSize: 15 }}>{s.profiles?.nom} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>cherche</span> {s.poste}</div>
+                  <div style={{ fontWeight: 600, fontSize: 14 }}>{s.profiles?.nom} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>cherche</span> {s.poste}</div>
                   <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 2 }}>{s.niveau} · {s.ville}</div>
                   {s.details && <div style={{ fontSize: 13, color: 'var(--text-2)', marginTop: 6, maxWidth: 420 }}>{s.details}</div>}
                   <div style={{ marginTop: 8 }}><Badge tone={s.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{s.urgence}</Badge></div>

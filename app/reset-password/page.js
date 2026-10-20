@@ -31,7 +31,7 @@ export default function ResetPasswordPage() {
           <div style={{ width: 9, height: 9, background: 'var(--lime)', borderRadius: '50%' }} />
           <span className="turnover-anton" style={{ fontSize: 24 }}>TURNOVER</span>
         </div>
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 28 }}>
+        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28 }}>
           {done ? (
             <p style={{ color: 'var(--lime)', fontSize: 14 }}>Mot de passe mis à jour. Redirection…</p>
           ) : (

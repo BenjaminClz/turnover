@@ -2,8 +2,8 @@ export const metadata = { title: 'Mentions légales — Turnover' };
 
 const Section = ({ title, children }) => (
   <section style={{ marginBottom: 32 }}>
-    <h2 style={{ fontSize: 18, marginBottom: 10, color: 'var(--lime)' }}>{title}</h2>
-    <div style={{ fontSize: 15, color: 'var(--text-2)', lineHeight: 1.7 }}>{children}</div>
+    <h2 style={{ fontSize: 16, marginBottom: 10, color: 'var(--lime)' }}>{title}</h2>
+    <div style={{ fontSize: 14, color: 'var(--text-2)', lineHeight: 1.7 }}>{children}</div>
   </section>
 );
 
@@ -11,8 +11,8 @@ export default function MentionsLegales() {
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'sans-serif', padding: '48px 5vw' }}>
       <div style={{ maxWidth: 720, margin: '0 auto' }}>
-        <a href="/" style={{ color: 'var(--lime)', fontSize: 14, fontWeight: 700, textDecoration: 'none' }}>← Turnover</a>
-        <h1 style={{ fontSize: 32, margin: '24px 0 32px' }}>Mentions légales</h1>
+        <a href="/" style={{ color: 'var(--lime)', fontSize: 14, fontWeight: 600, textDecoration: 'none' }}>← Turnover</a>
+        <h1 style={{ fontSize: 28, margin: '24px 0 32px' }}>Mentions légales</h1>
 
         <Section title="Éditeur du site">
           <p>

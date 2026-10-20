@@ -51,7 +51,7 @@ export function VilleAutocomplete({ onSelect }) {
             <li
               key={place_id}
               onClick={() => handleSelect(description)}
-              style={{ padding: '11px 16px', cursor: 'pointer', fontSize: 15, color: 'var(--text)' }}
+              style={{ padding: '11px 16px', cursor: 'pointer', fontSize: 14, color: 'var(--text)' }}
               onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(212,255,63,0.08)'}
               onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
             >

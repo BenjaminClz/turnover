@@ -173,7 +173,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       <PageTitle>Rechercher</PageTitle>
       <PageSubtitle>{isClub ? 'Trouve les profils les plus proches de toi, partout en France.' : 'Trouve les clubs et profils les plus proches de toi, partout en France.'}</PageSubtitle>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, padding: 24, marginBottom: 32 }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'end', marginBottom: 18 }}>
           <Field label="Chercher autour de">
             <TextInput autoFocus value={villeInput} onChange={(e) => setVilleInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocate(); } }} placeholder="Ta ville (ex. Annemasse, Lyon, Paris…)" />
@@ -200,10 +200,10 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
         {originCoords && (
           <div>
-            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 600 }}>Rayon de recherche</div>
+            <div style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 10, fontWeight: 600 }}>Rayon de recherche</div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
               {RAYONS.map((r) => (
-                <button key={r} onClick={() => setRayon(r)} style={{ padding: '7px 16px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (rayon === r ? 'var(--lime)' : 'var(--line)'), background: rayon === r ? 'rgba(212,255,63,0.12)' : 'transparent', color: rayon === r ? 'var(--lime)' : 'var(--muted)' }}>
+                <button key={r} onClick={() => setRayon(r)} style={{ padding: '7px 16px', borderRadius: 12, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (rayon === r ? 'var(--lime)' : 'var(--line)'), background: rayon === r ? 'rgba(212,255,63,0.12)' : 'transparent', color: rayon === r ? 'var(--lime)' : 'var(--muted)' }}>
                   {r === 'Toute la France' ? r : `${r} km`}
                 </button>
               ))}
@@ -240,7 +240,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
             <div style={{ display: 'grid', gap: 32 }}>
               {showNeeds && filteredNeeds.length > 0 && (
                 <div>
-                  <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Besoins clubs ({filteredNeeds.length})</h2>
+                  <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 16, fontWeight: 600 }}>Besoins clubs ({filteredNeeds.length})</h2>
                   <div style={CARD_GRID}>
                     {filteredNeeds.map((n) => (
                       <ResultCard key={n.id} title={n.club} verified={n.profiles?.verified} details={`${needDetails(n)} · ${n.ville}`} distance={n._distance} showContact={n.owner_id !== user.id} onContact={() => onContact(n.owner_id, n.club, needDetails(n), n.id)} onClickProfile={() => onOpenProfile(n.owner_id)} avatarPath={n.profiles?.avatar_path} supabase={supabase} featured={n._featured} reportProps={{ targetType: 'club_need', targetId: n.id, targetOwnerId: n.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'club_need', targetId: n.id, ownerId: user.id }} />
@@ -251,7 +251,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
 
               {showPlayers && filteredPlayers.length > 0 && (
                 <div>
-                  <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Joueurs ({filteredPlayers.length})</h2>
+                  <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 16, fontWeight: 600 }}>Joueurs ({filteredPlayers.length})</h2>
                   <div style={CARD_GRID}>
                     {filteredPlayers.map((p) => (
                       <ResultCard key={p.id} title={p.profiles?.nom} details={`${p.poste} · ${p.niveau} · ${p.ville}`} distance={p._distance} showContact={p.owner_id !== user.id} onContact={() => onContact(p.owner_id, p.profiles?.nom, `${p.poste} · ${p.ville}`)} onClickProfile={() => onOpenProfile(p.owner_id)} avatarPath={p.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'player_listing', targetId: p.id, targetOwnerId: p.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'player_listing', targetId: p.id, ownerId: user.id }} />
@@ -265,7 +265,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
                 if (list.length === 0) return null;
                 return (
                   <div key={role}>
-                    <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>{ROLE_LABELS[role]} ({list.length})</h2>
+                    <h2 style={{ fontSize: 16, color: 'var(--text)', marginBottom: 16, fontWeight: 600 }}>{ROLE_LABELS[role]} ({list.length})</h2>
                     <div style={CARD_GRID}>
                       {list.map((s) => (
                         <ResultCard key={s.id} title={s.profiles?.nom} details={`${staffDetails(s)} · ${s.ville}`} distance={s._distance} showContact={s.owner_id !== user.id} onContact={() => onContact(s.owner_id, s.profiles?.nom, staffDetails(s))} onClickProfile={() => onOpenProfile(s.owner_id)} avatarPath={s.profiles?.avatar_path} supabase={supabase} reportProps={{ targetType: 'staff_listing', targetId: s.id, targetOwnerId: s.owner_id, reporterId: user.id, showToast }} favoriteProps={{ targetType: 'staff_listing', targetId: s.id, ownerId: user.id }} />
@@ -296,7 +296,7 @@ function ResultCard({ title, verified, details, distance, showContact, onContact
         {favoriteProps && <FavoriteButton {...favoriteProps} />}
         {reportProps && <ReportButton {...reportProps} />}
       </div>
-      {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 11, fontWeight: 800, color: 'var(--on-lime)', background: 'var(--lime)', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
+      {featured && <span style={{ position: 'absolute', top: 10, left: 10, fontSize: 12, fontWeight: 600, color: 'var(--on-lime)', background: 'var(--lime)', padding: '2px 7px', borderRadius: 8, letterSpacing: '0.02em' }}>MIS EN AVANT</span>}
 
       <button onClick={onClickProfile} style={{ background: 'transparent', border: 'none', cursor: 'pointer', padding: 0 }}>
         <div style={{ position: 'relative', marginTop: featured ? 14 : 0, marginBottom: 10 }}>
@@ -311,12 +311,12 @@ function ResultCard({ title, verified, details, distance, showContact, onContact
             <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: 'var(--lime)', color: 'var(--on-lime)', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)' }}><Icon name="check" size={11} strokeWidth={3} /></span>
           )}
         </div>
-        <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4, color: 'var(--text)' }}>{title}</div>
+        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 4, color: 'var(--text)' }}>{title}</div>
       </button>
       <div style={{ fontSize: 13, color: 'var(--muted)', lineHeight: 1.4, marginBottom: distance != null ? 2 : 14 }}>{details}</div>
       {distance != null && <div style={{ fontSize: 12, color: 'var(--lime)', marginBottom: 14 }}>{distance.toFixed(0)} km</div>}
       {showContact && (
-        <button className="tv-btn" onClick={onContact} style={{ width: '100%', marginTop: 8, background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 0', borderRadius: 8, fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>
+        <button className="tv-btn" onClick={onContact} style={{ width: '100%', marginTop: 8, background: 'var(--lime)', color: 'var(--on-lime)', border: 'none', padding: '9px 0', borderRadius: 8, fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>
           Contacter
         </button>
       )}

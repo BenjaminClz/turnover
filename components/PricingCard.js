@@ -49,7 +49,7 @@ export default function PricingCard({ userId, isActive, showToast }) {
   }
 
   return (
-    <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 32 }}>
+    <div className="tv-panel" style={{ marginBottom: 32 }}>
       <h3 style={{ fontSize: 16, marginBottom: 6 }}>Passer à Turnover Pro</h3>
       <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 24 }}>Annonces illimitées, mise en avant dans la recherche, coordonnées directes et statistiques de consultation.</p>
 

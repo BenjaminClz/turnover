@@ -173,7 +173,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
       <PageTitle>Rechercher</PageTitle>
       <PageSubtitle>{isClub ? 'Trouve les profils les plus proches de toi, partout en France.' : 'Trouve les clubs et profils les plus proches de toi, partout en France.'}</PageSubtitle>
 
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 32 }}>
+      <div className="tv-panel" style={{ marginBottom: 32 }}>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr auto', gap: 12, alignItems: 'end', marginBottom: 18 }}>
           <Field label="Chercher autour de">
             <TextInput autoFocus value={villeInput} onChange={(e) => setVilleInput(e.target.value)} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleLocate(); } }} placeholder="Ta ville (ex. Annemasse, Lyon, Paris…)" />

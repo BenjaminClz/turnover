@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import ExperienceEditor from './ExperienceEditor';
 import { SPORTS, NIVEAUX, POSTES, URGENCES } from '@/lib/constants';
-import { Field, TextInput, TextArea, Select, Badge, PrimaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
+import { Field, TextInput, TextArea, Select, Badge, PrimaryButton, GhostButton, PageTitle, PageSubtitle, Stat, StatStrip } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import { sharePublicLink, ShareIcon } from '@/lib/share';
@@ -279,24 +279,18 @@ export default function PlayersTab({ user, profile, showToast }) {
             <button type="button" className="tv-b tv-b-secondary" onClick={() => sharePublicLink(`/j/${myListing.id}`, `${profile?.nom || 'Mon profil'} sur Turnover`, showToast)}>
               <ShareIcon />Partager mon profil
             </button>
-            <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost">Voir ma page publique ↗</a>
+            <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost">Voir ma page publique<Icon name="external" size={14} /></a>
           </>
         )}
       </div>
 
-      <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followersCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnés</div>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followingCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnements</div>
-        </div>
-      </div>
+      <StatStrip style={{ marginBottom: 28, borderTop: '1px solid var(--line-soft)', borderBottom: '1px solid var(--line-soft)' }}>
+        <Stat label="Abonnés" value={followersCount} />
+        <Stat label="Abonnements" value={followingCount} />
+      </StatStrip>
 
       {!myListing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+        <div className="tv-panel" style={{ marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 16 }}>Créer mon profil</h3>
           <form onSubmit={handleCreateBasic}>
             {renderBasicFields()}
@@ -310,7 +304,7 @@ export default function PlayersTab({ user, profile, showToast }) {
       ) : myListing && (
         <>
           {editing ? (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 24 }}>
+            <div className="tv-panel" style={{ marginBottom: 24 }}>
               <h3 style={{ marginBottom: 20, fontSize: 16 }}>Modifier mes informations de base</h3>
               <form onSubmit={handleUpdateBasic}>
                 {renderBasicFields()}
@@ -321,7 +315,7 @@ export default function PlayersTab({ user, profile, showToast }) {
               </form>
             </div>
           ) : editingDetails ? (
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 24 }}>
+            <div className="tv-panel" style={{ marginBottom: 24 }}>
               <h3 style={{ marginBottom: 6, fontSize: 16 }}>Informations personnelles</h3>
               <p style={{ fontSize: 13, color: 'var(--muted)', marginBottom: 20 }}>Date de naissance, taille et poids comptent pour ta progression vers les 80%. Le reste est facultatif.</p>
               <form onSubmit={handleSaveDetails}>
@@ -382,7 +376,7 @@ export default function PlayersTab({ user, profile, showToast }) {
             <>
             <div className="tv-two-col">
             <div>
-            <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
+            <div className="tv-panel" style={{ marginBottom: 24, opacity: deletePending ? 0.35 : 1, pointerEvents: deletePending ? 'none' : 'auto', transition: 'opacity .2s ease' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
                 <h3 style={{ fontSize: 16 }}>Mes informations</h3>
                 <div style={{ display: 'flex', gap: 10 }}>
@@ -508,7 +502,7 @@ export default function PlayersTab({ user, profile, showToast }) {
                   <ShareIcon />Partager mon profil
                 </button>
                 <a href={`/j/${myListing.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost" style={{ fontSize: 13 }}>
-                  Voir la page publique ↗
+                  Voir la page publique<Icon name="external" size={14} style={{ marginLeft: 6 }} />
                 </a>
               </div>
             </div>

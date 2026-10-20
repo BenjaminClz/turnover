@@ -323,8 +323,20 @@ button:focus:not(:focus-visible), a:focus:not(:focus-visible), [role="tab"]:focu
 /* Panneau / carte standard */
 .tv-panel {
   background: var(--surface); border: 1px solid var(--line);
-  border-radius: var(--radius-lg); padding: 20px;
+  border-radius: var(--radius-lg); padding: 24px;
 }
+@media (max-width: 640px) { .tv-panel { padding: 16px; } }
+
+/* Bandeau de chiffres clés (profil, Mon espace) */
+.tv-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+.tv-stat { background: transparent; border: none; color: inherit; font: inherit; text-align: left; padding: 12px 16px; cursor: default; }
+.tv-stat:first-child { padding-left: 0; }
+.tv-stat:disabled { opacity: 1; }
+.tv-stat-l { font-size: 12px; color: var(--muted); }
+.tv-stat-v { font-size: 16px; font-weight: 600; margin-top: 2px; color: var(--text); font-variant-numeric: tabular-nums; transition: color .12s ease; }
+.tv-stat[data-click="1"] { cursor: pointer; }
+.tv-stat[data-click="1"]:hover .tv-stat-v { color: var(--lime); }
+@media (max-width: 640px) { .tv-stat { padding: 10px 12px; } }
 
 /* En-tête de section : casse normale, hiérarchie par la taille et la graisse */
 .tv-section-label {

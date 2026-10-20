@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import { ClubFacilitiesList } from './ClubFacilities';
 import ExperienceTimeline from './ExperienceTimeline';
-import { Badge, TextArea } from '@/components/ui';
+import { Badge, TextArea, Stat, StatStrip } from '@/components/ui';
 import { ROLE_LABELS } from '@/lib/constants';
 import { avatarUrl } from '@/components/AvatarUpload';
 import PlayerCard from '@/components/PlayerCard';
@@ -90,19 +90,13 @@ const css = `
 .pp-tab { background: transparent; border: none; border-bottom: 2px solid transparent; color: ${C.muted}; padding: 12px 0; margin-right: 24px; font-size: 14px; font-weight: 500; cursor: pointer; }
 .pp-tab:hover { color: ${C.text}; }
 .pp-tab[aria-selected="true"] { color: ${C.text}; border-bottom-color: ${C.lime}; }
-.pp-stat { background: transparent; border: none; color: inherit; text-align: left; padding: 12px 16px; }
-.pp-stat:first-child { border-left: none; padding-left: 0; }
 .pp-annonces-row { display: flex; gap: 20px; align-items: stretch; margin-bottom: 32px; }
 .pp-featured { width: 200px; flex-shrink: 0; align-self: flex-start; }
 @media (max-width: 760px) { .pp-annonces-row { flex-direction: column; } .pp-featured { width: 100%; } }
-.pp-stat[data-click="1"] { cursor: pointer; }
-.pp-stat[data-click="1"]:hover .pp-stat-v { color: ${C.lime}; }
-.pp-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
 @media (max-width: 640px) {
   .pp-head { flex-wrap: wrap; }
   .pp-actions { width: 100%; }
   .pp-actions button { flex: 1; }
-  .pp-stat { padding: 10px 12px; }
   .pp-cols { grid-template-columns: 1fr !important; }
 }
 `;
@@ -342,21 +336,21 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
       </div>
 
       {/* Bandeau de chiffres clés */}
-      <div className="pp-stats" style={{ marginTop: 20 }}>
+      <StatStrip style={{ marginTop: 20 }}>
         <Stat label="Abonnés" value={followersCount} onClick={() => openFollowList('followers')} />
         <Stat label="Abonnements" value={followingCount} onClick={() => openFollowList('following')} />
         <Stat label="Photos" value={galleryItems.length} onClick={() => setTab('photos')} />
         {isPlayer && <Stat label="Recommandations" value={recommendations.length} onClick={() => setTab('recos')} />}
         {isClub && <Stat label="Annonces" value={needs.length} />}
         {listing?.dispo && (
-          <div className="pp-stat">
-            <div style={{ fontSize: 12, color: C.muted }}>Disponibilité</div>
+          <div className="tv-stat">
+            <div className="tv-stat-l">Disponibilité</div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3, fontSize: 14, fontWeight: 500, color: C.lime }}>
               <span style={{ width: 7, height: 7, borderRadius: '50%', background: C.lime }} />{listing.dispo}
             </div>
           </div>
         )}
-      </div>
+      </StatStrip>
 
       {/* Onglets */}
       <div role="tablist" style={{ display: 'flex', overflowX: 'auto', marginBottom: 8 }}>
@@ -559,14 +553,6 @@ export default function ProfilePage({ targetUserId, currentUserId, onBack, onCon
   );
 }
 
-function Stat({ label, value, onClick }) {
-  return (
-    <button className="pp-stat" data-click={onClick ? '1' : '0'} onClick={onClick} disabled={!onClick} style={{ cursor: onClick ? 'pointer' : 'default' }}>
-      <div style={{ fontSize: 12, color: C.muted }}>{label}</div>
-      <div className="pp-stat-v" style={{ fontSize: 16, fontWeight: 600, marginTop: 2, fontVariantNumeric: 'tabular-nums', color: C.text, transition: 'color .12s ease' }}>{value}</div>
-    </button>
-  );
-}
 
 function SectionTitle({ children }) {
   return <h2 style={{ fontSize: 14, fontWeight: 600, color: C.text, margin: '0 0 10px' }}>{children}</h2>;

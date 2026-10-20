@@ -151,7 +151,7 @@ export default async function PublicClubPage({ params }) {
           <Section title="Adresse">
             <a href={mapsHref} target="_blank" rel="noopener noreferrer" className="tv-panel" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, padding: '16px 20px' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 10, color: 'var(--text-2)' }}><Icon size={16} />{club.adresse}</span>
-              <span style={{ color: 'var(--lime)', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Itinéraire ↗</span>
+              <span style={{ color: 'var(--lime)', fontSize: 14, fontWeight: 600, whiteSpace: 'nowrap' }}>Itinéraire</span>
             </a>
           </Section>
         )}

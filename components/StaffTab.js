@@ -180,7 +180,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       </div>
 
       {!myListing && !editing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+        <div className="tv-panel" style={{ marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 16 }}>{config.formTitle}</h3>
           <form onSubmit={handleSubmit}>
             {renderSpecificFields()}
@@ -209,7 +209,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       )}
 
       {myListing && editing && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+        <div className="tv-panel" style={{ marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 16 }}>Modifier mon profil</h3>
           <form onSubmit={handleSubmit}>
             {renderSpecificFields()}

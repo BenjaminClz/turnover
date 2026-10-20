@@ -108,6 +108,20 @@ export function Toast({ message }) {
   );
 }
 
+// Bandeau de chiffres clés : même rendu sur la page profil et dans « Mon espace »
+export function StatStrip({ children, style }) {
+  return <div className="tv-stats" style={style}>{children}</div>;
+}
+
+export function Stat({ label, value, onClick, accent }) {
+  return (
+    <button type="button" className="tv-stat" data-click={onClick ? '1' : '0'} onClick={onClick} disabled={!onClick}>
+      <div className="tv-stat-l">{label}</div>
+      <div className="tv-stat-v" style={accent ? { color: 'var(--lime)' } : undefined}>{value}</div>
+    </button>
+  );
+}
+
 export function PageTitle({ children }) {
   return <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(1.5rem, 3.2vw, 1.9rem)', fontWeight: 600, letterSpacing: '-0.015em', color: C.text, marginBottom: 6 }}>{children}</h1>;
 }

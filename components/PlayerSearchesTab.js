@@ -103,7 +103,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
           <div style={{ display: 'grid', gap: 10 }}>
             {myListings.map((listing) => (
               editingId === listing.id ? (
-                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24 }}>
+                <div key={listing.id} className="tv-panel">
                   <h3 style={{ marginBottom: 18, fontSize: 16 }}>Modifier ma recherche</h3>
                   {renderForm()}
                 </div>
@@ -133,7 +133,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
       )}
 
       {creating && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 28 }}>
+        <div className="tv-panel" style={{ marginBottom: 28 }}>
           <h3 style={{ marginBottom: 18, fontSize: 16 }}>Nouvelle recherche de club</h3>
           {renderForm()}
         </div>

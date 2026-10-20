@@ -16,7 +16,7 @@ export default function ConfirmDialog({ open, title, message, confirmLabel = 'Co
       onClick={onCancel}
       style={{ position: 'fixed', inset: 0, background: 'rgba(11,31,26,0.75)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 400, padding: 20 }}
     >
-      <div onClick={(e) => e.stopPropagation()} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, maxWidth: 380, width: '100%' }}>
+      <div onClick={(e) => e.stopPropagation()} className="tv-panel" style={{ maxWidth: 380, width: '100%' }}>
         <h3 style={{ fontSize: 16, marginBottom: 10, color: 'var(--text)' }}>{title}</h3>
         <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 22, lineHeight: 1.5 }}>{message}</p>
         <div style={{ display: 'flex', gap: 12 }}>

@@ -317,7 +317,7 @@ export default function GalleryTab({
 
   if (embedded) {
     return (
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24 }}>
+      <div className="tv-panel">
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10, marginBottom: 6 }}>
           <h3 style={{ fontSize: 16 }}>{title}</h3>
           {!readOnly && (
@@ -347,7 +347,7 @@ export default function GalleryTab({
       </p>
 
       {!readOnly && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 24 }}>
+        <div className="tv-panel" style={{ marginBottom: 24 }}>
           <h3 style={{ fontSize: 16, marginBottom: 14 }}>Nouvelle publication</h3>
           {uploadInput}
           <label htmlFor="gallery-upload-input" style={{ display: 'inline-block', background: 'var(--lime)', color: 'var(--on-lime)', padding: '12px 22px', borderRadius: 8, fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>

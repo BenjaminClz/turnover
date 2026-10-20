@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@/lib/supabase-client';
 import ClubFacilitiesEditor from './ClubFacilities';
 import { SPORTS, NIVEAUX, POSTES, URGENCES, ROLE_LABELS, SPECIALITES_SANTE, TYPES_ENTRAINEUR, TYPES_MISSION_BENEVOLE, NIVEAUX_ARBITRAGE } from '@/lib/constants';
-import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, GhostButton, PageTitle, PageSubtitle } from '@/components/ui';
+import { Field, TextInput, TextArea, Select, Badge, EmptyState, PrimaryButton, SecondaryButton, GhostButton, PageTitle, PageSubtitle, Stat, StatStrip } from '@/components/ui';
 import { geocodeVille } from '@/lib/geo';
 import AvatarUpload, { avatarUrl } from '@/components/AvatarUpload';
 import { sharePublicLink, ShareIcon } from '@/lib/share';
@@ -285,29 +285,20 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
         <button type="button" className="tv-b tv-b-secondary" onClick={() => sharePublicLink(`/c/${user.id}`, `${profile?.nom || 'Notre club'} sur Turnover`, showToast)}>
           <ShareIcon />Partager la page du club
         </button>
-        <a href={`/c/${user.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost">Voir la page publique ↗</a>
+        <a href={`/c/${user.id}`} target="_blank" rel="noopener noreferrer" className="tv-b tv-b-ghost">Voir la page publique<Icon name="external" size={14} /></a>
       </div>
 
-      <div style={{ display: 'flex', gap: 36, marginBottom: 28 }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{myListings.length}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Annonces</div>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followersCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnés</div>
-        </div>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: 20, fontWeight: 600, color: 'var(--text)' }}>{followingCount}</div>
-          <div style={{ fontSize: 12, color: 'var(--muted)' }}>Abonnements</div>
-        </div>
-      </div>
+      <StatStrip style={{ marginBottom: 28, borderTop: '1px solid var(--line-soft)', borderBottom: '1px solid var(--line-soft)' }}>
+        <Stat label="Annonces" value={myListings.length} />
+        <Stat label="Abonnés" value={followersCount} />
+        <Stat label="Abonnements" value={followingCount} />
+      </StatStrip>
 
       <div className="tv-two-col">
       <div>
 
       {/* Mes informations club — même principe que la carte du profil joueur */}
-      <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 24, marginBottom: 24 }}>
+      <div className="tv-panel" style={{ marginBottom: 24 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 10 }}>
           <h3 style={{ fontSize: 16 }}>Mes informations</h3>
           {onEditAccount && <GhostButton onClick={onEditAccount} style={{ fontSize: 13 }}>Modifier</GhostButton>}
@@ -316,7 +307,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--bg)', border: '1px solid var(--line)', borderRadius: 8, padding: '12px 14px', marginBottom: 16 }}>
           <Badge tone={isActive ? 'lime' : 'default'}>{isActive ? 'Pro' : 'Gratuit'}</Badge>
           <span style={{ fontSize: 13, color: 'var(--muted)' }}>
-            {isActive ? 'Abonnement actif — annonces illimitées et mise en avant.' : 'Compte gratuit — 1 annonce active à la fois.'}
+            {isActive ? 'Abonnement actif : annonces illimitées et mise en avant.' : 'Compte gratuit : 1 annonce active à la fois.'}
           </span>
         </div>
 
@@ -342,7 +333,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                   <button onClick={cancelDelete} style={{ background: 'transparent', border: 'none', color: 'var(--lime)', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Annuler</button>
                 </div>
               ) : editingId === listing.id ? (
-                <div key={listing.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28 }}>
+                <div key={listing.id} className="tv-panel">
                   <h3 style={{ marginBottom: 20, fontSize: 16 }}>Modifier — {ROLE_LABELS[listing.besoin_type] || 'Joueur'}</h3>
                   {renderForm(listing.besoin_type)}
                 </div>
@@ -366,7 +357,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       {/* Bouton pour ajouter une nouvelle annonce, ou sélecteur de type si pas encore d'annonce */}
       {!creatingType && !editingId && !(myListings.length >= 1 && !isActive && !subLoading) && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+        <div className="tv-panel" style={{ marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 16 }}>{myListings.length > 0 ? 'Publier une nouvelle annonce' : 'Tu cherches…'}</h3>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 12 }}>
             {BESOIN_TYPES.map((t) => (
@@ -384,7 +375,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
 
       {/* Formulaire de création d'une nouvelle annonce */}
       {creatingType && (
-        <div style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 12, padding: 28, marginBottom: 36 }}>
+        <div className="tv-panel" style={{ marginBottom: 36 }}>
           <h3 style={{ marginBottom: 20, fontSize: 16 }}>Tu cherches {BESOIN_TYPES.find((t) => t.value === creatingType)?.label.toLowerCase()}</h3>
           {renderForm(creatingType)}
         </div>

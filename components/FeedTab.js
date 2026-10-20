@@ -36,6 +36,7 @@ const SEND = 'M22 3 9.5 15.5M22 3l-7 19-5.5-6.5L3 10l19-7z';
 const MORE = 'M5 12h.01M12 12h.01M19 12h.01';
 const IMAGE = 'M4 5h16v14H4zM4 15l5-5 4 4 3-3 4 4M15.5 8.5h.01';
 const CLOSE = 'M18 6 6 18M6 6l12 12';
+const COMMENT = 'M20.7 15.4A8.5 8.5 0 1 0 17 19.6L21 21z';
 const CHEV_L = 'M15 18l-6-6 6-6';
 const CHEV_R = 'M9 18l6-6-6-6';
 
@@ -56,6 +57,14 @@ const css = `
 @keyframes fd-pop { 0% { transform: translate(-50%,-50%) scale(.3); opacity: 0; } 15% { transform: translate(-50%,-50%) scale(1.15); opacity: 1; } 30% { transform: translate(-50%,-50%) scale(.95); } 45%, 80% { transform: translate(-50%,-50%) scale(1); opacity: 1; } 100% { transform: translate(-50%,-50%) scale(1); opacity: 0; } }
 @keyframes fd-like { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
 .fd-liked { animation: fd-like .3s ease; }
+.fd-comment-input { flex: 1; min-width: 0; background: transparent; border: none; border-bottom: 1px solid transparent; padding: 6px 0; font-size: 14px; color: ${C.text}; outline: none; transition: border-color .12s ease; }
+.fd-comment-input:focus { border-bottom-color: ${C.line}; }
+.fd-comment-input:focus-visible { outline: none; }
+.fd-comment-del { background: transparent; border: none; color: ${C.muted}; cursor: pointer; padding: 3px; display: inline-flex; border-radius: 4px; opacity: 0; transition: opacity .12s ease, color .12s ease; }
+.fd-comment:hover .fd-comment-del, .fd-comment-del:focus-visible { opacity: 1; }
+.fd-comment-del:hover { color: var(--danger); }
+@media (hover: none) { .fd-comment-del { opacity: 1; } }
+@media (max-width: 640px) { .fd-comment-input { font-size: 16px; } }
 `;
 
 function Avatar({ supabase, path, name, size = 32 }) {
@@ -125,6 +134,9 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
   const [feedTab, setFeedTab] = useState('tous');
   const [followingIds, setFollowingIds] = useState(new Set());
   const [suggestions, setSuggestions] = useState([]);
+  const [commentsByPost, setCommentsByPost] = useState({});
+  const [allCommentsOpen, setAllCommentsOpen] = useState({});
+  const [commentDrafts, setCommentDrafts] = useState({});
 
   const load = async () => {
     setLoading(true);
@@ -146,6 +158,16 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
         if (l.user_id === user.id) grouped[l.post_id].likedByMe = true;
       });
       setLikesByPost(grouped);
+
+      // Commentaires (silencieux si la table n'existe pas encore)
+      const { data: commentsData } = await supabase
+        .from('post_comments')
+        .select('id, post_id, author_id, content, created_at, profiles(nom, avatar_path, role)')
+        .in('post_id', ids)
+        .order('created_at', { ascending: true });
+      const byPost = {};
+      (commentsData || []).forEach((c) => { (byPost[c.post_id] ||= []).push(c); });
+      setCommentsByPost(byPost);
     }
     setLoading(false);
   };
@@ -258,6 +280,56 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
       users = profiles || [];
     }
     setLikersModal({ loading: false, users });
+  };
+
+  const addComment = async (post) => {
+    const content = (commentDrafts[post.id] || '').trim();
+    if (!content) return;
+    const tempId = `tmp-${Date.now()}`;
+    const temp = {
+      id: tempId, post_id: post.id, author_id: user.id, content, created_at: new Date().toISOString(),
+      profiles: { nom: profile?.nom, avatar_path: profile?.avatar_path, role: profile?.role }, pending: true,
+    };
+    // Affichage immédiat, retiré si le serveur refuse
+    setCommentsByPost((prev) => ({ ...prev, [post.id]: [...(prev[post.id] || []), temp] }));
+    setCommentDrafts((d) => ({ ...d, [post.id]: '' }));
+    const { data, error } = await supabase
+      .from('post_comments')
+      .insert({ post_id: post.id, author_id: user.id, content })
+      .select('id, created_at')
+      .single();
+    if (error) {
+      setCommentsByPost((prev) => ({ ...prev, [post.id]: (prev[post.id] || []).filter((c) => c.id !== tempId) }));
+      setCommentDrafts((d) => ({ ...d, [post.id]: content }));
+      showToast("Le commentaire n'a pas pu être publié. Réessaie.");
+      return;
+    }
+    setCommentsByPost((prev) => ({
+      ...prev,
+      [post.id]: (prev[post.id] || []).map((c) => (c.id === tempId ? { ...c, id: data.id, created_at: data.created_at, pending: false } : c)),
+    }));
+    if (post.author_id !== user.id) {
+      const extrait = content.length > 80 ? `${content.slice(0, 80).trimEnd()}…` : content;
+      await supabase.from('notifications').insert({
+        user_id: post.author_id,
+        type: 'nouveau_commentaire',
+        title: 'Nouveau commentaire',
+        body: `${profile?.nom || 'Quelqu’un'} a commenté ta publication : « ${extrait} »`,
+        link_tab: 'actualites',
+      });
+    }
+  };
+
+  const deleteComment = async (postId, comment) => {
+    setCommentsByPost((prev) => ({ ...prev, [postId]: (prev[postId] || []).filter((c) => c.id !== comment.id) }));
+    const { error } = await supabase.from('post_comments').delete().eq('id', comment.id);
+    if (error) {
+      setCommentsByPost((prev) => ({
+        ...prev,
+        [postId]: [...(prev[postId] || []), comment].sort((a, b) => a.created_at.localeCompare(b.created_at)),
+      }));
+      showToast("La suppression n'a pas fonctionné. Réessaie.");
+    }
   };
 
   const handleDelete = async (id) => {
@@ -449,6 +521,14 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                       <Icon d={HEART} fill={likes.likedByMe ? 'currentColor' : 'none'} />
                     </span>
                   </button>
+                  <button
+                    className="fd-icon"
+                    onClick={() => document.getElementById(`fd-c-${post.id}`)?.focus()}
+                    aria-label="Commenter"
+                    title="Commenter"
+                  >
+                    <Icon d={COMMENT} />
+                  </button>
                   {!isMine && (
                     <button
                       className="fd-icon"
@@ -477,6 +557,52 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                     )}
                   </div>
                 )}
+
+                {/* Commentaires : les 2 derniers, puis « Voir les N commentaires » */}
+                {(() => {
+                  const list = commentsByPost[post.id] || [];
+                  const showAll = allCommentsOpen[post.id];
+                  const shown = showAll ? list : list.slice(-2);
+                  const draft = commentDrafts[post.id] || '';
+                  return (
+                    <div style={{ marginTop: 6 }}>
+                      {list.length > 2 && !showAll && (
+                        <button className="fd-link" onClick={() => setAllCommentsOpen((o) => ({ ...o, [post.id]: true }))} style={{ color: C.muted, fontSize: 14, marginBottom: 2 }}>
+                          Voir les {list.length} commentaires
+                        </button>
+                      )}
+                      {shown.map((c) => (
+                        <div key={c.id} className="fd-comment" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, lineHeight: 1.5, marginTop: 3, opacity: c.pending ? 0.55 : 1 }}>
+                          <div style={{ flex: 1, minWidth: 0, color: C.text, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
+                            <button className="fd-link" onClick={() => onOpenProfile(c.author_id)} style={{ fontWeight: 600, marginRight: 6 }}>{c.profiles?.nom || 'Utilisateur'}</button>
+                            {c.content}
+                            <span style={{ color: C.muted, fontSize: 12, marginLeft: 8, whiteSpace: 'nowrap' }}>{c.pending ? 'envoi…' : timeAgo(c.created_at)}</span>
+                          </div>
+                          {!c.pending && (c.author_id === user.id || isMine) && (
+                            <button className="fd-comment-del" onClick={() => deleteComment(post.id, c)} aria-label="Supprimer le commentaire" title="Supprimer">
+                              <Icon d={CLOSE} size={14} width={2} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: list.length > 0 ? 6 : 2 }}>
+                        <input
+                          id={`fd-c-${post.id}`}
+                          className="fd-comment-input"
+                          value={draft}
+                          onChange={(e) => setCommentDrafts((d) => ({ ...d, [post.id]: e.target.value }))}
+                          onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addComment(post); } }}
+                          placeholder="Ajouter un commentaire…"
+                          maxLength={1000}
+                          aria-label={`Commenter la publication de ${author.nom || 'cet utilisateur'}`}
+                        />
+                        {draft.trim() && (
+                          <button className="fd-link" onClick={() => addComment(post)} style={{ color: C.lime, fontWeight: 600, fontSize: 14 }}>Publier</button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
               </article>
             );
           })

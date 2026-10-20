@@ -572,7 +572,10 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                         </button>
                       )}
                       {shown.map((c) => (
-                        <div key={c.id} className="fd-comment" style={{ display: 'flex', alignItems: 'flex-start', gap: 8, fontSize: 14, lineHeight: 1.5, marginTop: 3, opacity: c.pending ? 0.55 : 1 }}>
+                        <div key={c.id} className="fd-comment" style={{ display: 'flex', alignItems: 'flex-start', gap: 10, fontSize: 14, lineHeight: 1.5, marginTop: 8, opacity: c.pending ? 0.55 : 1 }}>
+                          <button className="fd-link" onClick={() => onOpenProfile(c.author_id)} aria-label={`Voir le profil de ${c.profiles?.nom || 'cet utilisateur'}`} style={{ display: 'flex', marginTop: 1 }}>
+                            <Avatar supabase={supabase} path={c.profiles?.avatar_path} name={c.profiles?.nom} size={26} />
+                          </button>
                           <div style={{ flex: 1, minWidth: 0, color: C.text, whiteSpace: 'pre-wrap', overflowWrap: 'anywhere' }}>
                             <button className="fd-link" onClick={() => onOpenProfile(c.author_id)} style={{ fontWeight: 600, marginRight: 6 }}>{c.profiles?.nom || 'Utilisateur'}</button>
                             {c.content}
@@ -585,7 +588,8 @@ export default function FeedTab({ user, profile, showToast, onContact, onViewGal
                           )}
                         </div>
                       ))}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: list.length > 0 ? 6 : 2 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginTop: list.length > 0 ? 10 : 6 }}>
+                        <Avatar supabase={supabase} path={profile?.avatar_path} name={profile?.nom} size={26} />
                         <input
                           id={`fd-c-${post.id}`}
                           className="fd-comment-input"

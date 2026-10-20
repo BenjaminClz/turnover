@@ -22,6 +22,7 @@ import UserMenu from '@/components/UserMenu';
 import AccountSettingsModal from '@/components/AccountSettingsModal';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { isProfileComplete } from '@/lib/profile-completion';
+import { Icon } from '@/components/icons';
 
 const ROLE_HOME_TAB = {
   joueur: 'joueur', club: 'club', sante: 'sante', preparateur: 'preparateur',
@@ -202,7 +203,7 @@ function AppPageInner() {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--bg)', color: 'var(--text)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24, textAlign: 'center' }}>
         <div style={{ maxWidth: 420 }}>
-          <div style={{ fontSize: 40, marginBottom: 16 }}>🚫</div>
+          <div style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', margin: '0 auto 20px' }}><Icon name="ban" size={22} /></div>
           <h1 style={{ fontSize: 24, marginBottom: 12 }}>Ton compte a été suspendu</h1>
           <p style={{ fontSize: 15, color: 'var(--muted)', lineHeight: 1.6, marginBottom: 20 }}>
             L'accès à ton compte a été temporairement suspendu suite à un ou plusieurs signalements.

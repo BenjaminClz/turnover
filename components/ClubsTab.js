@@ -11,14 +11,15 @@ import { sharePublicLink, ShareIcon } from '@/lib/share';
 import GalleryTab from '@/components/GalleryTab';
 import { useSubscription } from '@/lib/use-subscription';
 import { SkeletonList } from '@/components/Skeleton';
+import { Icon } from '@/components/icons';
 
 const BESOIN_TYPES = [
-  { value: 'joueur', label: 'Un joueur', icon: '🏉' },
-  { value: 'sante', label: 'Un professionnel de santé', icon: '🩺' },
-  { value: 'preparateur', label: 'Un préparateur physique', icon: '💪' },
-  { value: 'entraineur', label: 'Un entraîneur / coach', icon: '📋' },
-  { value: 'arbitre', label: 'Un arbitre', icon: '🟨' },
-  { value: 'benevole', label: 'Un bénévole', icon: '🤝' },
+  { value: 'joueur', label: 'Un joueur', icon: 'ball' },
+  { value: 'sante', label: 'Un professionnel de santé', icon: 'stethoscope' },
+  { value: 'preparateur', label: 'Un préparateur physique', icon: 'dumbbell' },
+  { value: 'entraineur', label: 'Un entraîneur / coach', icon: 'clipboard' },
+  { value: 'arbitre', label: 'Un arbitre', icon: 'card' },
+  { value: 'benevole', label: 'Un bénévole', icon: 'users' },
 ];
 
 const emptyForm = {
@@ -125,11 +126,11 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
     if (editingId) {
       const { error } = await supabase.from('club_needs').update(payload).eq('id', editingId);
       if (error) { showToast('Erreur lors de la mise à jour.'); return; }
-      showToast('Besoin mis à jour ✓');
+      showToast('Besoin mis à jour');
     } else {
       const { error } = await supabase.from('club_needs').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
-      showToast('Besoin publié ✓');
+      showToast('Besoin publié');
 
       // Publication automatique dans le fil d'actualité.
       const typeLabel = BESOIN_TYPES.find((t) => t.value === payload.besoin_type)?.label.toLowerCase() || 'un profil';
@@ -350,7 +351,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                   <div>
                     <div style={{ fontWeight: 700, marginBottom: 4 }}>{ROLE_LABELS[listing.besoin_type] || 'Joueur'}</div>
                     <div style={{ fontSize: 14, color: 'var(--muted)' }}>{describeNeed(listing)} · {listing.ville}</div>
-                    {listing.remuneration && <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4 }}>💰 {listing.remuneration}</div>}
+                    {listing.remuneration && <div style={{ fontSize: 13, color: 'var(--lime)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="banknote" size={14} />{listing.remuneration}</div>}
                   </div>
                   <div style={{ display: 'flex', gap: 10 }}>
                     <button className="tv-b tv-b-secondary" onClick={() => startEditing(listing)}>Modifier</button>
@@ -373,7 +374,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
                 onMouseEnter={(e) => e.currentTarget.style.borderColor = 'var(--lime)'}
                 onMouseLeave={(e) => e.currentTarget.style.borderColor = 'var(--line)'}
               >
-                <div style={{ fontSize: 28, marginBottom: 8 }}>{t.icon}</div>
+                <div style={{ color: 'var(--muted)', marginBottom: 12 }}><Icon name={t.icon} size={24} /></div>
                 <div style={{ fontWeight: 700, fontSize: 15 }}>{t.label}</div>
               </button>
             ))}
@@ -411,7 +412,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
       {loading ? (
         <SkeletonList count={3} />
       ) : othersNeeds.length === 0 ? (
-        <EmptyState icon="📋" title="Aucune autre annonce pour le moment" sub="Les annonces des autres clubs apparaîtront ici." />
+        <EmptyState icon="clipboard" title="Aucune autre annonce pour le moment" sub="Les annonces des autres clubs apparaîtront ici." />
       ) : (
         <div style={{ display: 'grid', gap: 12, marginTop: 16 }}>
           <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>Annonces des autres clubs</h2>
@@ -420,7 +421,7 @@ export default function ClubsTab({ user, profile, showToast, onContact, onEditAc
               <div>
                 <div style={{ fontWeight: 700, fontSize: 16 }}>{n.club} <span style={{ color: 'var(--muted)', fontWeight: 500 }}>cherche</span> {ROLE_LABELS[n.besoin_type]?.toLowerCase() || 'un joueur'}</div>
                 <div style={{ fontSize: 14, color: 'var(--muted)', marginTop: 4 }}>{describeNeed(n)} · {n.ville}</div>
-                {n.remuneration && <div style={{ fontSize: 14, color: 'var(--lime)', marginTop: 6 }}>💰 {n.remuneration}</div>}
+                {n.remuneration && <div style={{ fontSize: 14, color: 'var(--lime)', marginTop: 6, display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="banknote" size={14} />{n.remuneration}</div>}
                 {n.details && <div style={{ fontSize: 14, color: 'var(--text-2)', marginTop: 10, maxWidth: 460 }}>{n.details}</div>}
                 <div style={{ marginTop: 12 }}><Badge tone={n.urgence === 'Dès que possible' ? 'urgent' : 'default'}>{n.urgence}</Badge></div>
               </div>

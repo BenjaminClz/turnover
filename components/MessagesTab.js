@@ -7,6 +7,7 @@ import { avatarUrl } from '@/components/AvatarUpload';
 import { useSubscription } from '@/lib/use-subscription';
 import ReportButton from '@/components/ReportButton';
 import { SkeletonList } from '@/components/Skeleton';
+import { Icon } from '@/components/icons';
 
 export default function MessagesTab({ user, profile, setUnreadCount, pendingConvTarget, clearPendingConvTarget, showToast }) {
   const supabase = createClient();
@@ -167,7 +168,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
     <div>
       <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: 'clamp(1.5rem, 3.2vw, 1.9rem)', fontWeight: 600, letterSpacing: '-0.015em', color: 'var(--text)', marginBottom: 24 }}>Messages</h1>
       {conversations.length === 0 ? (
-        <EmptyState icon="💬" title="Aucune conversation" sub="Clique sur « Contacter » depuis un profil ou un besoin pour démarrer une discussion." />
+        <EmptyState icon="message" title="Aucune conversation" sub="Clique sur « Contacter » depuis un profil ou un besoin pour démarrer une discussion." />
       ) : (
         <div className="tv-messages-grid" style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, overflow: 'hidden', minHeight: 480 }}>
           <div className={activeConvId ? 'tv-messages-list-mobile-hidden' : ''} style={{ borderRight: '1px solid var(--line)', overflowY: 'auto' }}>
@@ -181,7 +182,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: 14, display: 'flex', alignItems: 'center', gap: 6 }}>
                       {other?.nom}
-                      {locked && <span style={{ fontSize: 11 }}>🔒</span>}
+                      {locked && <Icon name="lock" size={12} style={{ color: 'var(--muted)' }} />}
                     </div>
                     <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 2 }}>{c.context}</div>
                   </div>
@@ -200,10 +201,10 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
               </button>
             )}
             {!activeConv ? (
-              <EmptyState icon="💬" title="Sélectionne une conversation" sub="Choisis une discussion dans la liste à gauche." />
+              <EmptyState icon="message" title="Sélectionne une conversation" sub="Choisis une discussion dans la liste à gauche." />
             ) : activeLocked ? (
               <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, textAlign: 'center' }}>
-                <div style={{ fontSize: 40, marginBottom: 14 }}>🔒</div>
+                <div style={{ width: 56, height: 56, borderRadius: '50%', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--muted)', marginBottom: 16 }}><Icon name="lock" size={22} /></div>
                 <h3 style={{ fontSize: 18, marginBottom: 8 }}>Candidature de {otherOf(activeConv)?.nom}</h3>
                 <p style={{ fontSize: 14, color: 'var(--muted)', marginBottom: 24, maxWidth: 340 }}>
                   {alreadyUnlockedForScope(activeConv.id, activeConv.club_need_id)
@@ -244,7 +245,7 @@ export default function MessagesTab({ user, profile, setUnreadCount, pendingConv
                       }}>{m.content}</div>
                       {m.sender_id === user.id ? (
                         <span style={{ fontSize: 11, color: m.read_at ? 'var(--lime)' : 'var(--muted)', marginTop: 3, marginRight: 2 }}>
-                          {m.read_at ? '✓✓ Lu' : '✓ Envoyé'}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Icon name={m.read_at ? 'checks' : 'check'} size={13} />{m.read_at ? 'Lu' : 'Envoyé'}</span>
                         </span>
                       ) : (
                         <ReportButton targetType="message" targetId={m.id} targetOwnerId={m.sender_id} reporterId={user.id} showToast={showToast} style={{ marginTop: 3, marginLeft: 2 }} />

@@ -18,6 +18,7 @@ import VilleAutocomplete from '@/components/VilleAutocomplete';
 import { SkeletonList } from '@/components/Skeleton';
 import GalleryTab from '@/components/GalleryTab';
 import { nationalites } from '@/lib/nationalites';
+import { Icon } from '@/components/icons';
 
 const nomNationalite = (code) => nationalites.find((n) => n.code === code)?.nom || code;
 
@@ -125,7 +126,7 @@ export default function PlayersTab({ user, profile, showToast }) {
     };
     const { error } = await supabase.from('player_listings').insert(payload);
     if (error) { showToast('Erreur lors de la création.'); return; }
-    showToast('Profil créé ✓ Complète-le pour pouvoir le publier.');
+    showToast('Profil créé. Complète-le pour pouvoir le publier.');
     load();
   };
 
@@ -147,7 +148,7 @@ export default function PlayersTab({ user, profile, showToast }) {
     };
     const { error } = await supabase.from('player_listings').update(payload).eq('id', myListing.id);
     if (error) { showToast('Erreur lors de la mise à jour.'); return; }
-    showToast('Profil mis à jour ✓');
+    showToast('Profil mis à jour');
     setEditing(false);
     load();
   };
@@ -181,7 +182,7 @@ export default function PlayersTab({ user, profile, showToast }) {
     };
     const { error } = await supabase.from('player_listings').update(payload).eq('id', myListing.id);
     if (error) { showToast('Erreur lors de la mise à jour.'); return; }
-    showToast('Informations enregistrées ✓');
+    showToast('Informations enregistrées');
     setEditingDetails(false);
     load();
   };
@@ -191,7 +192,7 @@ export default function PlayersTab({ user, profile, showToast }) {
     const { error } = await supabase.from('player_listings').update({ published: true }).eq('id', myListing.id);
     setPublishing(false);
     if (error) { showToast('Erreur lors de la publication.'); return; }
-    showToast('Profil publié ✓ Les clubs peuvent maintenant te trouver.');
+    showToast('Profil publié. Les clubs peuvent maintenant te trouver.');
 
     // Publication automatique dans le fil d'actualité.
     await supabase.from('posts').insert({
@@ -468,7 +469,7 @@ export default function PlayersTab({ user, profile, showToast }) {
           <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1.5px solid var(--lime)', borderRadius: 16, padding: 24 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
               <h3 style={{ fontSize: 18 }}>Mon annonce</h3>
-              <button onClick={() => setAnnonceOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+              <button onClick={() => setAnnonceOpen(false)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', display: 'flex' }} aria-label="Fermer"><Icon name="close" size={20} /></button>
             </div>
             {isPublished ? (
               <div style={{ fontWeight: 700, marginBottom: 4, display: 'flex', alignItems: 'center', gap: 8 }}>

@@ -67,7 +67,7 @@ export default function FavoritesTab({ user, onContact, onViewGallery }) {
       {loading ? (
         <SkeletonList count={3} />
       ) : favorites.length === 0 ? (
-        <EmptyState icon="🤍" title="Aucun favori pour le moment" sub="Clique sur le cœur depuis une annonce ou un profil pour le retrouver ici." />
+        <EmptyState icon="heart" title="Aucun favori pour le moment" sub="Clique sur le cœur depuis une annonce ou un profil pour le retrouver ici." />
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
           {favorites.map((item) => {

@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase-client';
 import { PageTitle, PageSubtitle, EmptyState, Badge } from '@/components/ui';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { SkeletonList } from '@/components/Skeleton';
+import { Icon } from '@/components/icons';
 
 const TARGET_LABELS = {
   player_listing: 'Profil joueur', staff_listing: 'Profil staff', club_need: 'Annonce club',
@@ -60,7 +61,7 @@ export default function AdminTab({ showToast }) {
   const toggleVerified = async (clubId, current) => {
     const { error } = await supabase.from('profiles').update({ verified: !current }).eq('id', clubId);
     if (error) { showToast('Erreur.'); return; }
-    showToast(!current ? 'Club vérifié ✓' : 'Vérification retirée.');
+    showToast(!current ? 'Club vérifié' : 'Vérification retirée.');
     load();
   };
 
@@ -85,7 +86,7 @@ export default function AdminTab({ showToast }) {
             <div key={c.id} style={{ background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 8, padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                 {c.nom}
-                {c.verified && <span title="Vérifié" style={{ color: 'var(--lime)' }}>✓</span>}
+                {c.verified && <Icon name="check" size={14} strokeWidth={2.5} title="Vérifié" style={{ color: 'var(--lime)' }} />}
               </span>
               <button
                 onClick={() => toggleVerified(c.id, c.verified)}
@@ -120,7 +121,7 @@ export default function AdminTab({ showToast }) {
       {loading ? (
         <SkeletonList count={4} />
       ) : groupedList.length === 0 ? (
-        <EmptyState icon="🛡️" title="Aucun signalement" sub="Tout est calme pour l'instant." />
+        <EmptyState icon="shield" title="Aucun signalement" sub="Tout est calme pour l'instant." />
       ) : (
         <div>
           <h2 style={{ fontSize: 15, color: 'var(--lime)', marginBottom: 14, textTransform: 'uppercase', letterSpacing: '0.04em', fontWeight: 700 }}>

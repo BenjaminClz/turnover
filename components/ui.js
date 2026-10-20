@@ -1,5 +1,7 @@
 'use client';
 
+import { Icon } from '@/components/icons';
+
 // Style épuré inspiré de TradingView : traits fins, lime réservé à l'action principale
 const C = { bg: 'var(--surface)', line: 'var(--line)', lineHover: 'var(--line-strong)', text: 'var(--text)', muted: 'var(--muted)', lime: 'var(--lime)', ink: 'var(--on-lime)', red: 'var(--danger)' };
 
@@ -47,7 +49,11 @@ export function Badge({ children, tone = 'default' }) {
 export function EmptyState({ icon, title, sub }) {
   return (
     <div style={{ textAlign: 'center', padding: '48px 20px', color: C.muted }}>
-      {icon && <div style={{ fontSize: 28, marginBottom: 12, opacity: 0.8 }}>{icon}</div>}
+      {icon && (
+        <div style={{ width: 48, height: 48, margin: '0 auto 14px', borderRadius: '50%', border: `1px solid ${C.line}`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: C.muted }}>
+          {typeof icon === 'string' ? <Icon name={icon} size={20} /> : icon}
+        </div>
+      )}
       <div style={{ fontWeight: 600, fontSize: 16, color: C.text, marginBottom: 6 }}>{title}</div>
       <div style={{ fontSize: 14 }}>{sub}</div>
     </div>

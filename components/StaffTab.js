@@ -84,11 +84,11 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
     if (myListing) {
       const { error } = await supabase.from('staff_listings').update(payload).eq('id', myListing.id);
       if (error) { showToast('Erreur lors de la mise à jour.'); return; }
-      showToast('Profil mis à jour ✓');
+      showToast('Profil mis à jour');
     } else {
       const { error } = await supabase.from('staff_listings').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
-      showToast('Profil publié ✓');
+      showToast('Profil publié');
 
       // Publication automatique dans le fil d'actualité.
       await supabase.from('posts').insert({
@@ -230,7 +230,7 @@ export default function StaffTab({ role, user, profile, showToast, onContact }) 
       {loading ? (
         <SkeletonList count={3} />
       ) : listings.length === 0 ? (
-        <EmptyState icon="🧑‍⚕️" title="Aucun profil pour le moment" sub="Les premiers profils apparaîtront ici." />
+        <EmptyState icon="users" title="Aucun profil pour le moment" sub="Les premiers profils apparaîtront ici." />
       ) : (
         <div style={{ display: 'grid', gap: 12 }}>
           {listings.map((l) => (

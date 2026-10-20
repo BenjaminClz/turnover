@@ -30,7 +30,7 @@ export default function UserMenu({ nom, roleLabel, showSubscription, onSubscript
         onClick={() => setOpen((v) => !v)}
         style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'transparent', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: 8 }}
       >
-        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton', color: 'var(--on-lime)', fontSize: 12, flexShrink: 0 }}>
+        <div style={{ width: 30, height: 30, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 12, flexShrink: 0 }}>
           {initials(nom)}
         </div>
         <span style={{ fontSize: 15, color: 'var(--text)', fontWeight: 700 }}>{nom}</span>

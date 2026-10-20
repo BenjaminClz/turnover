@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Icon } from '@/components/icons';
 
 export default function ProfileMediaGrid({ items }) {
   const [lightboxIdx, setLightboxIdx] = useState(null);
@@ -33,7 +34,7 @@ export default function ProfileMediaGrid({ items }) {
           onClick={() => setLightboxIdx(null)}
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}
         >
-          <button onClick={() => setLightboxIdx(null)} style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 28, cursor: 'pointer' }}>✕</button>
+          <button onClick={() => setLightboxIdx(null)} style={{ position: 'absolute', top: 20, right: 20, background: 'transparent', border: 'none', color: 'var(--text)', fontSize: 28, cursor: 'pointer', display: 'flex' }} aria-label="Fermer"><Icon name="close" size={26} /></button>
           {lightboxIdx > 0 && (
             <button onClick={(e) => { e.stopPropagation(); setLightboxIdx(lightboxIdx - 1); }} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', background: 'rgba(255,255,255,0.12)', border: 'none', color: 'var(--text)', fontSize: 24, width: 42, height: 42, borderRadius: '50%', cursor: 'pointer' }}>‹</button>
           )}

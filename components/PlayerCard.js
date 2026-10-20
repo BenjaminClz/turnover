@@ -42,13 +42,13 @@ export default function PlayerCard({ player, nom, avatarSrc }) {
         {avatarSrc ? (
           <img src={avatarSrc} alt="" style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', border: '3px solid var(--bg)' }} />
         ) : (
-          <div style={{ width: 96, height: 96, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 32, border: '3px solid var(--bg)' }}>
+          <div style={{ width: 96, height: 96, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 30, border: '3px solid var(--bg)', boxShadow: '0 0 0 1px var(--line)' }}>
             {initials}
           </div>
         )}
       </div>
 
-      <div style={{ textAlign: 'center', fontFamily: 'Anton, sans-serif', fontSize: 20, color: 'var(--text)', textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: 2 }}>
+      <div style={{ textAlign: 'center', fontSize: 19, fontWeight: 600, color: 'var(--text)', letterSpacing: '-0.01em', marginBottom: 2 }}>
         {nom}
       </div>
       <div style={{ textAlign: 'center', fontSize: 12, color: 'var(--muted)', marginBottom: 14 }}>

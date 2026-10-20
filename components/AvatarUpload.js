@@ -33,7 +33,7 @@ export default function AvatarUpload({ userId, currentPath, onUploaded, showToas
     setUploading(false);
     if (dbError) { showToast("Photo envoyée mais erreur d'enregistrement."); return; }
 
-    showToast('Photo de profil mise à jour ✓');
+    showToast('Photo de profil mise à jour');
     onUploaded?.(path);
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
@@ -42,14 +42,14 @@ export default function AvatarUpload({ userId, currentPath, onUploaded, showToas
     <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
       <div style={{
         width: size, height: size, borderRadius: '50%', overflow: 'hidden', flexShrink: 0,
-        background: url ? 'transparent' : 'linear-gradient(135deg,var(--lime),var(--lime-deep))',
+        background: url ? 'transparent' : 'var(--surface-2)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         border: '2px solid var(--line)',
       }}>
         {url ? (
           <img src={url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         ) : (
-          <span style={{ fontFamily: 'Anton', color: 'var(--on-lime)', fontSize: size * 0.4 }}>?</span>
+          <svg width={size * 0.42} height={size * 0.42} viewBox="0 0 24 24" fill="none" stroke="var(--muted)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
         )}
       </div>
       <div>

@@ -64,7 +64,7 @@ export default function AccountSettingsModal({ open, profile, onClose, showToast
       showToast(`Erreur : ${error.message}`);
       return;
     }
-    showToast('Informations mises à jour ✓');
+    showToast('Informations mises à jour');
     window.location.reload();
   };
 

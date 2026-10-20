@@ -10,6 +10,7 @@ import ReportButton from '@/components/ReportButton';
 import FavoriteButton from '@/components/FavoriteButton';
 import { SkeletonList } from '@/components/Skeleton';
 import SearchMap from '@/components/SearchMap';
+import { Icon } from '@/components/icons';
 
 const RAYONS = [10, 25, 50, 100, 'Toute la France'];
 const STAFF_ROLES = ['sante', 'preparateur', 'entraineur', 'arbitre', 'benevole'];
@@ -27,7 +28,7 @@ function staffDetails(l) {
 function needDetails(n) {
   if (n.besoin_type === 'joueur' || !n.besoin_type) {
     const base = `${n.poste || ''} · ${n.niveau || ''}`.trim();
-    return n.remuneration ? `${base} · 💰 ${n.remuneration}` : base;
+    return n.remuneration ? `${base} · ${n.remuneration}` : base;
   }
   if (n.besoin_type === 'sante') return `${n.specialite || 'Professionnel de santé'}${n.sport ? ' · ' + n.sport : ''}`;
   if (n.besoin_type === 'preparateur') return `Préparateur physique${n.sport ? ' · ' + n.sport : ''}`;
@@ -209,18 +210,21 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
             </div>
           </div>
         )}
-        {originCoords && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 14 }}>📍 Localisé : {originCoords.label}</div>}
+        {originCoords && <div style={{ fontSize: 13, color: 'var(--muted)', marginTop: 14, display: 'flex', alignItems: 'center', gap: 6 }}><Icon name="pin" size={14} />Localisé : {originCoords.label}</div>}
       </div>
 
       {loading ? (
         <SkeletonList count={4} />
       ) : !hasActiveFilter ? (
-        <EmptyState icon="🔍" title="Lance ta recherche" sub="Renseigne une ville, un sport, un niveau ou un nom pour voir les profils correspondants." />
+        <EmptyState icon="search" title="Lance ta recherche" sub="Renseigne une ville, un sport, un niveau ou un nom pour voir les profils correspondants." />
       ) : (
         <>
-          <div style={{ display: 'flex', gap: 8, marginBottom: 20 }}>
-            <button onClick={() => setViewMode('liste')} style={{ padding: '8px 18px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'liste' ? 'var(--lime)' : 'var(--line)'), background: viewMode === 'liste' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'liste' ? 'var(--lime)' : 'var(--muted)' }}>📋 Liste</button>
-            <button onClick={() => setViewMode('carte')} style={{ padding: '8px 18px', borderRadius: 16, fontSize: 13, fontWeight: 600, cursor: 'pointer', border: '1.5px solid ' + (viewMode === 'carte' ? 'var(--lime)' : 'var(--line)'), background: viewMode === 'carte' ? 'rgba(212,255,63,0.12)' : 'transparent', color: viewMode === 'carte' ? 'var(--lime)' : 'var(--muted)' }}>🗺️ Carte</button>
+          <div role="tablist" aria-label="Affichage des résultats" style={{ display: 'inline-flex', padding: 3, gap: 2, border: '1px solid var(--line)', borderRadius: 8, background: 'var(--surface)', marginBottom: 20 }}>
+            {[['liste', 'Liste', 'clipboard'], ['carte', 'Carte', 'pin']].map(([v, label, icon]) => (
+              <button key={v} role="tab" aria-selected={viewMode === v} onClick={() => setViewMode(v)} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 14px', borderRadius: 6, fontSize: 13, fontWeight: 500, cursor: 'pointer', border: 'none', background: viewMode === v ? 'var(--surface-2)' : 'transparent', color: viewMode === v ? 'var(--text)' : 'var(--muted)', transition: 'background .15s ease, color .15s ease' }}>
+                <Icon name={icon} size={14} />{label}
+              </button>
+            ))}
           </div>
 
           {viewMode === 'carte' ? (
@@ -272,7 +276,7 @@ export default function SearchTab({ user, viewerRole, showToast, onContact, onVi
               })}
 
               {filteredNeeds.length === 0 && filteredPlayers.length === 0 && filteredStaff.length === 0 && (
-                <EmptyState icon="🔍" title="Aucun résultat" sub="Essaie d'élargir tes critères de recherche." />
+                <EmptyState icon="search" title="Aucun résultat" sub="Essaie d'élargir tes critères de recherche." />
               )}
             </div>
           )}
@@ -299,12 +303,12 @@ function ResultCard({ title, verified, details, distance, showContact, onContact
           {url ? (
             <img src={url} alt="" style={{ width: 64, height: 64, borderRadius: '50%', objectFit: 'cover', display: 'block' }} />
           ) : (
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 24 }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 22 }}>
               {initials(title)}
             </div>
           )}
           {verified && (
-            <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: '#27500A', color: '#EAF3DE', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 800, border: '2px solid var(--surface)' }}>✓</span>
+            <span title="Vérifié" style={{ position: 'absolute', bottom: -2, right: -2, background: 'var(--lime)', color: 'var(--on-lime)', width: 19, height: 19, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid var(--surface)' }}><Icon name="check" size={11} strokeWidth={3} /></span>
           )}
         </div>
         <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 4, color: 'var(--text)' }}>{title}</div>

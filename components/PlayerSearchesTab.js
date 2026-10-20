@@ -53,11 +53,11 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
     if (editingId) {
       const { error } = await supabase.from('player_searches').update(payload).eq('id', editingId);
       if (error) { showToast('Erreur lors de la mise à jour.'); return; }
-      showToast('Recherche mise à jour ✓');
+      showToast('Recherche mise à jour');
     } else {
       const { error } = await supabase.from('player_searches').insert(payload);
       if (error) { showToast('Erreur lors de la publication.'); return; }
-      showToast('Recherche publiée ✓');
+      showToast('Recherche publiée');
     }
     cancelForm();
     load();
@@ -142,7 +142,7 @@ export default function PlayerSearchesTab({ user, showToast, onContact }) {
       {loading ? (
         <SkeletonList count={2} />
       ) : othersSearches.length === 0 ? (
-        <EmptyState icon="🔍" title="Aucune autre recherche pour le moment" sub="Les recherches publiées par d'autres joueurs apparaîtront ici." />
+        <EmptyState icon="search" title="Aucune autre recherche pour le moment" sub="Les recherches publiées par d'autres joueurs apparaîtront ici." />
       ) : (
         <div>
           <h3 style={{ fontSize: 14, color: 'var(--lime)', marginBottom: 12, textTransform: 'uppercase', letterSpacing: '0.03em', fontWeight: 700 }}>Autres joueurs en recherche</h3>

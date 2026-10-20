@@ -6,6 +6,7 @@ import { EmptyState } from '@/components/ui';
 import { avatarUrl } from '@/components/AvatarUpload';
 import { ROLE_LABELS } from '@/lib/constants';
 import { SkeletonGrid } from '@/components/Skeleton';
+import { Icon } from '@/components/icons';
 
 const BUCKET = 'gallery';
 const MAX_FILE_BYTES = 20 * 1024 * 1024; // 20 Mo par fichier
@@ -209,7 +210,7 @@ export default function GalleryTab({
     const { error } = await supabase.from('gallery_items').update({ description: value }).eq('id', item.id);
     if (error) { showToast('Erreur lors de l\'enregistrement.'); return; }
     setItems((prev) => prev.map((it) => it.id === item.id ? { ...it, description: value } : it));
-    showToast('Description enregistrée ✓');
+    showToast('Description enregistrée');
   };
 
   const shareItem = async (item) => {
@@ -248,7 +249,7 @@ export default function GalleryTab({
   const grid = loading ? (
     <SkeletonGrid />
   ) : items.length === 0 ? (
-    <EmptyState icon="🎞️" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
+    <EmptyState icon="image" title="Aucune publication" sub={readOnly ? `${ownerName} n'a rien publié pour le moment.` : 'Ajoute une photo ou une vidéo pour ta première publication.'} />
   ) : (
     <div className="tv-masonry">
       {items.map((item, i) => (
@@ -286,7 +287,7 @@ export default function GalleryTab({
       <div onClick={(e) => e.stopPropagation()} style={{ width: '100%', maxWidth: 400, background: 'var(--surface)', border: '1px solid var(--line)', borderRadius: 16, maxHeight: '70vh', display: 'flex', flexDirection: 'column' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '16px 18px', borderBottom: '1px solid var(--line)' }}>
           <span style={{ fontWeight: 700, fontSize: 15 }}>J'aime</span>
-          <button onClick={() => setLikersModal(null)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer' }}>✕</button>
+          <button onClick={() => setLikersModal(null)} style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', display: 'flex' }} aria-label="Fermer"><Icon name="close" size={20} /></button>
         </div>
         <div style={{ overflowY: 'auto' }}>
           {likersModal.loading ? (
@@ -300,7 +301,7 @@ export default function GalleryTab({
                 {av ? (
                   <img src={av} alt="" style={{ width: 38, height: 38, borderRadius: '50%', objectFit: 'cover' }} />
                 ) : (
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 13 }}>{initials(u.nom)}</div>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 13 }}>{initials(u.nom)}</div>
                 )}
                 <div>
                   <div style={{ fontWeight: 700, fontSize: 14, color: 'var(--text)' }}>{u.nom}</div>
@@ -387,7 +388,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
       try { await navigator.share({ title: ownerName, text: `Regarde la publication de ${ownerName} sur TurnOver`, url: link }); } catch { /* annulé */ }
     } else {
       navigator.clipboard?.writeText(link);
-      showToast('Lien copié ✓');
+      showToast('Lien copié');
     }
   };
 
@@ -395,7 +396,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
     const link = await getShareLink();
     setShareOpen(false);
     navigator.clipboard?.writeText(link);
-    showToast('Lien copié ✓');
+    showToast('Lien copié');
   };
 
   return (
@@ -405,7 +406,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
         {ownerAvatar ? (
           <img src={ownerAvatar} alt="" style={{ width: 36, height: 36, borderRadius: '50%', objectFit: 'cover' }} />
         ) : (
-          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'linear-gradient(135deg,var(--lime),var(--lime-deep))', display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: 'Anton, sans-serif', color: 'var(--on-lime)', fontSize: 13 }}>{initials(ownerName)}</div>
+          <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'var(--surface-2)', border: '1px solid var(--line)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, color: 'var(--text-2)', fontSize: 13 }}>{initials(ownerName)}</div>
         )}
         <div style={{ flex: 1 }}>
           <div style={{ color: 'var(--text)', fontSize: 14, fontWeight: 700 }}>{ownerName}</div>
@@ -428,7 +429,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
           </>
         )}
         {modal && onClose && (
-          <button onClick={onClose} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', lineHeight: 1, marginLeft: 4 }}>✕</button>
+          <button onClick={onClose} aria-label="Fermer" style={{ background: 'transparent', border: 'none', color: 'var(--muted)', fontSize: 20, cursor: 'pointer', lineHeight: 1, marginLeft: 4, display: 'flex' }}><Icon name="close" size={20} /></button>
         )}
       </div>
 
@@ -512,7 +513,7 @@ function PostCard({ item, isOwner, canInteract, ownerName, ownerAvatar, ownerRol
             <div key={c.id} style={{ fontSize: 13, color: 'var(--text-2)', lineHeight: 1.45, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
               <span><span style={{ color: 'var(--text)', fontWeight: 700 }}>{c.profiles?.nom || 'Utilisateur'}</span> {c.content}</span>
               {isOwner && (
-                <button onClick={() => onDeleteComment(c.id)} style={{ background: 'transparent', border: 'none', color: 'var(--faint)', fontSize: 12, cursor: 'pointer', flexShrink: 0 }}>✕</button>
+                <button onClick={() => onDeleteComment(c.id)} style={{ background: 'transparent', border: 'none', color: 'var(--faint)', fontSize: 12, cursor: 'pointer', flexShrink: 0, display: 'flex' }} aria-label="Supprimer le commentaire"><Icon name="close" size={14} /></button>
               )}
             </div>
           ))}
